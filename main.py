@@ -124,23 +124,13 @@ def show_frame():
 
     pauseVal = frame2control.pause.get()
     if pauseVal == False:
-        if imageDo == False:
-            if cap.isOpened():
-                rval, img = cap.read()
-            else:
-                rval = False
-            if rval == False:
-                rval = False
-                btnPause.select()
-                cap.open(demoName)
+        global testName
+        if (testName is None)==True:
+            xx=0
+            img = readImage("test32.jpg", 's8+ (Размеры 160×73)')
         else:
-            global testName
-            if (testName is None)==True:
-                xx=0
-                img = readImage("test32.jpg", 's8+ (Размеры 160×73)')
-            else:
-                img = cv2.imread(testName);
-            rval = True
+            img = cv2.imread(testName);
+        rval = True
 
     if pauseVal == False and rval == True:
         imgTemp = img.copy()
@@ -154,42 +144,12 @@ def show_frame():
             addedW = -2
         params = (addedW, addedH)
 
+        imgR = Image.fromarray(img)
+        imgtkR = ImageTk.PhotoImage(image=imgR)
+        rmain.imgtk = imgtkR
+        rmain.configure(image=imgtkR)
+
         # findCtr, imgUpd, contures, resultImgGray , imgRotated, imgRotatedResult, mainImgConture = lekaloMain.doFrame(img, slider1.get(), slider2.get(), 0.1 * slider3.get(), slider4.get(), params)
-        findCtr = False
-        if findCtr == True:
-            if isinstance(imgUpd, str):
-                imgUpd = img
-
-            imgOk = imgTemp
-            scaleResize = 0.5
-            wOriginal = img.shape[0]
-            if wOriginal==1920:
-                scaleResize = 0.25
-            if wOriginal>2000:
-                scaleResize = 0.25
-            intrpolationResize =  cv2.INTER_LANCZOS4
-            # оригинальный вид
-            img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-            img2 = cv2.resize(img,(0,0),intrpolationResize,scaleResize,scaleResize)
-
-            imgL = Image.fromarray(img2)
-            imgtkL = ImageTk.PhotoImage(image=imgL)
-            lmain.imgtk = imgtkL
-            lmain.configure(image=imgtkL)
-
-            # контуры вид
-            scaleResize = 1
-            imgUpd = cv2.cvtColor(imgUpd, cv2.COLOR_BGR2RGB)
-            wUpd = imgUpd.shape[0]
-            if wUpd==800:
-                scaleResize = 0.5
-            img3 = cv2.resize(imgUpd,(0,0),intrpolationResize,scaleResize,scaleResize)
-
-            imgR = Image.fromarray(img3)
-            imgtkR = ImageTk.PhotoImage(image=imgR)
-            rmain.imgtk = imgtkR
-            rmain.configure(image=imgtkR)
-
 
     rmain.after(10, show_frame)
 
