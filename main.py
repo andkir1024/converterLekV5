@@ -13,14 +13,21 @@ import os
 
 ################################### andy 22222 33333 old branch
 testName = None
+filesDir = '../popular_graphs_interesting/'
+updateImage = False
+
 def getFiles():
-    return os.listdir('../popular_graphs_interesting/')
+    return os.listdir(filesDir)
 def selected(event):
+    global testName
+    global updateImage
     # получаем индексы выделенных элементов
     selected_indices = lmain.curselection()
     # получаем сами выделенные элементы
     selected_files = ",".join([lmain.get(i) for i in selected_indices])
     msg = f"вы выбрали: {selected_files}"
+    testName = filesDir + selected_files
+    updateImage = True
     return
     # selection_label["text"] = msg
     
@@ -109,8 +116,6 @@ def show_Image( container,img, imgDefault, scale):
     container.configure(image=imgtkRAdd)
 
 def readImage( imgName, title):
-    global testName
-    testName = imgName
     img = cv2.imread(imgName);  # tecno camon 19 pro (997x1280)(Размеры 166.8x74.6)
     w, h = img.shape[:2]
     title = title + (f'  viewBox h: {w} w: {h}')
@@ -118,32 +123,25 @@ def readImage( imgName, title):
     return img
 ################################### andy
 def show_frame():
-    global panelA, panelB
     global imgOk
-
+    global updateImage
     global testName
-    if (testName is None)==True:
-        img = readImage("test32.jpg", 's8+ (Размеры 160×73)')
-    else:
-        img = cv2.imread(testName);
-    rval = True
-
-    if rval == True:
-        imgTemp = img.copy()
-        param0 = frame2control.param0.get()
-        param1 = frame2control.param1.get()
-        addedW = 0
-        if param0 == True:
-            addedW = 2
-        addedH = 0
-        if param1 == True:
-            addedW = -2
-        params = (addedW, addedH)
-
-        imgR = Image.fromarray(img)
-        imgtkR = ImageTk.PhotoImage(image=imgR)
-        rmain.imgtk = imgtkR
-        rmain.configure(image=imgtkR)
+    
+    if updateImage == True:
+        # testName = "../test33.jpg"
+        updateImage = False
+        img = cv2.imdecode(np.fromfile(testName, dtype=np.uint8), cv2.IMREAD_COLOR)
+        if img is not None:
+            maxHeight = 1024
+            height = img.shape[0]
+            if height > maxHeight:
+                scale = 1024 / height
+                img = cv2.resize(img, (0, 0), interpolation=cv2.INTER_CUBIC, fx=scale, fy=scale)
+                # img = cv2.resize(img, (0, 0), interpolation=cv2.INTER_LANCZOS4, fx=scale, fy=scale)
+            imgR = Image.fromarray(img)
+            imgtkR = ImageTk.PhotoImage(image=imgR)
+            rmain.imgtk = imgtkR
+            rmain.configure(image=imgtkR)
 
 
     rmain.after(10, show_frame)
