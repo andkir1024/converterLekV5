@@ -9,10 +9,21 @@ import lecaloUtils
 # from wand.image import Image
 import pillow_heif
 import numpy as np
+import os
 
 ################################### andy 22222 33333 old branch
 testName = None
-
+def getFiles():
+    return os.listdir('../popular_graphs_interesting/')
+def selected(event):
+    # получаем индексы выделенных элементов
+    selected_indices = lmain.curselection()
+    # получаем сами выделенные элементы
+    selected_files = ",".join([lmain.get(i) for i in selected_indices])
+    msg = f"вы выбрали: {selected_files}"
+    return
+    # selection_label["text"] = msg
+    
 ###################################
 root = Tk()
 root.bind('<Escape>', lambda e: root.quit())
@@ -26,9 +37,14 @@ frame2control = Frame(master=root, bg="blue")
 frame2control.pack()
 
 # верхняя полоса экранов
-lmain = Label(frame1original)
-lmain.pack(side="left", padx=10, pady=1)
+# выбор файла
+listFiles = getFiles()
+lmain = Listbox(frame1original, listvariable=Variable(value=listFiles), width=60, height=50, selectmode=SINGLE)
+lmain.pack(expand=1, side="left", anchor=NW, fill=X, padx=5, pady=5)
+lmain.select_set(first=0)
+lmain.bind("<<ListboxSelect>>", selected)
 
+# собственно картинка
 rmain = Label(frame1original)
 rmain.pack(side="right", padx=10, pady=1)
 
@@ -61,8 +77,8 @@ btnParam1.pack(side="left",  padx="10", pady="1")
 btnSvg = Button(frame2control, text="Export to SVG", command=export_svg)
 btnSvg.pack(side="left",  padx="10", pady="1")
 
-btnExit = Button(frame2control, text="Exit", command=exit)
-btnExit.pack(side="left",  padx="10", pady="1")
+btnExit = Button(frame2control, text="Exit", command=exit, width= 20)
+btnExit.pack(side="right",  padx="10", pady="1")
 
 slider1 = Scale( frame2control,from_=1, to=250, orient='horizontal',  command=slider_changed1, variable=current_value1, length = 200)
 slider1.set(200)
@@ -72,13 +88,7 @@ slider2 = Scale( frame2control,from_=1, to=100, orient='horizontal',  command=sl
 slider2.set(30)
 slider2.pack(side="left",  padx="10", pady="1")
 
-slider3 = Scale( frame2control,from_=1, to=100, orient='horizontal',  length = 200)
-slider3.set(2)
-slider3.pack(side="left",  padx="10", pady="1")
 
-slider4 = Scale( frame2control,from_=1, to=100, orient='horizontal',  length = 200)
-slider4.set(8)
-slider4.pack(side="left",  padx="10", pady="1")
 def show_testImage(nameImage, container, scale):
     afterL = cv2.imread(nameImage)
     afterLimg = cv2.resize(afterL, (0, 0), interpolation=cv2.INTER_LANCZOS4, fx=scale, fy=scale)
