@@ -12,9 +12,6 @@ import numpy as np
 
 ################################### andy 22222 33333 old branch
 testName = None
-imageDo = True
-# imageDo = False
-counterSaved = 1
 
 ###################################
 root = Tk()
@@ -25,9 +22,7 @@ root.geometry("+%d+%d" % (0, 0))
 
 frame1original = Frame(master=root, bg="red")
 frame1original.pack()
-frame3 = Frame(master=root, bg="blue")
-frame3.pack()
-frame2control = Frame(master=root)
+frame2control = Frame(master=root, bg="blue")
 frame2control.pack()
 
 # верхняя полоса экранов
@@ -46,23 +41,17 @@ def slider_changed2(event):
     return
 
 def export_svg():
-    # data = [('svg', '*.svg')]
-    # file_path = filedialog.asksaveasfilename(filetypes=data, defaultextension=data)
-    # file_path = 'f:/out.svg'
-    # lekaloMain.saveToSvg(imgOk,file_path)
-    global counterSaved
-    counterSaved =1
+    data = [('svg', '*.svg')]
+    file_path = filedialog.asksaveasfilename(filetypes=data, defaultextension=data)
+    file_path = 'f:/out.svg'
+    lekaloMain.saveToSvg(imgOk,file_path)
     return
 
 def exit():
     root.quit()
 
-frame2control.pause = BooleanVar()
 frame2control.param0 = BooleanVar()
 frame2control.param1 = BooleanVar()
-
-btnPause = Checkbutton(frame2control, text="Пауза", variable=frame2control.pause, onvalue=1, offvalue=0, )
-btnPause.pack(side="left",  padx="10", pady="1")
 
 btnParam0 = Checkbutton(frame2control, text="Параметр 0", variable=frame2control.param0, onvalue=1, offvalue=0, )
 btnParam0.pack(side="left",  padx="10", pady="1")
@@ -122,17 +111,14 @@ def show_frame():
     global panelA, panelB
     global imgOk
 
-    pauseVal = frame2control.pause.get()
-    if pauseVal == False:
-        global testName
-        if (testName is None)==True:
-            xx=0
-            img = readImage("test32.jpg", 's8+ (Размеры 160×73)')
-        else:
-            img = cv2.imread(testName);
-        rval = True
+    global testName
+    if (testName is None)==True:
+        img = readImage("test32.jpg", 's8+ (Размеры 160×73)')
+    else:
+        img = cv2.imread(testName);
+    rval = True
 
-    if pauseVal == False and rval == True:
+    if rval == True:
         imgTemp = img.copy()
         param0 = frame2control.param0.get()
         param1 = frame2control.param1.get()
@@ -149,7 +135,6 @@ def show_frame():
         rmain.imgtk = imgtkR
         rmain.configure(image=imgtkR)
 
-        # findCtr, imgUpd, contures, resultImgGray , imgRotated, imgRotatedResult, mainImgConture = lekaloMain.doFrame(img, slider1.get(), slider2.get(), 0.1 * slider3.get(), slider4.get(), params)
 
     rmain.after(10, show_frame)
 
