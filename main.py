@@ -53,7 +53,7 @@ lmain.select_set(first=0)
 lmain.event_generate("<<ListboxSelect>>")
 
 # собственно картинка
-rmain = Label(frame1original)
+rmain = Label(frame1original, width=512, height=1000)
 rmain.pack(side="right", padx=10, pady=1)
 
 # slider current value
@@ -71,13 +71,18 @@ def export_svg():
     lekaloMain.saveToSvg(imgOk,file_path)
     return
 
+def update_image():
+    global updateImage
+    updateImage = True
+    return
+
 def exit():
     root.quit()
 
 frame2control.param0 = BooleanVar()
 frame2control.param1 = BooleanVar()
 
-btnParam0 = Checkbutton(frame2control, text="Параметр 0", variable=frame2control.param0, onvalue=1, offvalue=0, )
+btnParam0 = Checkbutton(frame2control, text="Показывать контур", variable=frame2control.param0, onvalue=1, offvalue=0, command=update_image)
 btnParam0.pack(side="left",  padx="10", pady="1")
 btnParam1 = Checkbutton(frame2control, text="Параметр 1", variable=frame2control.param1, onvalue=1, offvalue=0, )
 btnParam1.pack(side="left",  padx="10", pady="1")
@@ -129,7 +134,7 @@ def show_frame():
     global testName
     
     if updateImage == True:
-        # testName = "../test33.jpg"
+        param0 = frame2control.param0.get()
         updateImage = False
         img = cv2.imdecode(np.fromfile(testName, dtype=np.uint8), cv2.IMREAD_COLOR)
         if img is not None:
@@ -138,24 +143,13 @@ def show_frame():
                 # img = cv2.resize(img, (0, 0), interpolation=cv2.INTER_LANCZOS4, fx=scale, fy=scale)
             # qq = lecaloConverterUtils.cvUtils 
             img_grey = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
-            rows = img_grey.shape[0]
-            circles = cv2.HoughCircles(img_grey, cv2.HOUGH_GRADIENT, 1, rows / 8,
-                                    param1=100, param2=30,
-                                    minRadius=1, maxRadius=100)            
-            if circles is not None:
-                circles = np.uint16(np.around(circles))
-                for i in circles[0, :]:
-                    center = (i[0], i[1])
-                    # circle center
-                    cv2.circle(img, center, 1, (0, 100, 100), 3)
-                    # circle outline
-                    radius = i[2]
-                    cv2.circle(img, center, radius, (255, 0, 255), 3)
-        
-            # circles =(i cv2.HoughCirclesmg, cv2.HOUGH_GRADIENT_ALT,dp=32,minDist=1,param1=50,param2=70,minRadius=5, maxRadius=20)
+            # img_grey  = cv2.medianBlur(img_grey,7)
+            img_grey = cv2.blur(img_grey, (3, 3))
             
-            # circles = cvUtils.findCircles(imgOriginal)
+            cvUtils.findCircles(img_grey, img, draw_conrure = param0)
+            
             height = img.shape[0]
+            # height2 = rmain.height
             if height > maxHeight:
                 scale = 1024 / height
                 img = cv2.resize(img, (0, 0), interpolation=cv2.INTER_CUBIC, fx=scale, fy=scale)
