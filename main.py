@@ -13,10 +13,12 @@ import os
 import lecaloConverterUtils
 from lecaloConverterUtils import cvUtils
 
-################################### andy 22222 33333 old branch
+################################### andy 
 testName = None
 filesDir = '../popular_graphs_interesting/'
 updateImage = False
+# updateImageZoom = False
+imgOk = None
 
 def getFiles():
     return os.listdir(filesDir)
@@ -31,12 +33,13 @@ def selected(event):
     updateImage = True
     return
 def press_mouse(event):
+    # global updateImageZoom
     x = event.x
     y = event.y
     width = rmainImage.winfo_width()-4
     height = rmainImage.winfo_height()-4
+    # updateImageZoom = True
     return
-    # rzoomImage.scan_mark(event.x, event.y)
             
 ###################################
 root = Tk()
@@ -146,34 +149,36 @@ def show_frame():
     global imgOk
     global updateImage
     global testName
+    global updateImageZoom
     
     if updateImage == True:
         param0 = frame2control.param0.get()
         updateImage = False
-        img = cv2.imdecode(np.fromfile(testName, dtype=np.uint8), cv2.IMREAD_COLOR)
-        if img is not None:
+        imgOk = cv2.imdecode(np.fromfile(testName, dtype=np.uint8), cv2.IMREAD_COLOR)
+        if imgOk is not None:
             maxHeight = 1024
-            # imgOriginal = img.copy()
-                # img = cv2.resize(img, (0, 0), interpolation=cv2.INTER_LANCZOS4, fx=scale, fy=scale)
-            # qq = lecaloConverterUtils.cvUtils 
-            img_grey = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
+            img_grey = cv2.cvtColor(imgOk,cv2.COLOR_BGR2GRAY)
             # img_grey  = cv2.medianBlur(img_grey,7)
             img_grey = cv2.blur(img_grey, (3, 3))
             
-            cvUtils.findCircles(img_grey, img, draw_conrure = param0)
+            cvUtils.findCircles(img_grey, imgOk, draw_conrure = param0)
             
-            height = img.shape[0]
-            # height2 = rmain.height
+            height = imgOk.shape[0]
             if height > maxHeight:
                 scale = 1024 / height
-                img = cv2.resize(img, (0, 0), interpolation=cv2.INTER_LINEAR, fx=scale, fy=scale)
-            imgR = Image.fromarray(img)
+                img = cv2.resize(imgOk, (0, 0), interpolation=cv2.INTER_LINEAR, fx=scale, fy=scale)
+                imgR = Image.fromarray(img)
+            else:
+                imgR = Image.fromarray(imgOk)
             imgtkR = ImageTk.PhotoImage(image=imgR)
             rmainImage.imgtk = imgtkR
             rmainImage.configure(image=imgtkR)
-
-            rzoomImage.imgtk = imgtkR
-            rzoomImage.configure(image=imgtkR)
+    # if updateImageZoom == True:
+    #     imgR = Image.fromarray(imgOk)
+    #     imgtkR = ImageTk.PhotoImage(image=imgR)
+    #     rzoomImage.imgtk = imgtkR
+    #     rzoomImage.configure(image=imgtkR)
+    #     updateImageZoom = False
 
     rmainImage.after(10, show_frame)
 
