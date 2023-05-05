@@ -6,7 +6,6 @@ from PIL import ImageTk
 from tkinter import filedialog
 import lekaloSvg
 import lecaloUtils
-# from wand.image import Image
 import pillow_heif
 import numpy as np
 import os
@@ -17,30 +16,32 @@ from lecaloConverterUtils import cvUtils
 testName = None
 filesDir = '../popular_graphs_interesting/'
 updateImage = False
-# updateImageZoom = False
+updateImageZoom = False
 imgOk = None
+xZoom = 0
+yZoom = 0
 
 def getFiles():
     return os.listdir(filesDir)
 def selected(event):
     global testName
     global updateImage
+    global xZoom,yZoom
     # получаем индексы выделенных элементов
     selected_indices = lmainListImages.curselection()
     # получаем сами выделенные элементы
     selected_files = ",".join([lmainListImages.get(i) for i in selected_indices])
     testName = filesDir + selected_files
+    xZoom = yZoom = 0
     updateImage = True
-    return
 def press_mouse(event):
-    # global updateImageZoom
-    x = event.x
-    y = event.y
+    global xZoom,yZoom
+    global updateImageZoom
+    xZoom = event.x
+    yZoom = event.y
     width = rmainImage.winfo_width()-4
     height = rmainImage.winfo_height()-4
-    # updateImageZoom = True
-    return
-            
+    updateImageZoom = True
 ###################################
 root = Tk()
 root.bind('<Escape>', lambda e: root.quit())
@@ -64,7 +65,7 @@ lmainListImages.select_set(first=0)
 lmainListImages.event_generate("<<ListboxSelect>>")
 
 # собственно картинка в реальном размере
-rzoomImage = Label(frame1original, width=256, height=256)
+rzoomImage = Label(frame1original, width=500, height=800)
 rzoomImage.pack(side="right", padx=5, pady=5, anchor=NE)
 
 # собственно картинка
@@ -128,30 +129,22 @@ def show_testImage(nameImage, container, scale):
     container.configure(image=rmain1tkAdd)
     return
 
-def show_Image( container,img, imgDefault, scale):
-    if img is None:
-        img = imgDefault
-    img4 = cv2.resize(img, (0, 0), interpolation=cv2.INTER_LANCZOS4, fx=scale, fy=scale)
-
-    imgRAdd = Image.fromarray(img4)
-    imgtkRAdd = ImageTk.PhotoImage(image=imgRAdd)
-    container.imgtk = imgtkRAdd
-    container.configure(image=imgtkRAdd)
-
 def readImage( imgName, title):
     img = cv2.imread(imgName);  # tecno camon 19 pro (997x1280)(Размеры 166.8x74.6)
     w, h = img.shape[:2]
     title = title + (f'  viewBox h: {w} w: {h}')
     root.title(title)
     return img
-################################### andy
+
 def show_frame():
     global imgOk
     global updateImage
     global testName
     global updateImageZoom
-    
-    if updateImage == True:
+    global xZoom,yZoom
+
+    updateAny = False
+    if updateImage == True or updateImageZoom == True:
         param0 = frame2control.param0.get()
         updateImage = False
         imgOk = cv2.imdecode(np.fromfile(testName, dtype=np.uint8), cv2.IMREAD_COLOR)
@@ -173,8 +166,27 @@ def show_frame():
             imgtkR = ImageTk.PhotoImage(image=imgR)
             rmainImage.imgtk = imgtkR
             rmainImage.configure(image=imgtkR)
-    # if updateImageZoom == True:
+            updateAny = True
+
+            scale = 0.25*2
+            img = cv2.resize(imgOk, (0, 0), interpolation=cv2.INTER_LINEAR, fx=scale, fy=scale)
+            # yZoom = xZoom= 0
+            im_crop = img[yZoom:yZoom+500, xZoom:xZoom+500]
+            # im_crop = img[0:500, 0:500]
+            # crop_img = img[y:y+h, x:x+w]
+            imgR = Image.fromarray(im_crop)
+            imgtkZoom = ImageTk.PhotoImage(image=imgR)
+            rzoomImage.imgtk = imgtkZoom
+            rzoomImage.configure(image=imgtkZoom)
+            updateImageZoom = False
+            
+    # if updateImageZoom == True or updateAny == True:
+    #     # im_crop = imgOk.crop((xZoom, yZoom))
+    #     # im_crop = imgOk[xZoom: yZoom, xZoom+200: yZoom+200]
+    #     # im_crop = imgOk[10:10, 100:200]
+    #     # im_crop = imgOk[yZoom:yZoom+500, xZoom:xZoom+500]
     #     imgR = Image.fromarray(imgOk)
+    #     # imgR = Image.fromarray()
     #     imgtkR = ImageTk.PhotoImage(image=imgR)
     #     rzoomImage.imgtk = imgtkR
     #     rzoomImage.configure(image=imgtkR)
