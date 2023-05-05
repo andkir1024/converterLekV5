@@ -24,19 +24,27 @@ def selected(event):
     global testName
     global updateImage
     # получаем индексы выделенных элементов
-    selected_indices = lmain.curselection()
+    selected_indices = lmainListImages.curselection()
     # получаем сами выделенные элементы
-    selected_files = ",".join([lmain.get(i) for i in selected_indices])
+    selected_files = ",".join([lmainListImages.get(i) for i in selected_indices])
     testName = filesDir + selected_files
     updateImage = True
     return
-    
+def press_mouse(event):
+    x = event.x
+    y = event.y
+    width = rmainImage.winfo_width()-4
+    height = rmainImage.winfo_height()-4
+    return
+    # rzoomImage.scan_mark(event.x, event.y)
+            
 ###################################
 root = Tk()
 root.bind('<Escape>', lambda e: root.quit())
 root.title("Лекала тестер")
 # root.geometry("{}x{}+{}+{}".format(100, 100, 0, 0))
-root.geometry("+%d+%d" % (0, 0))
+# root.geometry("+%d+%d" % (0, 0))
+root.geometry("1800x900")
 
 frame1original = Frame(master=root, bg="red")
 frame1original.pack()
@@ -46,15 +54,21 @@ frame2control.pack()
 # верхняя полоса экранов
 # выбор файла
 listFiles = getFiles()
-lmain = Listbox(frame1original, listvariable=Variable(value=listFiles), width=60, height=50, selectmode=SINGLE)
-lmain.pack(expand=1, side="left", anchor=NW, fill=X, padx=5, pady=5)
-lmain.bind("<<ListboxSelect>>", selected)
-lmain.select_set(first=0)
-lmain.event_generate("<<ListboxSelect>>")
+lmainListImages = Listbox(frame1original, listvariable=Variable(value=listFiles), width=60, height=50, selectmode=SINGLE)
+lmainListImages.pack(expand=1, side="left", anchor=NW, fill=X, padx=5, pady=5)
+lmainListImages.bind("<<ListboxSelect>>", selected)
+lmainListImages.select_set(first=0)
+lmainListImages.event_generate("<<ListboxSelect>>")
+
+# собственно картинка в реальном размере
+rzoomImage = Label(frame1original, width=256, height=256)
+rzoomImage.pack(side="right", padx=5, pady=5, anchor=NE)
 
 # собственно картинка
-rmain = Label(frame1original, width=512, height=1000)
-rmain.pack(side="right", padx=10, pady=1)
+rmainImage = Label(frame1original, width=512, height=800)
+rmainImage.pack(side="right", padx=0, pady=5, anchor=N,expand=False)
+# rmainImage.bind("<MouseWheel>", do_zoom)
+rmainImage.bind("<ButtonPress-1>", press_mouse)
 
 # slider current value
 current_value1 = DoubleVar()
@@ -152,14 +166,16 @@ def show_frame():
             # height2 = rmain.height
             if height > maxHeight:
                 scale = 1024 / height
-                img = cv2.resize(img, (0, 0), interpolation=cv2.INTER_CUBIC, fx=scale, fy=scale)
+                img = cv2.resize(img, (0, 0), interpolation=cv2.INTER_LINEAR, fx=scale, fy=scale)
             imgR = Image.fromarray(img)
             imgtkR = ImageTk.PhotoImage(image=imgR)
-            rmain.imgtk = imgtkR
-            rmain.configure(image=imgtkR)
+            rmainImage.imgtk = imgtkR
+            rmainImage.configure(image=imgtkR)
 
+            rzoomImage.imgtk = imgtkR
+            rzoomImage.configure(image=imgtkR)
 
-    rmain.after(10, show_frame)
+    rmainImage.after(10, show_frame)
 
 show_frame()
 root.mainloop()
