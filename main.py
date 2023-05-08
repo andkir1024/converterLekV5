@@ -48,7 +48,7 @@ root.bind('<Escape>', lambda e: root.quit())
 root.title("Лекала тестер")
 # root.geometry("{}x{}+{}+{}".format(100, 100, 0, 0))
 # root.geometry("+%d+%d" % (0, 0))
-root.geometry("1800x900")
+root.geometry("1500x900")
 
 frame1original = Frame(master=root, bg="red")
 frame1original.pack()
