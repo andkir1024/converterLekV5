@@ -65,9 +65,6 @@ frame2control.pack()
 listFiles = getFiles()
 lmainListImages = Listbox(frame1original, listvariable=Variable(value=listFiles), width=60, height=50, selectmode=SINGLE)
 lmainListImages.pack(expand=1, side="left", anchor=NW, fill=X, padx=5, pady=5)
-lmainListImages.bind("<<ListboxSelect>>", selected)
-lmainListImages.select_set(first=0)
-lmainListImages.event_generate("<<ListboxSelect>>")
 
 # собственно картинка в реальном размере
 rzoomImage = Label(frame1original, width=500, height=800)
@@ -78,6 +75,7 @@ rmainImage = Label(frame1original, width=512, height=800)
 rmainImage.pack(side="right", padx=0, pady=5, anchor=N,expand=False)
 # rmainImage.bind("<MouseWheel>", do_zoom)
 rmainImage.bind("<ButtonPress-1>", press_mouse)
+# frame1original.bind("<Configure>", on_resize) # !!!!
 
 # slider current value
 current_value1 = DoubleVar()
@@ -87,6 +85,23 @@ current_value2 = DoubleVar()
 def slider_changed2(event):
     return
 
+def handle_configure(event):
+    text="window geometry:\n" + root.geometry()
+    return
+
+root.bind("<Configure>", handle_configure)
+
+# resizing window:
+def on_resize(self, event): # !!!!
+    # # determine the ratio of old width/height to new width/height
+    # self.canvas_frame.width = event.width
+    # self.canvas_frame.height = event.height
+    # # resize the canvas
+    # self.canvas_frame.config(width=self.canvas_frame.width, height=self.canvas_frame.height)
+    # print(self.canvas_frame.width)  # return the same height and width
+    # print(self.canvas_frame.height) # after resizing
+    return
+        
 def export_svg():
     data = [('svg', '*.svg')]
     file_path = filedialog.asksaveasfilename(filetypes=data, defaultextension=data)
@@ -123,6 +138,11 @@ slider1.pack(side="left",  padx="10", pady="1")
 slider2 = Scale( frame2control,from_=1, to=100, orient='horizontal',  command=slider_changed2, variable=current_value2, length = 200)
 slider2.set(30)
 slider2.pack(side="left",  padx="10", pady="1")
+
+# генерация выбора первого элемента в списке каритнок
+lmainListImages.bind("<<ListboxSelect>>", selected)
+lmainListImages.select_set(first=0)
+lmainListImages.event_generate("<<ListboxSelect>>")
 
 
 def show_testImage(nameImage, container, scale):
@@ -161,6 +181,9 @@ def show_frame():
             
             cvUtils.findCircles(img_grey, imgOk, draw_conrure = param0)
             
+            widthW = rmainImage.winfo_width()-4
+            heightW = rmainImage.winfo_height()-4
+
             height = imgOk.shape[0]
             if height > maxHeight:
                 scale = 1024 / height
@@ -169,8 +192,8 @@ def show_frame():
                 img = cv2.rectangle(img, (5,150), (500,500), (255, 255, 0), 4)
                 
                 imgR = Image.fromarray(img)
-            else:
-                imgR = Image.fromarray(imgOk)
+            # else:
+                # imgR = Image.fromarray(imgOk)
             # cv2.rectangle(imgR, pt1=(400,200), pt2=(100,50), color=(255,0,0), thickness=10)
             # draw = ImageDraw.Draw(imgR)
             # draw.rectangle(((0, 00), (100, 100)), fill="black")
