@@ -1,7 +1,7 @@
 import cv2
 import lekaloMain
 from tkinter import *
-from PIL import Image
+from PIL import Image, ImageDraw
 from PIL import ImageTk
 from tkinter import filedialog
 import lekaloSvg
@@ -37,6 +37,11 @@ def selected(event):
 def press_mouse(event):
     global xZoom,yZoom
     global updateImageZoom
+    
+    rmainImage.update_idletasks()
+    wl1 = rmainImage.winfo_width()
+    wl2 = rmainImage.winfo_reqwidth()
+
     xZoom = event.x
     yZoom = event.y
     width = rmainImage.winfo_width()-4
@@ -160,9 +165,15 @@ def show_frame():
             if height > maxHeight:
                 scale = 1024 / height
                 img = cv2.resize(imgOk, (0, 0), interpolation=cv2.INTER_LINEAR, fx=scale, fy=scale)
+                # cv::Rect rect(x, y, width, height);
+                img = cv2.rectangle(img, (5,150), (500,500), (255, 255, 0), 4)
+                
                 imgR = Image.fromarray(img)
             else:
                 imgR = Image.fromarray(imgOk)
+            # cv2.rectangle(imgR, pt1=(400,200), pt2=(100,50), color=(255,0,0), thickness=10)
+            # draw = ImageDraw.Draw(imgR)
+            # draw.rectangle(((0, 00), (100, 100)), fill="black")
             imgtkR = ImageTk.PhotoImage(image=imgR)
             rmainImage.imgtk = imgtkR
             rmainImage.configure(image=imgtkR)
