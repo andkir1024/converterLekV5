@@ -1,12 +1,12 @@
 import cv2
 
 def show_testImage(nameImage, container, scale):
-    afterL = cv2.imread(nameImage)
-    afterLimg = cv2.resize(afterL, (0, 0), interpolation=cv2.INTER_LANCZOS4, fx=scale, fy=scale)
-    rmain1Add = Image.fromarray(afterLimg)
-    rmain1tkAdd = ImageTk.PhotoImage(image=rmain1Add)
-    container.imgtk = rmain1tkAdd
-    container.configure(image=rmain1tkAdd)
+    # afterL = cv2.imread(nameImage)
+    # afterLimg = cv2.resize(afterL, (0, 0), interpolation=cv2.INTER_LANCZOS4, fx=scale, fy=scale)
+    # rmain1Add = Image.fromarray(afterLimg)
+    # rmain1tkAdd = ImageTk.PhotoImage(image=rmain1Add)
+    # container.imgtk = rmain1tkAdd
+    # container.configure(image=rmain1tkAdd)
     return
 
 def readImage( imgName, title):

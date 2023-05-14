@@ -37,15 +37,22 @@ def selected(event):
 def press_mouse(event):
     global xZoom,yZoom
     global updateImageZoom
+    if imgOk is None:
+        return
     
     rmainImage.update_idletasks()
-    wl1 = rmainImage.winfo_width()
-    wl2 = rmainImage.winfo_reqwidth()
+    # wl1 = rmainImage.winfo_width()
+    # wl2 = rmainImage.winfo_reqwidth()
 
     xZoom = event.x
     yZoom = event.y
     width = rmainImage.winfo_width()-4
     height = rmainImage.winfo_height()-4
+    widthImg = imgOk.shape[1]
+    heightImg = imgOk.shape[0]
+    
+    # scale, dispX, dispY = calkScale(rmainImage.winfo_width()-4, rmainImage.winfo_height()-4, imgOk.shape[1], imgOk.shape[0])
+    
     updateImageZoom = True
 ###################################
 root = Tk()
@@ -82,22 +89,18 @@ def slider_changed1(event):
 current_value2 = DoubleVar()
 def slider_changed2(event):
     return
-       
 def export_svg():
     data = [('svg', '*.svg')]
     file_path = filedialog.asksaveasfilename(filetypes=data, defaultextension=data)
     file_path = 'f:/out.svg'
     lekaloMain.saveToSvg(imgOk,file_path)
     return
-
 def update_image():
     global updateImage
     updateImage = True
     return
-
 def exit():
     root.quit()
-
 # изменение размера гдавного окна
 def handle_configure(event):
     update_image()
@@ -133,18 +136,25 @@ lmainListImages.bind("<<ListboxSelect>>", selected)
 lmainListImages.select_set(first=0)
 lmainListImages.event_generate("<<ListboxSelect>>")
 
-def calkScale( wScr, hScr, wImg, hImg):
+# def calkViewParam( wScr, hScr, wImg, hImg):
+def calkViewParam( label, image):
     dispX = 0
     dispY = 0
-    if wScr < 0:
+    rmainImage.update_idletasks()
+    hScr = label.winfo_height()
+    wScr = label.winfo_width()
+    wImg = image.shape[1]
+    hImg = image.shape[0]
+    
+    if wScr < 10:
         return 1024 / hImg,dispX,dispY
     
     coff0= wScr / hScr
     coff1= wImg / hImg
     if coff0 < coff1:
         scale = wScr / wImg
-        dispY = -(hScr * scale)
-        dispY = -280
+        dispY = -(hScr - (hImg * scale))/2
+        # dispY = -280
     else:
         scale = hScr / hImg
         dispX = -(wScr * scale)
@@ -160,6 +170,19 @@ def calkSizeViewRect(xZoom, yZoom, label, scale, dispX, dispY):
     widthZoom = label.winfo_width() * scale
     return [(int(xZoom),int(yZoom)),(int(xZoom + widthZoom), int(yZoom + heightZoom))]
 
+def convertScreenToImageCoord(xZoom, yZoom, dispX, dispY, scale):
+    deltaX = xZoom - dispX
+    if deltaX < 0:
+        deltaX = 0
+        
+    deltaY = yZoom - dispY
+    if deltaY < 0:
+        deltaY = 0
+
+    viewX = int(deltaX / scale)
+    viewY = int(deltaY / scale)
+    return viewX, viewY
+
 def show_frame():
     global imgOk
     global updateImage
@@ -172,14 +195,14 @@ def show_frame():
         updateImage = False
         imgOk = cv2.imdecode(np.fromfile(testName, dtype=np.uint8), cv2.IMREAD_COLOR)
         if imgOk is not None:
-            img_grey = cv2.cvtColor(imgOk,cv2.COLOR_BGR2GRAY)
+            # img_grey = cv2.cvtColor(imgOk,cv2.COLOR_BGR2GRAY)
             # img_grey  = cv2.medianBlur(img_grey,7)
-            img_grey = cv2.blur(img_grey, (3, 3))
+            # img_grey = cv2.blur(img_grey, (3, 3))
             
-            cvUtils.findCircles(img_grey, imgOk, draw_conrure = param0)
+            # cvUtils.findCircles(img_grey, imgOk, draw_conrure = param0)
 
-            scale, dispX, dispY = calkScale(rmainImage.winfo_width()-4, rmainImage.winfo_height()-4, imgOk.shape[1], imgOk.shape[0])
-            
+            # scale, dispX, dispY = calkViewParam(rmainImage.winfo_width()-4, rmainImage.winfo_height()-4, imgOk.shape[1], imgOk.shape[0])
+            scale, dispX, dispY = calkViewParam(rmainImage, imgOk)
             img = cv2.resize(imgOk, (0, 0), interpolation=cv2.INTER_LINEAR, fx=scale, fy=scale)
             rectView = calkSizeViewRect(xZoom, yZoom, rzoomImage, scale, dispX, dispY)
             if rectView is not None:
@@ -187,17 +210,28 @@ def show_frame():
             
             imgR = Image.fromarray(img)
             imgtkR = ImageTk.PhotoImage(image=imgR)
+            # rmainImage.image = imgtkR
             rmainImage.imgtk = imgtkR
             rmainImage.configure(image=imgtkR)
+            # rmainImage.place(x = 0, y = 0)
 
             # scale = 0.25*2
             scaleZoom = 1
             img = cv2.resize(imgOk, (0, 0), interpolation=cv2.INTER_LINEAR, fx=scaleZoom, fy=scaleZoom)
-            viewX = int(xZoom / scale)
+            viewX = int(xZoom - dispX / scale)
             viewY = int(yZoom / scale)
-            im_crop = img[viewY:viewY+500, viewX:viewX+1500]
+            # viewX = 390
+            # viewY = 940
+            viewX = 100
+            heightZoom = rzoomImage.winfo_height()
+            widthZoom = rzoomImage.winfo_width()
+            heightZoom = widthZoom =200
+            # im_crop = img[viewY:viewY+heightZoom, viewX:viewX+widthZoom]
+            # im_crop = img[viewY:viewY+heightZoom, viewX:viewX+widthZoom]
             # im_crop = img[viewY:viewY+500, viewX:viewX+500]
-            # im_crop = img[0:500, 0:500]
+            im_crop = img[0:200, 50:500]
+            
+            
             # crop_img = img[y:y+h, x:x+w]
             imgR = Image.fromarray(im_crop)
             imgtkZoom = ImageTk.PhotoImage(image=imgR)
@@ -205,7 +239,7 @@ def show_frame():
             rzoomImage.configure(image=imgtkZoom)
             updateImageZoom = False
 
-    rmainImage.after(10, show_frame)
+    rmainImage.after(100, show_frame)
 
 show_frame()
 root.mainloop()
