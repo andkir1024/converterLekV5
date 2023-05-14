@@ -60,7 +60,7 @@ root.bind('<Escape>', lambda e: root.quit())
 root.title("Лекала тестер")
 # root.geometry("{}x{}+{}+{}".format(100, 100, 0, 0))
 # root.geometry("+%d+%d" % (0, 0))
-root.geometry("1500x900")
+root.geometry("1500x900+0+0")
 
 frame1original = Frame(master=root, bg="red")
 frame1original.pack()
@@ -170,8 +170,9 @@ def calkSizeViewRect(xZoom, yZoom, label, scale, dispX, dispY):
     widthZoom = label.winfo_width() * scale
     return [(int(xZoom),int(yZoom)),(int(xZoom + widthZoom), int(yZoom + heightZoom))]
 
-def convertScreenToImageCoord(xZoom, yZoom, dispX, dispY, scale):
-    deltaX = xZoom - dispX
+def convertScreenToImageCoord(rmainImage, imgOk, xZoom, yZoom):
+    scale, dispX, dispY = calkViewParam(rmainImage, imgOk)
+    deltaX = xZoom + dispX
     if deltaX < 0:
         deltaX = 0
         
@@ -181,6 +182,8 @@ def convertScreenToImageCoord(xZoom, yZoom, dispX, dispY, scale):
 
     viewX = int(deltaX / scale)
     viewY = int(deltaY / scale)
+    # viewX = 440
+    # viewY = 934
     return viewX, viewY
 
 def show_frame():
@@ -210,26 +213,21 @@ def show_frame():
             
             imgR = Image.fromarray(img)
             imgtkR = ImageTk.PhotoImage(image=imgR)
-            # rmainImage.image = imgtkR
             rmainImage.imgtk = imgtkR
             rmainImage.configure(image=imgtkR)
-            # rmainImage.place(x = 0, y = 0)
 
-            # scale = 0.25*2
             scaleZoom = 1
             img = cv2.resize(imgOk, (0, 0), interpolation=cv2.INTER_LINEAR, fx=scaleZoom, fy=scaleZoom)
-            viewX = int(xZoom - dispX / scale)
-            viewY = int(yZoom / scale)
+            viewX, viewY = convertScreenToImageCoord(rmainImage, imgOk, xZoom, yZoom)
             # viewX = 390
             # viewY = 940
-            viewX = 100
             heightZoom = rzoomImage.winfo_height()
             widthZoom = rzoomImage.winfo_width()
-            heightZoom = widthZoom =200
+            # heightZoom = widthZoom =200
             # im_crop = img[viewY:viewY+heightZoom, viewX:viewX+widthZoom]
-            # im_crop = img[viewY:viewY+heightZoom, viewX:viewX+widthZoom]
-            # im_crop = img[viewY:viewY+500, viewX:viewX+500]
-            im_crop = img[0:200, 50:500]
+            im_crop = img[viewY:viewY+heightZoom, viewX:viewX+widthZoom]
+            # im_crop = img[viewY:viewY+1000, viewX:viewX+1500]
+            # im_crop = img[0:200, 50:500]
             
             
             # crop_img = img[y:y+h, x:x+w]
