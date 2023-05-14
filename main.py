@@ -133,6 +133,18 @@ lmainListImages.bind("<<ListboxSelect>>", selected)
 lmainListImages.select_set(first=0)
 lmainListImages.event_generate("<<ListboxSelect>>")
 
+def calkScale( wScr, hScr, wImg, hImg):
+    if wScr < 0:
+        return 1024 / hImg
+    
+    coff0= wScr / hScr
+    coff1= wImg / hImg
+    if coff0 < coff1:
+        scale = wScr / wImg
+    else:
+        scale = hScr / hImg
+    return scale
+
 def show_frame():
     global imgOk
     global updateImage
@@ -145,25 +157,28 @@ def show_frame():
         param0 = frame2control.param0.get()
         updateImage = False
         imgOk = cv2.imdecode(np.fromfile(testName, dtype=np.uint8), cv2.IMREAD_COLOR)
+        heightW = rmainImage.winfo_height()
         if imgOk is not None:
-            maxHeight = 1024
+            # maxHeight = 1024
             img_grey = cv2.cvtColor(imgOk,cv2.COLOR_BGR2GRAY)
             # img_grey  = cv2.medianBlur(img_grey,7)
             img_grey = cv2.blur(img_grey, (3, 3))
             
             cvUtils.findCircles(img_grey, imgOk, draw_conrure = param0)
             
-            widthW = rmainImage.winfo_width()-4
-            heightW = rmainImage.winfo_height()-4
+            # widthW = rmainImage.winfo_width()-4
+            # heightW = rmainImage.winfo_height()-4
 
-            height = imgOk.shape[0]
-            if height > maxHeight:
-                scale = 1024 / height
-                img = cv2.resize(imgOk, (0, 0), interpolation=cv2.INTER_LINEAR, fx=scale, fy=scale)
-                # cv::Rect rect(x, y, width, height);
-                img = cv2.rectangle(img, (5,150), (500,500), (255, 255, 0), 4)
-                
-                imgR = Image.fromarray(img)
+            # height = imgOk.shape[0]
+            # if height > maxHeight:
+                # scale = 1024 / height
+
+            scale = calkScale(rmainImage.winfo_width()-4, rmainImage.winfo_height()-4, imgOk.shape[1], imgOk.shape[0])
+            img = cv2.resize(imgOk, (0, 0), interpolation=cv2.INTER_LINEAR, fx=scale, fy=scale)
+            # cv::Rect rect(x, y, width, height);
+            img = cv2.rectangle(img, (5,150), (500,500), (255, 255, 0), 4)
+            
+            imgR = Image.fromarray(img)
             # else:
                 # imgR = Image.fromarray(imgOk)
             # cv2.rectangle(imgR, pt1=(400,200), pt2=(100,50), color=(255,0,0), thickness=10)
