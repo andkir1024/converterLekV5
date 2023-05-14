@@ -145,6 +145,18 @@ def calkScale( wScr, hScr, wImg, hImg):
         scale = hScr / hImg
     return scale
 
+def calkSizeViewRect(xZoom, yZoom, label, scale, img):
+    if label.winfo_height() < 10:
+        return None
+        
+    heightZoom = label.winfo_height() * scale
+    widthZoom = label.winfo_width() * scale
+    # xZoom = xZoom * scale
+    # yZoom = yZoom * scale
+    # img = cv2.rectangle(img, (100,0), (heightZoom, widthZoom), (0, 255, 0), 2)
+    # img = cv2.rectangle(img, (0,0), (65, 105), (0, 255, 0), 2)
+    return [(int(xZoom),int(yZoom)),(int(xZoom + widthZoom), int(yZoom + heightZoom))]
+
 def show_frame():
     global imgOk
     global updateImage
@@ -152,31 +164,25 @@ def show_frame():
     global updateImageZoom
     global xZoom,yZoom
 
-    updateAny = False
     if updateImage == True or updateImageZoom == True:
         param0 = frame2control.param0.get()
         updateImage = False
         imgOk = cv2.imdecode(np.fromfile(testName, dtype=np.uint8), cv2.IMREAD_COLOR)
-        heightW = rmainImage.winfo_height()
         if imgOk is not None:
-            # maxHeight = 1024
             img_grey = cv2.cvtColor(imgOk,cv2.COLOR_BGR2GRAY)
             # img_grey  = cv2.medianBlur(img_grey,7)
             img_grey = cv2.blur(img_grey, (3, 3))
             
             cvUtils.findCircles(img_grey, imgOk, draw_conrure = param0)
-            
-            # widthW = rmainImage.winfo_width()-4
-            # heightW = rmainImage.winfo_height()-4
-
-            # height = imgOk.shape[0]
-            # if height > maxHeight:
-                # scale = 1024 / height
 
             scale = calkScale(rmainImage.winfo_width()-4, rmainImage.winfo_height()-4, imgOk.shape[1], imgOk.shape[0])
+            
             img = cv2.resize(imgOk, (0, 0), interpolation=cv2.INTER_LINEAR, fx=scale, fy=scale)
             # cv::Rect rect(x, y, width, height);
-            img = cv2.rectangle(img, (5,150), (500,500), (255, 255, 0), 4)
+            # img = cv2.rectangle(img, (5,150), (200,500), (255, 255, 0), 2)
+            rectView = calkSizeViewRect(xZoom, yZoom, rzoomImage, scale, img)
+            if rectView is not None:
+                img = cv2.rectangle(img, rectView[0], rectView[1], (0, 255, 0), 2)
             
             imgR = Image.fromarray(img)
             # else:
