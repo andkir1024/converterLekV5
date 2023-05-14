@@ -134,27 +134,30 @@ lmainListImages.select_set(first=0)
 lmainListImages.event_generate("<<ListboxSelect>>")
 
 def calkScale( wScr, hScr, wImg, hImg):
+    dispX = 0
+    dispY = 0
     if wScr < 0:
-        return 1024 / hImg
+        return 1024 / hImg,dispX,dispY
     
     coff0= wScr / hScr
     coff1= wImg / hImg
     if coff0 < coff1:
         scale = wScr / wImg
+        dispY = -(hScr * scale)
+        dispY = -280
     else:
         scale = hScr / hImg
-    return scale
+        dispX = -(wScr * scale)
+    
+    return scale, dispX, dispY
 
-def calkSizeViewRect(xZoom, yZoom, label, scale, img):
+def calkSizeViewRect(xZoom, yZoom, label, scale, dispX, dispY):
     if label.winfo_height() < 10:
         return None
-        
+    xZoom = xZoom + dispX
+    yZoom = yZoom + dispY
     heightZoom = label.winfo_height() * scale
     widthZoom = label.winfo_width() * scale
-    # xZoom = xZoom * scale
-    # yZoom = yZoom * scale
-    # img = cv2.rectangle(img, (100,0), (heightZoom, widthZoom), (0, 255, 0), 2)
-    # img = cv2.rectangle(img, (0,0), (65, 105), (0, 255, 0), 2)
     return [(int(xZoom),int(yZoom)),(int(xZoom + widthZoom), int(yZoom + heightZoom))]
 
 def show_frame():
@@ -175,30 +178,25 @@ def show_frame():
             
             cvUtils.findCircles(img_grey, imgOk, draw_conrure = param0)
 
-            scale = calkScale(rmainImage.winfo_width()-4, rmainImage.winfo_height()-4, imgOk.shape[1], imgOk.shape[0])
+            scale, dispX, dispY = calkScale(rmainImage.winfo_width()-4, rmainImage.winfo_height()-4, imgOk.shape[1], imgOk.shape[0])
             
             img = cv2.resize(imgOk, (0, 0), interpolation=cv2.INTER_LINEAR, fx=scale, fy=scale)
-            # cv::Rect rect(x, y, width, height);
-            # img = cv2.rectangle(img, (5,150), (200,500), (255, 255, 0), 2)
-            rectView = calkSizeViewRect(xZoom, yZoom, rzoomImage, scale, img)
+            rectView = calkSizeViewRect(xZoom, yZoom, rzoomImage, scale, dispX, dispY)
             if rectView is not None:
                 img = cv2.rectangle(img, rectView[0], rectView[1], (0, 255, 0), 2)
             
             imgR = Image.fromarray(img)
-            # else:
-                # imgR = Image.fromarray(imgOk)
-            # cv2.rectangle(imgR, pt1=(400,200), pt2=(100,50), color=(255,0,0), thickness=10)
-            # draw = ImageDraw.Draw(imgR)
-            # draw.rectangle(((0, 00), (100, 100)), fill="black")
             imgtkR = ImageTk.PhotoImage(image=imgR)
             rmainImage.imgtk = imgtkR
             rmainImage.configure(image=imgtkR)
-            updateAny = True
 
-            scale = 0.25*2
-            img = cv2.resize(imgOk, (0, 0), interpolation=cv2.INTER_LINEAR, fx=scale, fy=scale)
-            # yZoom = xZoom= 0
-            im_crop = img[yZoom:yZoom+500, xZoom:xZoom+500]
+            # scale = 0.25*2
+            scaleZoom = 1
+            img = cv2.resize(imgOk, (0, 0), interpolation=cv2.INTER_LINEAR, fx=scaleZoom, fy=scaleZoom)
+            viewX = int(xZoom / scale)
+            viewY = int(yZoom / scale)
+            im_crop = img[viewY:viewY+500, viewX:viewX+1500]
+            # im_crop = img[viewY:viewY+500, viewX:viewX+500]
             # im_crop = img[0:500, 0:500]
             # crop_img = img[y:y+h, x:x+w]
             imgR = Image.fromarray(im_crop)
@@ -206,18 +204,6 @@ def show_frame():
             rzoomImage.imgtk = imgtkZoom
             rzoomImage.configure(image=imgtkZoom)
             updateImageZoom = False
-            
-    # if updateImageZoom == True or updateAny == True:
-    #     # im_crop = imgOk.crop((xZoom, yZoom))
-    #     # im_crop = imgOk[xZoom: yZoom, xZoom+200: yZoom+200]
-    #     # im_crop = imgOk[10:10, 100:200]
-    #     # im_crop = imgOk[yZoom:yZoom+500, xZoom:xZoom+500]
-    #     imgR = Image.fromarray(imgOk)
-    #     # imgR = Image.fromarray()
-    #     imgtkR = ImageTk.PhotoImage(image=imgR)
-    #     rzoomImage.imgtk = imgtkR
-    #     rzoomImage.configure(image=imgtkR)
-    #     updateImageZoom = False
 
     rmainImage.after(10, show_frame)
 
