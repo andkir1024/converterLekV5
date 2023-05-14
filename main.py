@@ -194,15 +194,14 @@ def show_frame():
     global xZoom,yZoom
 
     if updateImage == True or updateImageZoom == True:
-        param0 = frame2control.param0.get()
         updateImage = False
         imgOk = cv2.imdecode(np.fromfile(testName, dtype=np.uint8), cv2.IMREAD_COLOR)
         if imgOk is not None:
-            # img_grey = cv2.cvtColor(imgOk,cv2.COLOR_BGR2GRAY)
+            param0 = frame2control.param0.get()
+            img_grey = cv2.cvtColor(imgOk,cv2.COLOR_BGR2GRAY)
             # img_grey  = cv2.medianBlur(img_grey,7)
             # img_grey = cv2.blur(img_grey, (3, 3))
-            
-            # cvUtils.findCircles(img_grey, imgOk, draw_conrure = param0)
+            cvUtils.findCircles(img_grey, imgOk, draw_conrure = param0)
 
             # scale, dispX, dispY = calkViewParam(rmainImage.winfo_width()-4, rmainImage.winfo_height()-4, imgOk.shape[1], imgOk.shape[0])
             scale, dispX, dispY = calkViewParam(rmainImage, imgOk)
@@ -216,20 +215,11 @@ def show_frame():
             rmainImage.imgtk = imgtkR
             rmainImage.configure(image=imgtkR)
 
-            scaleZoom = 1
-            img = cv2.resize(imgOk, (0, 0), interpolation=cv2.INTER_LINEAR, fx=scaleZoom, fy=scaleZoom)
             viewX, viewY = convertScreenToImageCoord(rmainImage, imgOk, xZoom, yZoom)
-            # viewX = 390
-            # viewY = 940
             heightZoom = rzoomImage.winfo_height()
             widthZoom = rzoomImage.winfo_width()
-            # heightZoom = widthZoom =200
-            # im_crop = img[viewY:viewY+heightZoom, viewX:viewX+widthZoom]
-            im_crop = img[viewY:viewY+heightZoom, viewX:viewX+widthZoom]
-            # im_crop = img[viewY:viewY+1000, viewX:viewX+1500]
+            im_crop = imgOk[viewY:viewY+heightZoom, viewX:viewX+widthZoom]
             # im_crop = img[0:200, 50:500]
-            
-            
             # crop_img = img[y:y+h, x:x+w]
             imgR = Image.fromarray(im_crop)
             imgtkZoom = ImageTk.PhotoImage(image=imgR)
