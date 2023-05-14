@@ -13,10 +13,10 @@ class cvUtils:
                 for i in circles[0, :]:
                     center = (i[0], i[1])
                     # circle center
-                    cv2.circle(img_Draw, center, 1, (0, 100, 100), 3)
+                    # cv2.circle(img_Draw, center, 1, (0, 100, 100), 3)
                     # circle outline
                     radius = i[2]
-                    cv2.circle(img_Draw, center, radius, (255, 0, 255), 8)
+                    cv2.circle(img_Draw, center, radius, (255, 0, 255), 2)
         return
 
 def getContours(img,cThr=[100,100],showCanny=False,minArea=1000,filter=0,draw =False):

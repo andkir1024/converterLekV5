@@ -33,34 +33,21 @@ def selected(event):
     selected_files = ",".join([lmainListImages.get(i) for i in selected_indices])
     testName = filesDir + selected_files
     xZoom = yZoom = 0
+    # scale, xZoom, yZoom = calkViewParam(rmainImage, imgOk)
     updateImage = True
 def press_mouse(event):
     global xZoom,yZoom
     global updateImageZoom
     if imgOk is None:
         return
-    
-    rmainImage.update_idletasks()
-    # wl1 = rmainImage.winfo_width()
-    # wl2 = rmainImage.winfo_reqwidth()
-
     xZoom = event.x
     yZoom = event.y
-    width = rmainImage.winfo_width()-4
-    height = rmainImage.winfo_height()-4
-    widthImg = imgOk.shape[1]
-    heightImg = imgOk.shape[0]
-    
-    # scale, dispX, dispY = calkScale(rmainImage.winfo_width()-4, rmainImage.winfo_height()-4, imgOk.shape[1], imgOk.shape[0])
-    
     updateImageZoom = True
 ###################################
 root = Tk()
 root.bind('<Escape>', lambda e: root.quit())
 root.title("Лекала тестер")
-# root.geometry("{}x{}+{}+{}".format(100, 100, 0, 0))
-# root.geometry("+%d+%d" % (0, 0))
-root.geometry("1500x900+0+0")
+root.geometry("1700x900+0+0")
 
 frame1original = Frame(master=root, bg="red")
 frame1original.pack()
@@ -74,7 +61,7 @@ lmainListImages = Listbox(frame1original, listvariable=Variable(value=listFiles)
 lmainListImages.pack(expand=1, side="left", anchor=NW, fill=X, padx=5, pady=5)
 
 # собственно картинка в реальном размере
-rzoomImage = Label(frame1original, width=500, height=800)
+rzoomImage = Label(frame1original, width=800, height=800)
 rzoomImage.pack(side="right", padx=5, pady=5, anchor=NE)
 
 # собственно картинка
@@ -218,7 +205,13 @@ def show_frame():
             viewX, viewY = convertScreenToImageCoord(rmainImage, imgOk, xZoom, yZoom)
             heightZoom = rzoomImage.winfo_height()
             widthZoom = rzoomImage.winfo_width()
-            im_crop = imgOk[viewY:viewY+heightZoom, viewX:viewX+widthZoom]
+            height = imgOk.shape[0]
+            width = imgOk.shape[1]
+            right = viewX+widthZoom 
+            if right > width:
+                right = width
+                viewX = right-widthZoom
+            im_crop = imgOk[viewY:viewY+heightZoom, viewX:right]
             # im_crop = img[0:200, 50:500]
             # crop_img = img[y:y+h, x:x+w]
             imgR = Image.fromarray(im_crop)
