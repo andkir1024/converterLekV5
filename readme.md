@@ -12,3 +12,4 @@ git config --global user.email "andkir@mail.ru"
 git config --global user.name "andkir1024"
 
 pip install PyInstaller
+pyinstaller --onefile main.py

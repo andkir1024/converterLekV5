@@ -28,7 +28,6 @@ def getFiles():
         for f in os.scandir(filesDir):
             if f.is_file() and f.path.split('.')[-1].lower() == 'png':
                 files.append(f.path)
-                print(f.path)
         return files
     return None
 def selected(event):
