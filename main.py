@@ -189,6 +189,8 @@ def show_frame():
             # img_grey  = cv2.medianBlur(img_grey,7)
             # img_grey = cv2.blur(img_grey, (3, 3))
             cvUtils.findCircles(img_grey, imgOk, draw_conrure = param0)
+            cvUtils.getContours(img_grey, imgOk)
+
 
             # scale, dispX, dispY = calkViewParam(rmainImage.winfo_width()-4, rmainImage.winfo_height()-4, imgOk.shape[1], imgOk.shape[0])
             scale, dispX, dispY = calkViewParam(rmainImage, imgOk)
