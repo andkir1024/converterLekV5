@@ -11,6 +11,7 @@ import numpy as np
 import os
 import lecaloConverterUtils
 from lecaloConverterUtils import cvUtils
+from drawUtils import cvDraw
 
 ################################### andy 
 testName = None
@@ -22,18 +23,26 @@ xZoom = 0
 yZoom = 0
 
 def getFiles():
-    return os.listdir(filesDir)
+    if os.path.isdir(filesDir) == True:
+        files = []
+        for f in os.scandir(filesDir):
+            if f.is_file() and f.path.split('.')[-1].lower() == 'png':
+                files.append(f.path)
+                print(f.path)
+        return files
+    return None
 def selected(event):
     global testName
     global updateImage
     global xZoom,yZoom
+    global imgOk
     # получаем индексы выделенных элементов
     selected_indices = lmainListImages.curselection()
     # получаем сами выделенные элементы
     selected_files = ",".join([lmainListImages.get(i) for i in selected_indices])
     testName = filesDir + selected_files
     xZoom = yZoom = 0
-    # scale, xZoom, yZoom = calkViewParam(rmainImage, imgOk)
+    imgOk = cv2.imdecode(np.fromfile(testName, dtype=np.uint8), cv2.IMREAD_COLOR)
     updateImage = True
 def press_mouse(event):
     global xZoom,yZoom
@@ -72,9 +81,11 @@ rmainImage.bind("<ButtonPress-1>", press_mouse)
 # slider current value
 current_value1 = DoubleVar()
 def slider_changed1(event):
+    update_image()
     return
 current_value2 = DoubleVar()
 def slider_changed2(event):
+    update_image()
     return
 def export_svg():
     data = [('svg', '*.svg')]
@@ -123,7 +134,6 @@ lmainListImages.bind("<<ListboxSelect>>", selected)
 lmainListImages.select_set(first=0)
 lmainListImages.event_generate("<<ListboxSelect>>")
 
-# def calkViewParam( wScr, hScr, wImg, hImg):
 def calkViewParam( label, image):
     dispX = 0
     dispY = 0
@@ -147,7 +157,6 @@ def calkViewParam( label, image):
         dispX = -(wScr * scale)
     
     return scale, dispX, dispY
-
 def calkSizeViewRect(xZoom, yZoom, label, scale, dispX, dispY):
     if label.winfo_height() < 10:
         return None
@@ -156,7 +165,6 @@ def calkSizeViewRect(xZoom, yZoom, label, scale, dispX, dispY):
     heightZoom = label.winfo_height() * scale
     widthZoom = label.winfo_width() * scale
     return [(int(xZoom),int(yZoom)),(int(xZoom + widthZoom), int(yZoom + heightZoom))]
-
 def convertScreenToImageCoord(rmainImage, imgOk, xZoom, yZoom):
     scale, dispX, dispY = calkViewParam(rmainImage, imgOk)
     deltaX = xZoom + dispX
@@ -182,19 +190,15 @@ def show_frame():
 
     if updateImage == True or updateImageZoom == True:
         updateImage = False
-        imgOk = cv2.imdecode(np.fromfile(testName, dtype=np.uint8), cv2.IMREAD_COLOR)
         if imgOk is not None:
+            imgDraw = imgOk.copy()
             param0 = frame2control.param0.get()
-            img_grey = cv2.cvtColor(imgOk,cv2.COLOR_BGR2GRAY)
-            # img_grey  = cv2.medianBlur(img_grey,7)
-            # img_grey = cv2.blur(img_grey, (3, 3))
-            cvUtils.findCircles(img_grey, imgOk, draw_conrure = param0)
-            cvUtils.getContours(img_grey, imgOk)
+            imgGrey =cvDraw.createGray(imgOk, slider1.get())
+            cvUtils.findCircles(imgGrey, imgDraw, draw_conrure = param0)
+            cvUtils.getContours(imgGrey, imgDraw)
 
-
-            # scale, dispX, dispY = calkViewParam(rmainImage.winfo_width()-4, rmainImage.winfo_height()-4, imgOk.shape[1], imgOk.shape[0])
-            scale, dispX, dispY = calkViewParam(rmainImage, imgOk)
-            img = cv2.resize(imgOk, (0, 0), interpolation=cv2.INTER_LINEAR, fx=scale, fy=scale)
+            scale, dispX, dispY = calkViewParam(rmainImage, imgDraw)
+            img = cv2.resize(imgDraw, (0, 0), interpolation=cv2.INTER_LINEAR, fx=scale, fy=scale)
             rectView = calkSizeViewRect(xZoom, yZoom, rzoomImage, scale, dispX, dispY)
             if rectView is not None:
                 img = cv2.rectangle(img, rectView[0], rectView[1], (0, 255, 0), 2)
@@ -213,7 +217,10 @@ def show_frame():
             if right > width:
                 right = width
                 viewX = right-widthZoom
-            im_crop = imgOk[viewY:viewY+heightZoom, viewX:right]
+
+            im_crop = imgDraw[viewY:viewY+heightZoom, viewX:right]
+            # im_crop = imgGrey[viewY:viewY+heightZoom, viewX:right]
+
             # im_crop = img[0:200, 50:500]
             # crop_img = img[y:y+h, x:x+w]
             imgR = Image.fromarray(im_crop)
