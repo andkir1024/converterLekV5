@@ -4,11 +4,11 @@ import numpy as np
 class cvUtils:
     def findCircles(img_grey, img_Draw, draw_conrure):
         rows = img_grey.shape[0]
-        circles = cv2.HoughCircles(img_grey, cv2.HOUGH_GRADIENT, 1, rows / 64,
-                                param1=100, param2=40,
+        circles = cv2.HoughCircles(img_grey, cv2.HOUGH_GRADIENT, 1, rows / (64),
+                                param1=40, param2=40,
                                 # param1=200, param2=10,
                                 # param1=100, param2=30,
-                                minRadius=10, maxRadius=1000)            
+                                minRadius=3, maxRadius=1000)            
         if draw_conrure == True:
             if circles is not None :
                 circles = np.uint16(np.around(circles))

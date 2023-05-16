@@ -197,10 +197,14 @@ def show_frame():
             cvUtils.getContours(imgGrey, imgDraw)
 
             scale, dispX, dispY = calkViewParam(rmainImage, imgDraw)
-            img = cv2.resize(imgDraw, (0, 0), interpolation=cv2.INTER_LINEAR, fx=scale, fy=scale)
+            # img = cv2.resize(imgDraw, (0, 0), interpolation=cv2.INTER_LINEAR, fx=scale, fy=scale)
+            img = cv2.resize(imgDraw, (0, 0), interpolation=cv2.INTER_AREA, fx=scale, fy=scale)
             rectView = calkSizeViewRect(xZoom, yZoom, rzoomImage, scale, dispX, dispY)
             if rectView is not None:
                 img = cv2.rectangle(img, rectView[0], rectView[1], (0, 255, 0), 2)
+            
+            kernel = np.ones((3,3))
+            img = cv2.erode(img,kernel,iterations=1)
             
             imgR = Image.fromarray(img)
             imgtkR = ImageTk.PhotoImage(image=imgR)
