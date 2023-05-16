@@ -21,13 +21,24 @@ class cvDraw:
     def createGray(imgOk, param0):
         imgGray = cv2.cvtColor(imgOk,cv2.COLOR_BGR2GRAY)
 
+        imgGray  = cv2.medianBlur(imgGray,7)
+
+        # 1 повышение резкости
+        kernel = np.array([[-1,-1,-1], 
+                       [-1, 39,-1],
+                       [-1,-1,-1]])
+        # kernel = 1/3 * kernel
+        # imgGray = cv2.filter2D(imgGray, -1, kernel) 
+
+        # 2 выделение границ
         cThr=[100,100]
         imgBlur = cv2.GaussianBlur(imgGray,(5,5),1)
-        imgCanny = cv2.Canny(imgBlur,cThr[0],cThr[1])
+        imgBlur = cv2.Canny(imgBlur,cThr[0],cThr[1])
+        # imgGray = cv2.bitwise_not(imgBlury)
         
-        kernel = np.ones((5,5))
-        imgDial = cv2.dilate(imgCanny,kernel,iterations=3)
-        imgThre = cv2.erode(imgDial,kernel,iterations=3)
+        kernel = np.ones((3,3))
+        # imgGray = cv2.dilate(imgGray,kernel,iterations=13)
+        # imgGray = cv2.erode(imgGray,kernel,iterations=1)
         
         # img_grey  = cv2.medianBlur(img_grey,1)
         # img_grey = cv2.blur(img_grey, (3, 3))

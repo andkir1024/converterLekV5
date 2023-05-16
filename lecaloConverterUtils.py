@@ -5,7 +5,9 @@ class cvUtils:
     def findCircles(img_grey, img_Draw, draw_conrure):
         rows = img_grey.shape[0]
         circles = cv2.HoughCircles(img_grey, cv2.HOUGH_GRADIENT, 1, rows / 64,
-                                param1=100, param2=30,
+                                param1=100, param2=40,
+                                # param1=200, param2=10,
+                                # param1=100, param2=30,
                                 minRadius=10, maxRadius=1000)            
         if draw_conrure == True:
             if circles is not None :
@@ -18,8 +20,54 @@ class cvUtils:
                     radius = i[2]
                     cv2.circle(img_Draw, center, radius, (255, 0, 255), 2)
         return
-    def getContours1(img):
+    def findCircles2(img_grey, img_Draw, draw_conrure):
+        # detector = cv2.SimpleBlobDetector()
+        # keypoints = detector.detect(img_grey)
+    	# detector = cv2.SimpleBlobDetector_create(params)
+        # m_with_keypoints = cv2.drawKeypoints(img_Draw, keypoints, np.array([]), (0,0,255), cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
+    # Setup SimpleBlobDetector parameters.
+        params = cv2.SimpleBlobDetector_Params()
+
+        # Change thresholds
+        params.minThreshold = 10
+        params.maxThreshold = 200
+
+
+        # Filter by Area.
+        params.filterByArea = False
+        params.minArea = 15
+
+        # Filter by Circularity
+        params.filterByCircularity = True
+        params.minCircularity = 0.2
+
+        # Filter by Convexity
+        params.filterByConvexity = True
+        params.minConvexity = 0.87
+            
+        # Filter by Inertia
+        params.filterByInertia = True
+        params.minInertiaRatio = 0.01
+
+        # Create a detector with the parameters
+        ver = (cv2.__version__).split('.')
+        if int(ver[0]) < 3 :
+            detector = cv2.SimpleBlobDetector(params)
+        else : 
+            detector = cv2.SimpleBlobDetector_create(params)
+
+
+        # Detect blobs.
+        keypoints = detector.detect(img_Draw)
+
+        # Draw detected blobs as red circles.
+        # cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS ensures
+        # the size of the circle corresponds to the size of blob
+
+        img_Draw = cv2.drawKeypoints(img_Draw, keypoints, np.array([]), (0,0,255), cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
+     
         return
+
 
     def getContours(imgGray, img,cThr=[100,100],showCanny=False,minArea=1000,filter=0,draw =True):
         # imgGray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
