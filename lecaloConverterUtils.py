@@ -2,6 +2,35 @@ import cv2
 import numpy as np
 
 class cvUtils:
+    def findLines(img_grey, img_Draw, draw_conrure):
+        return
+        # rho = 1  # distance resolution in pixels of the Hough grid
+        # theta = np.pi / 180  # angular resolution in radians of the Hough grid
+        # threshold = 15  # minimum number of votes (intersections in Hough grid cell)
+        # min_line_length = 50  # minimum number of pixels making up a line
+        # max_line_gap = 40  # maximum gap in pixels between connectable line segments
+
+        # # Run Hough on edge detected image
+        # # Output "lines" is an array containing endpoints of detected line segments
+        # lines = cv2.HoughLinesP(img, rho, theta, threshold, np.array([]),min_line_length, max_line_gap)
+        # return lines
+        # lines = cv2.HoughLines(img_grey, rho = 1, theta = 1 * np.pi/180, threshold=120, srn=0, stn = 0, min_theta=1, max_theta=2)
+        lines = cv2.HoughLinesP(img_grey, rho = 1, theta = np.pi/180, threshold = 5, minLineLength= 500, maxLineGap=40)
+
+        # lines = cv2.HoughLines(img_grey, rho = 1, theta = 1 * np.pi/180, threshold=120, srn=0, stn = 0, min_theta=1, max_theta=2)
+
+        for i in range(0, len(lines)):
+            rho, theta = lines[i][0][0], lines[i][0][1]
+            a = np.cos(theta)
+            b = np.sin(theta)
+            x0 = a*rho
+            y0 = b*rho
+            x1 = int(x0 + 1000*(-b))
+            y1 = int(y0 + 1000*(a))
+            x2 = int(x0 - 1000*(-b))
+            y2 = int(y0 - 1000*(a))
+            cv2.line(img_Draw, (x1, y1), (x2, y2), (0, 0, 255), 2)
+            
     def findCircles(img_grey, img_Draw, draw_conrure):
         rows = img_grey.shape[0]
         circles = cv2.HoughCircles(img_grey, cv2.HOUGH_GRADIENT, 1, rows / (64),
@@ -69,7 +98,7 @@ class cvUtils:
         return
 
 
-    def getContours(imgGray, img,cThr=[100,100],showCanny=False,minArea=1000,filter=0,draw =True):
+    def getContours(imgGray, img,cThr=[100,100],showCanny=False,minArea=0,filter=0,draw =True):
         # imgGray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
         imgBlur = cv2.GaussianBlur(imgGray,(5,5),1)
         imgCanny = cv2.Canny(imgBlur,cThr[0],cThr[1])
@@ -78,6 +107,7 @@ class cvUtils:
         imgThre = cv2.erode(imgDial,kernel,iterations=3)
         if showCanny:cv2.imshow('Canny',imgCanny)
         # contours,hiearchy = cv2.findContours(imgThre,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
+        # imgCanny = imgGray
         contours,hiearchy = cv2.findContours(imgCanny,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
         finalCountours = []
         for i in contours:
@@ -91,7 +121,7 @@ class cvUtils:
                         finalCountours.append([len(approx),area,approx,bbox,i])
                 else:
                     finalCountours.append([len(approx),area,approx,bbox,i])
-        finalCountours = sorted(finalCountours,key = lambda x:x[1] ,reverse= True)
+        # finalCountours = sorted(finalCountours,key = lambda x:x[1] ,reverse= True)
         if draw:
             for con in finalCountours:
                 cv2.drawContours(img,con[4],-1,(0,255,255),6)
@@ -193,18 +223,6 @@ class cvUtils:
         # objtours = sorted(objects_contours, key=cv2.contourArea)[-1]
         objects_contours.sort(key=custom_key, reverse=True)
         return objects_contours
-
-    def findLines(img):
-        rho = 1  # distance resolution in pixels of the Hough grid
-        theta = np.pi / 180  # angular resolution in radians of the Hough grid
-        threshold = 15  # minimum number of votes (intersections in Hough grid cell)
-        min_line_length = 50  # minimum number of pixels making up a line
-        max_line_gap = 40  # maximum gap in pixels between connectable line segments
-
-        # Run Hough on edge detected image
-        # Output "lines" is an array containing endpoints of detected line segments
-        lines = cv2.HoughLinesP(img, rho, theta, threshold, np.array([]),min_line_length, max_line_gap)
-        return lines
 
     def detect_contures_for_mainConture(aligmentedImgGray, minArea = 10000, maxArea = 100000000):
         mask = aligmentedImgGray.copy()

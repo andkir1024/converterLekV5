@@ -16,6 +16,8 @@ from drawUtils import cvDraw
 ################################### andy 
 testName = None
 filesDir = '../popular_graphs_interesting/'
+filesSrc = None
+svgDir = '../outSvg/'
 updateImage = False
 updateImageZoom = False
 imgOk = None
@@ -35,13 +37,14 @@ def selected(event):
     global updateImage
     global xZoom,yZoom
     global imgOk
+    global filesSrc
     # получаем индексы выделенных элементов
     selected_indices = lmainListImages.curselection()
     # получаем сами выделенные элементы
-    selected_files = ",".join([lmainListImages.get(i) for i in selected_indices])
-    testName = filesDir + selected_files
+    filesSrc  = ",".join([lmainListImages.get(i) for i in selected_indices])
+    # filesName = filesDir + filesSrc
     xZoom = yZoom = 0
-    imgOk = cv2.imdecode(np.fromfile(testName, dtype=np.uint8), cv2.IMREAD_COLOR)
+    imgOk = cv2.imdecode(np.fromfile(filesSrc, dtype=np.uint8), cv2.IMREAD_COLOR)
     updateImage = True
 def press_mouse(event):
     global xZoom,yZoom
@@ -87,11 +90,20 @@ def slider_changed2(event):
     update_image()
     return
 def export_svg():
-    data = [('svg', '*.svg')]
-    file_path = filedialog.asksaveasfilename(filetypes=data, defaultextension=data)
-    file_path = 'f:/out.svg'
-    lekaloMain.saveToSvg(imgOk,file_path)
-    return
+    global filesSrc
+    if imgOk is None:
+        return
+    # data = [('svg', '*.svg')]
+    # file_path = filedialog.asksaveasfilename(filetypes=data, defaultextension=data)
+    # file_path = 'f:/out.svg'
+    fileDst = os.path.splitext(filesSrc)
+    if not os.path.exists(svgDir):
+        os.mkdir(svgDir)
+    filename = fileDst[0].split('/')
+    fileDst = svgDir + filename[-1] + ".svg"
+    lekaloSvg.saveToSvg(imgOk,fileDst)
+    
+
 def update_image():
     global updateImage
     updateImage = True
@@ -195,6 +207,8 @@ def show_frame():
             imgGrey =cvDraw.createGray(imgOk, slider1.get())
             cvUtils.findCircles(imgGrey, imgDraw, draw_conrure = param0)
             cvUtils.getContours(imgGrey, imgDraw)
+            cvUtils.findLines(imgGrey, imgDraw, draw_conrure = param0)
+
 
             scale, dispX, dispY = calkViewParam(rmainImage, imgDraw)
             # img = cv2.resize(imgDraw, (0, 0), interpolation=cv2.INTER_LINEAR, fx=scale, fy=scale)

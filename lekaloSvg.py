@@ -2,11 +2,13 @@ import math
 
 import cv2
 
-import lekaloConture
-import lecaloUtils
+# import lekaloConture
+# import lecaloUtils
 import numpy as np
-import arucoSize
+# import arucoSize
 
+def saveToSvg(imgOk,file_path):
+    return
 
 def roundRectSvg(cnt, coff):
     # <rect class="fil0 str0" x="50" y="20" rx="100" ry="100" width="450" height="450"/>
