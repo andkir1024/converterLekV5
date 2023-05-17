@@ -1,13 +1,10 @@
 import math
-
 import cv2
-
-# import lekaloConture
-# import lecaloUtils
 import numpy as np
-# import arucoSize
 
-def saveToSvg(imgOk,file_path):
+def saveToSvg(imgOk,nameSvg):
+    cntExt = []
+    conturToSvg(cntExt, nameSvg)
     return
 
 def roundRectSvg(cnt, coff):
@@ -67,21 +64,18 @@ def boxSvg(cnt, coff, object_disp, object_startX):
     str = f'\t<rect class="fil0 str0" x="{x1}" y="{y1}" rx="{r}" ry="{r}"  width="{width}"  height="{height}"/>\n'
     return str
 
-def conturToSvg(cntExt, nameSvg):
-    if (cntExt is None) == True:
-        return
+def conturToSvg(cntExt, nameSvg, object_width = 100, object_height = 200, coff = 0.1):
+    # if (cntExt is None) == True:
+        # return
     # return
-    page = cntExt[0]
-    object_width = page[1]
-    object_height = page[2]
-    coff = page[3] * 0.1
-    object_disp = page[4]
-    object_startX = page[5]
-    object_startY = page[6]
+    # page = cntExt[0]
+    # object_disp = page[4]
+    # object_startX = page[5]
+    # object_startY = page[6]
 
-    main = cntExt[1]
-    mainConture = main[1]
-    mainContureTop = mainConture[1]
+    # main = cntExt[1]
+    # mainConture = main[1]
+    # mainContureTop = mainConture[1]
 
     with open(nameSvg, "w+") as f:
         f.write('<?xml version="1.0" encoding="UTF-8"?>\n')
@@ -103,18 +97,18 @@ def conturToSvg(cntExt, nameSvg):
         f.write('\n')
         f.write('<g id="0020_1">\n')
         f.write('<metadata id="CorelCorpID_0Corel-Layer"/>\n')
-        for cnt in cntExt:
-            type = cnt[0]
-            if type =='c':
-                str = circleSvg(cnt[1], coff, object_disp, object_startX, mainContureTop)
-                if (str is None)==False:
-                    f.write(str)
-            if type == 'm':
-                str = roundRectSvg(cnt[1], coff)
-                f.write(str)
-            if type == 'b':
-                str = boxSvg(cnt[1], coff, object_disp, object_startX)
-                f.write(str)
+        # for cnt in cntExt:
+        #     type = cnt[0]
+        #     if type =='c':
+        #         str = circleSvg(cnt[1], coff, object_disp, object_startX, mainContureTop)
+        #         if (str is None)==False:
+        #             f.write(str)
+        #     if type == 'm':
+        #         str = roundRectSvg(cnt[1], coff)
+        #         f.write(str)
+        #     if type == 'b':
+        #         str = boxSvg(cnt[1], coff, object_disp, object_startX)
+        #         f.write(str)
         f.write('\n</g>\n')
         f.write("</svg>")
     return
