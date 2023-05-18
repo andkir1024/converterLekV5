@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+import math
 
 class cvUtils:
     def findLines(img_grey, img_Draw, draw_conrure):
@@ -97,6 +98,62 @@ class cvUtils:
      
         return
 
+
+    def getContours1(imgGray, img,cThr=[100,100],showCanny=False,minArea=0,filter=0,draw =True):
+        # imgGray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
+        imgBlur = cv2.GaussianBlur(imgGray,(5,5),1)
+        imgCanny = cv2.Canny(imgBlur,cThr[0],cThr[1])
+        kernel = np.ones((5,5))
+        imgDial = cv2.dilate(imgCanny,kernel,iterations=3)
+        imgThre = cv2.erode(imgDial,kernel,iterations=3)
+        if showCanny:cv2.imshow('Canny',imgCanny)
+        # contours,hiearchy = cv2.findContours(imgThre,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
+        # imgCanny = imgGray
+        contours,hiearchy = cv2.findContours(imgCanny,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
+        # contours,hiearchy = cv2.findContours(imgCanny,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_NONE)
+        finalCountours = []
+        for i in contours:
+            area = cv2.contourArea(i)
+            if area > minArea:
+                peri = cv2.arcLength(i,True)
+                approx = cv2.approxPolyDP(i,0.02*peri,True)
+                bbox = cv2.boundingRect(approx)
+                finalCountours.append([len(approx),area,approx,bbox,i])
+                
+        max=0                
+        sel_countour=None
+        for countour in contours:
+            if countour.shape[0]>max:
+                sel_countour=countour
+                max=countour.shape[0]
+                
+        last_point=None
+        i=0
+        for point in sel_countour:
+            curr_point=point[0]
+            if not(last_point is None):
+                x1=int(last_point[0])
+                y1=int(last_point[1])
+                x2=int(curr_point[0])
+                y2=int(curr_point[1])
+                lenLine = math.sqrt( ((x1-x2)**2)+((y1-y2)**2))
+                if lenLine > 10:
+                    cv2.line(img, (x1, y1), (x2, y2), (255,0,0), thickness=6)
+                    i=i+1
+            # if i > 100:
+                # break                
+            last_point=curr_point
+    
+        # approx = cv2.approxPolyDP(contours[1],0.2,True)
+        # cv2.drawContours(img,contours[1],-1,(255,0,0),16)
+        # cv2.drawContours(img,[approx],-1,(0,255,0),6)
+        if draw:
+            for con in finalCountours:
+                approx = cv2.approxPolyDP(con[4],0.2,True)
+                # cv2.drawContours(img,con[4],-1,(255,0,0),16)
+                # cv2.drawContours(img,[approx],-1,(0,255,0),6)
+                # cv2.drawContours(img,con[4],-1,(0,255,0),16)
+        return img, finalCountours
 
     def getContours(imgGray, img,cThr=[100,100],showCanny=False,minArea=0,filter=0,draw =True):
         # imgGray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
