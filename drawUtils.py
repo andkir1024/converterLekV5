@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+import math
 
 class cvDraw:
     def show_testImage(nameImage, container, scale):
@@ -45,3 +46,12 @@ class cvDraw:
         # return imgBlur
         return imgGray
         # return imgCanny
+    def testLine( img, last_point, curr_point, border = 100):
+        x1=int(last_point[0])
+        y1=int(last_point[1])
+        x2=int(curr_point[0])
+        y2=int(curr_point[1])
+        lenLine = math.sqrt( ((x1-x2)**2)+((y1-y2)**2))
+        if lenLine > border:
+            cv2.line(img, (x1, y1), (x2, y2), (255,0,0), thickness=2)
+        return

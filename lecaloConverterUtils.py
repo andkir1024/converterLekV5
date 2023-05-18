@@ -1,6 +1,8 @@
 import cv2
 import numpy as np
 import math
+from drawUtils import cvDraw
+import drawsvg as drawSvg
 
 class cvUtils:
     def findLines(img_grey, img_Draw, draw_conrure):
@@ -100,6 +102,7 @@ class cvUtils:
 
 
     def getContours1(imgGray, img,cThr=[100,100],showCanny=False,minArea=0,filter=0,draw =True):
+        d = drawSvg.Drawing(200, 100, origin='center')
         # imgGray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
         imgBlur = cv2.GaussianBlur(imgGray,(5,5),1)
         imgCanny = cv2.Canny(imgBlur,cThr[0],cThr[1])
@@ -128,21 +131,12 @@ class cvUtils:
                 max=countour.shape[0]
                 
         last_point=None
-        i=0
         for point in sel_countour:
             curr_point=point[0]
             if not(last_point is None):
-                x1=int(last_point[0])
-                y1=int(last_point[1])
-                x2=int(curr_point[0])
-                y2=int(curr_point[1])
-                lenLine = math.sqrt( ((x1-x2)**2)+((y1-y2)**2))
-                if lenLine > 10:
-                    cv2.line(img, (x1, y1), (x2, y2), (255,0,0), thickness=6)
-                    i=i+1
-            # if i > 100:
-                # break                
+                cvDraw.testLine(img, last_point,curr_point, 100)
             last_point=curr_point
+        cvDraw.testLine(img, last_point,sel_countour[0][0], 100)
     
         # approx = cv2.approxPolyDP(contours[1],0.2,True)
         # cv2.drawContours(img,contours[1],-1,(255,0,0),16)
@@ -153,6 +147,21 @@ class cvUtils:
                 # cv2.drawContours(img,con[4],-1,(255,0,0),16)
                 # cv2.drawContours(img,[approx],-1,(0,255,0),6)
                 # cv2.drawContours(img,con[4],-1,(0,255,0),16)
+                
+# Draw arrows
+        # arrow = drawSvg.Marker(-0.1, -0.51, 0.9, 0.5, scale=4, orient='auto')
+        # arrow.append(drawSvg.Lines(-0.1, 0.5, -0.1, -0.5, 0.9, 0, fill='red', close=True))
+        p = drawSvg.Path(stroke='red', stroke_width=1, fill='none')  # Add an arrow to the end of a path
+        p.M(0, 0).C(50, 0, 100,50,100,100)  # Chain multiple path commands
+        d.append(p)
+        # d.append(drawSvg.Line(30, 20, 0, 10,
+                # stroke='red', stroke_width=2, fill='none',
+                # marker_end=arrow))  # Add an arrow to the end of a line
+
+        # d.set_pixel_scale(2)  # Set number of pixels per geometry unit
+        #d.set_render_size(400, 200)  # Alternative to set_pixel_scale
+        d.save_svg('example.svg')                
+
         return img, finalCountours
 
     def getContours(imgGray, img,cThr=[100,100],showCanny=False,minArea=0,filter=0,draw =True):
@@ -162,10 +171,12 @@ class cvUtils:
         kernel = np.ones((5,5))
         imgDial = cv2.dilate(imgCanny,kernel,iterations=3)
         imgThre = cv2.erode(imgDial,kernel,iterations=3)
-        if showCanny:cv2.imshow('Canny',imgCanny)
+        # imgCanny = imgGray
+        # if showCanny:cv2.imshow('Canny',imgCanny)
         # contours,hiearchy = cv2.findContours(imgThre,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
         # imgCanny = imgGray
-        contours,hiearchy = cv2.findContours(imgCanny,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
+        # contours,hiearchy = cv2.findContours(imgCanny,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
+        contours,hiearchy = cv2.findContours(imgCanny,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_NONE)
         finalCountours = []
         for i in contours:
             area = cv2.contourArea(i)
