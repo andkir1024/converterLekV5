@@ -7,13 +7,19 @@ def saveToSvg(imgOk,nameSvg):
     conturToSvg(cntExt, nameSvg)
     return
 def createCirclePath(cx, cy, r):
-    # strPath = f'\t<path "d="M 25, 50 a 25,25 0 1,1 50,0 a 25,25 0 1,1 -50,0"/>\n'
-    # strPath = f'<path d="M 25, 50 a 25,25 0 1,1 50,0 a 25,25 0 1,1 -50,0"/>'
     x = cx-r
     y = cy
     d = 2 * r
-    # strPath = f'<path d="M "{x}", "{y}" a "{r}","{r}" 0 1,1 "{d}",0 a "{r}","{r}" 0 1,1 -"{d}",0"/>'
-    strPath = f'<path class="fil0 str0" d="M {x}, {y} a {r},{r} 0 1,1 {d},0 a {r},{r} 0 1,1 -{d},0"/>'
+    # strPath = f'<path class="fil0 str0" d="M {x}, {y} a {r},{r} 0 1,1 {d},0 a {r},{r} 0 1,1 -{d},0"/>'
+    strPath = f'\t<path fill="none" stroke-width="1" stroke="red"  d="M {x}, {y} a {r},{r} 0 1,1 {d},0 a {r},{r} 0 1,1 -{d},0"/>\n'
+
+    return strPath
+
+def createRectPath(cx, cy, r):
+    x = cx-r
+    y = cy
+    d = 2 * r
+    strPath = f'\t<path fill="none" stroke-width="1" stroke="red"  d="M10 10 H 90 V 90 H 10 L 10 10"/>\n'
 
     return strPath
 
@@ -76,18 +82,6 @@ def boxSvg(cnt, coff, object_disp, object_startX):
     return str
 
 def conturToSvg(cntExt, nameSvg, object_width = 100, object_height = 200, coff = 0.1):
-    # if (cntExt is None) == True:
-        # return
-    # return
-    # page = cntExt[0]
-    # object_disp = page[4]
-    # object_startX = page[5]
-    # object_startY = page[6]
-
-    # main = cntExt[1]
-    # mainConture = main[1]
-    # mainContureTop = mainConture[1]
-
     with open(nameSvg, "w+") as f:
         f.write('<?xml version="1.0" encoding="UTF-8"?>\n')
         f.write(f'<svg xmlns="http://www.w3.org/2000/svg" xml:space="preserve" width="{round(object_width/coff, 3)}mm" height="{round(object_height/coff, 3)}mm"  version="1.1"\n')
@@ -111,6 +105,9 @@ def conturToSvg(cntExt, nameSvg, object_width = 100, object_height = 200, coff =
         
         str = createCirclePath(0,0,25)
         f.write(str)
+        str = createRectPath(0,0,25)
+        f.write(str)
+        
         # for cnt in cntExt:
         #     type = cnt[0]
         #     if type =='c':
