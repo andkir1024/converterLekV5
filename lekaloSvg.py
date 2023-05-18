@@ -6,6 +6,17 @@ def saveToSvg(imgOk,nameSvg):
     cntExt = []
     conturToSvg(cntExt, nameSvg)
     return
+def createCirclePath(cx, cy, r):
+    # strPath = f'\t<path "d="M 25, 50 a 25,25 0 1,1 50,0 a 25,25 0 1,1 -50,0"/>\n'
+    # strPath = f'<path d="M 25, 50 a 25,25 0 1,1 50,0 a 25,25 0 1,1 -50,0"/>'
+    x = cx-r
+    y = cy
+    d = 2 * r
+    # strPath = f'<path d="M "{x}", "{y}" a "{r}","{r}" 0 1,1 "{d}",0 a "{r}","{r}" 0 1,1 -"{d}",0"/>'
+    strPath = f'<path class="fil0 str0" d="M {x}, {y} a {r},{r} 0 1,1 {d},0 a {r},{r} 0 1,1 -{d},0"/>'
+
+    return strPath
+
 
 def roundRectSvg(cnt, coff):
     # <rect class="fil0 str0" x="50" y="20" rx="100" ry="100" width="450" height="450"/>
@@ -97,6 +108,9 @@ def conturToSvg(cntExt, nameSvg, object_width = 100, object_height = 200, coff =
         f.write('\n')
         f.write('<g id="0020_1">\n')
         f.write('<metadata id="CorelCorpID_0Corel-Layer"/>\n')
+        
+        str = createCirclePath(0,0,25)
+        f.write(str)
         # for cnt in cntExt:
         #     type = cnt[0]
         #     if type =='c':

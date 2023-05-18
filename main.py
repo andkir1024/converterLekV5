@@ -126,11 +126,11 @@ btnParam0.pack(side="left",  padx="10", pady="1")
 btnParam1 = Checkbutton(frame2control, text="Параметр 1", variable=frame2control.param1, onvalue=1, offvalue=0, )
 btnParam1.pack(side="left",  padx="10", pady="1")
 
-btnSvg = Button(frame2control, text="Export to SVG", command=export_svg)
-btnSvg.pack(side="left",  padx="10", pady="1")
-
 btnExit = Button(frame2control, text="Exit", command=exit, width= 20)
 btnExit.pack(side="right",  padx="10", pady="1")
+
+btnSvg = Button(frame2control, text="Export to SVG", command=export_svg, width= 20)
+btnSvg.pack(side="right",  padx="10", pady="1")
 
 slider1 = Scale( frame2control,from_=1, to=250, orient='horizontal',  command=slider_changed1, variable=current_value1, length = 200)
 slider1.set(200)
