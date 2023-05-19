@@ -396,7 +396,9 @@ class cvUtils:
         return img, finalCountours
     
     def createMainContours(lines, mainRect):
-        d = drawSvg.Drawing(mainRect[1][0]-mainRect[0][0], mainRect[1][1]-mainRect[0][1], origin=(0,0))
+        width = int((mainRect[1][0]-mainRect[0][0]) * 1.5)
+        height = int((mainRect[1][1]-mainRect[0][1]) * 1.5)
+        d = drawSvg.Drawing(width, height, origin=(0,0))
         # d = drawSvg.Drawing(200, 100, origin='center')
         # d = drawSvg.Drawing(5000, 3000, origin=(0,0))
         p = drawSvg.Path(stroke='red', stroke_width=2, fill='none')  # Add an arrow to the end of a path
@@ -404,11 +406,11 @@ class cvUtils:
         # p.C(50, 0, 100,50,100,100) 
         # d.append(p)        
         for index in range(len(lines)-1):
-            angleCur = cvDraw.angleLine( lines[index] )
-            angleNext = cvDraw.angleLine( lines[index+1] )
-            start = lines[index][0]
-            finish = lines[index][1]
-            finishA = lines[index+1][1]
+            # angleCur = cvDraw.angleLine( lines[index] )
+            # angleNext = cvDraw.angleLine( lines[index+1] )
+            # start = lines[index][0]
+            # finish = lines[index][1]
+            # finishA = lines[index+1][1]
             # p.M(start[0],start[1]).L(finish[0],finish[1]) 
             pp0, pp1, centroid1, centroid2, pp2 = cvUtils.createAngle(lines[index][0], lines[index][1],lines[index+1][0], lines[index+1][1])
             p.M(pp0.x,pp0.y).L(pp1.x,pp1.y) 
@@ -421,6 +423,12 @@ class cvUtils:
             # p.M(0, 0).C(50,0, 100,50, 100,100)  # Chain multiple path commands
             d.append(p)
             # break
+
+        index = len(lines)-1
+        pp0, pp1, centroid1, centroid2, pp2 = cvUtils.createAngle(lines[index][0], lines[index][1],lines[0][0], lines[0][1])
+        p.M(pp0.x,pp0.y).L(pp1.x,pp1.y) 
+        p.C(centroid1.x, centroid1.y, centroid2.x,centroid2.y,pp2.x,pp2.y)
+        d.append(p)
         #     line =  lines[index]
         # for line in lines:
         #     angle = cvDraw.angleLine( line )
@@ -444,14 +452,12 @@ class cvUtils:
             point2 = pointD
             point3 = pointC
             
-        deltaX = point1[0]-point2[0]
-        deltaY = point1[1]-point2[1]
+        # deltaX = point1[0]-point2[0]
+        # deltaY = point1[1]-point2[1]
         pp0 = Point(point0[0],point0[1])
         pp1 = Point(point1[0],point1[1])
         pp2 = Point(point2[0],point2[1])
         pp3 = Point(point3[0],point3[1])
-        ppA = cvUtils.Add(pp0, pp1, deltaX/2)
-        ppB = cvUtils.Add(pp3, pp2, deltaY/2)
 
         pp0s, pp1s = cvUtils.scale(pp0, pp1, 3)
         pp2s, pp3s = cvUtils.scale(pp2, pp3, 3)
