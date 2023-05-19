@@ -46,6 +46,7 @@ class cvDraw:
         # return imgBlur
         return imgGray
         # return imgCanny
+        
     def testLine( img, last_point, curr_point, border = 100):
         x1=int(last_point[0])
         y1=int(last_point[1])
@@ -55,3 +56,42 @@ class cvDraw:
         if lenLine > border:
             cv2.line(img, (x1, y1), (x2, y2), (255,0,0), thickness=2)
         return
+    
+    def packLine( last_point, curr_point, border = 100):
+        x1=int(last_point[0])
+        y1=int(last_point[1])
+        x2=int(curr_point[0])
+        y2=int(curr_point[1])
+        lenLine = math.sqrt( ((x1-x2)**2)+((y1-y2)**2))
+        if lenLine > border:
+            return  [(x1, y1), (x2, y2)]
+        return None
+    
+    def angleLine( line):
+        deltaX = abs(line[0][0] - line[1][0])
+        deltaY = abs(line[0][1] - line[1][1])
+        if cvDraw.testAngle( deltaX ) is None:
+            return "hor"
+        if cvDraw.testAngle( deltaY ) is None:
+            return "vert"
+        return deltaX / deltaY
+    
+    def testAngle( angle ):
+        if angle < 10:
+            return None
+        return angle    
+    
+    def calkSize( countour ):
+        minX = 100000
+        maxX = 0
+        minY = minX
+        maxY = maxX
+        for point in countour:
+            x =point[0][0]
+            y =point[0][1]
+            minX = min(minX, x)
+            maxX = max(maxX, x)
+
+            minY = min(minY, y)
+            maxY = max(maxY, y)
+        return [(minX, minY),(maxX, maxY)]

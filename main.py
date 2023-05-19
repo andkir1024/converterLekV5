@@ -206,7 +206,9 @@ def show_frame():
             param0 = frame2control.param0.get()
             imgGrey =cvDraw.createGray(imgOk, slider1.get())
             cvUtils.findCircles(imgGrey, imgDraw, draw_conrure = param0)
-            cvUtils.getContours1(imgGrey, imgDraw)
+            # выделение глапвного контура
+            cvUtils.getMainContours(imgGrey, imgDraw)
+            # cvUtils.getContours1(imgGrey, imgDraw)
             cvUtils.findLines(imgGrey, imgDraw, draw_conrure = param0)
 
 
