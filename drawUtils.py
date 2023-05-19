@@ -71,9 +71,9 @@ class cvDraw:
         deltaX = abs(line[0][0] - line[1][0])
         deltaY = abs(line[0][1] - line[1][1])
         if cvDraw.testAngle( deltaX ) is None:
-            return "hor"
+            return "h"
         if cvDraw.testAngle( deltaY ) is None:
-            return "vert"
+            return "v"
         return deltaX / deltaY
     
     def testAngle( angle ):

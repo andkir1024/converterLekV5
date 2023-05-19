@@ -393,14 +393,28 @@ class cvUtils:
         return img, finalCountours
     
     def createMainContours(lines, mainRect):
+        # d = drawSvg.Drawing(mainRect[1][0]-mainRect[0][0], mainRect[1][1]-mainRect[0][1], origin=(0,0))
         d = drawSvg.Drawing(200, 100, origin='center')
-        p = drawSvg.Path(stroke='red', stroke_width=1, fill='none')  # Add an arrow to the end of a path
+        # d = drawSvg.Drawing(5000, 3000, origin=(0,0))
+        p = drawSvg.Path(stroke='red', stroke_width=2, fill='none')  # Add an arrow to the end of a path
+        # p.M(0, 0) 
+        # p.C(50, 0, 100,50,100,100) 
+        # d.append(p)        
         for index in range(len(lines)-1):
             angleCur = cvDraw.angleLine( lines[index] )
             angleNext = cvDraw.angleLine( lines[index+1] )
-            # p.M(0, 0).C(50, 0, 100,50,100,100)  # Chain multiple path commands
-            # d.append(p)
-            continue
+            start = lines[index][0]
+            finish = lines[index][1]
+            finishA = lines[index+1][1]
+            # p.M(start[0],start[1]).L(finish[0],finish[1]) 
+            # p.C(500, 0, 1000,500,finishA[0],finishA[1])
+            # p.M(lines[index][0], lines[index][1]) 
+            # if angleCur == "h" and angleCur == "v":
+                # p.M(0, 0).C(50, 0, 100,50,100,100) 
+            # p.M(0, 0).C(500, 0, 1000,500,1000,1000)  # Chain multiple path commands
+            p.M(0, 0).C(50,0, 10,50, 100,100)  # Chain multiple path commands
+            d.append(p)
+            break
         #     line =  lines[index]
         # for line in lines:
         #     angle = cvDraw.angleLine( line )
