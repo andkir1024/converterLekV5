@@ -312,7 +312,7 @@ class cvUtils:
         # objtours = sorted(objects_contours, key=cv2.contourArea)[-1]
         objects_contours.sort(key=custom_key, reverse=True)
         return objects_contours
-    def getMainContours(imgGray, img,cThr=[100,100],showCanny=False,minArea=0,filter=0,draw =True):
+    def getMainContours(imgGray, img, cThr=[100,100],showCanny=False,minArea=0,filter=0,draw =True):
         circles = cvUtils.findCircles(imgGray, img, True)
         
         imgBlur = cv2.GaussianBlur(imgGray,(5,5),1)
@@ -355,7 +355,7 @@ class cvUtils:
         if line is not None:
             lines.insert(0,line)
         lines = lines[::-1]
-        cvUtils.createMainContours(lines, mainRect, circles)
+        cvUtils.createMainContours(lines, mainRect, circles, img)
 
         for line in lines:
             cv2.line(img, line[0], line[1], (255,0,0), thickness=12)
@@ -367,11 +367,16 @@ class cvUtils:
                 # cv2.drawContours(img,[approx],-1,(0,255,0),6)
                 # cv2.drawContours(img,con[4],-1,(0,255,0),16)
                 
+        # img = cv2.imdecode(np.fromfile("example.png", dtype=np.uint8), cv2.IMREAD_COLOR)
+
         return img, finalCountours
     
-    def createMainContours(lines, mainRect, circles):
+    def createMainContours(lines, mainRect, circles, img):
+        shape = img.shape
         width = int((mainRect[1][0]-mainRect[0][0]) * 1.5)
         height = int((mainRect[1][1]-mainRect[0][1]) * 1.5)
+        width = shape[1]
+        height = shape[0]
         d = drawSvg.Drawing(width, height, origin=(0,0))
         p = drawSvg.Path(stroke='red', stroke_width=2, fill='none') 
         for index in range(len(lines)-1):
@@ -389,27 +394,29 @@ class cvUtils:
             p.C(centroid1.x, centroid1.y, centroid2.x,centroid2.y,pp2.x,pp2.y)
             d.append(p)
 
-        circles = np.uint16(np.around(circles))
-        all=0
-        for i in circles[0, :]:
-# <svg:path d="M100,200
-# C100,100 250,100 250,200 
-# C250,300 100,300 100,200 
-# Z" 
-            center = Point(i[0], i[1])
-            radius = i[2]
-            coffRadius = radius *1.36
-            start = Point(center.x-radius, center.y)
-            finish = Point(center.x+radius, center.y)
-            all = all+1
-            # cv2.circle(img_Draw, center, radius, (255, 0, 255), 2)
-            p = drawSvg.Path(stroke='blue', stroke_width=2, fill='none') 
-            p.M(start.x, start.y)
-            p.C(start.x, start.y-coffRadius, finish.x,finish.y-coffRadius, finish.x,finish.y)
-            p.C(finish.x, finish.y+coffRadius, start.x,start.y+coffRadius, start.x,start.y)
-            d.append(p)
+        if circles is not None:
+            circles = np.uint16(np.around(circles))
+            all=0
+            for i in circles[0, :]:
+    # <svg:path d="M100,200
+    # C100,100 250,100 250,200 
+    # C250,300 100,300 100,200 
+    # Z" 
+                center = Point(i[0], i[1])
+                radius = i[2]
+                coffRadius = radius *1.36
+                start = Point(center.x-radius, center.y)
+                finish = Point(center.x+radius, center.y)
+                all = all+1
+                # cv2.circle(img_Draw, center, radius, (255, 0, 255), 2)
+                p = drawSvg.Path(stroke='blue', stroke_width=2, fill='none') 
+                p.M(start.x, start.y)
+                p.C(start.x, start.y-coffRadius, finish.x,finish.y-coffRadius, finish.x,finish.y)
+                p.C(finish.x, finish.y+coffRadius, start.x,start.y+coffRadius, start.x,start.y)
+                d.append(p)
         
         d.save_svg('example.svg')     
+        d.save_png('example.png')
         
     def createAngle(pointA, pointB,pointC, pointD):
         distAC = cvUtils.distancePoint(pointA, pointC) 

@@ -237,6 +237,7 @@ def show_frame():
                 right = width
                 viewX = right-widthZoom
 
+            # imgDraw = cv2.imdecode(np.fromfile("example.png", dtype=np.uint8), cv2.IMREAD_COLOR)
             im_crop = imgDraw[viewY:viewY+heightZoom, viewX:right]
             # im_crop = imgGrey[viewY:viewY+heightZoom, viewX:right]
 
