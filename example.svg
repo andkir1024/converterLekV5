@@ -3,7 +3,5 @@
      width="1553" height="3133" viewBox="0 0 1553 3133">
 <defs>
 </defs>
-<path d="M1909,3621 L1909,893 M516,3823 L1734,3823 M356,880 L356,3634" stroke="red" stroke-width="2" fill="none" id="d0" />
-<use xlink:href="#d0" />
-<use xlink:href="#d0" />
+<path d="M1909.0,893.0 L1909.0,3621.0 C1909.0,3722.0,1821.5,3823.0,1734.0,3823.0" stroke="red" stroke-width="2" fill="none" />
 </svg>

@@ -409,8 +409,10 @@ class cvUtils:
             start = lines[index][0]
             finish = lines[index][1]
             finishA = lines[index+1][1]
-            cvUtils.createAngle(lines[index][0], lines[index][1],lines[index+1][0], lines[index+1][1], 0)
-            p.M(start[0],start[1]).L(finish[0],finish[1]) 
+            # p.M(start[0],start[1]).L(finish[0],finish[1]) 
+            pp0, pp1, centroid1, centroid2, pp2 = cvUtils.createAngle(lines[index][0], lines[index][1],lines[index+1][0], lines[index+1][1])
+            p.M(pp0.x,pp0.y).L(pp1.x,pp1.y) 
+            p.C(centroid1.x, centroid1.y, centroid2.x,centroid2.y,pp2.x,pp2.y)
             
             # p.C(500, 0, 1000,500,finishA[0],finishA[1])
             # p.M(lines[index][0], lines[index][1]) 
@@ -426,7 +428,7 @@ class cvUtils:
         #     angle = cvDraw.angleLine( line )
         d.save_svg('example.svg')     
         
-    def createAngle(pointA, pointB,pointC, pointD, type):
+    def createAngle(pointA, pointB,pointC, pointD):
         distAC = cvUtils.distancePoint(pointA, pointC) 
         distAD = cvUtils.distancePoint(pointA, pointD)
         distBC = cvUtils.distancePoint(pointB, pointC)
@@ -465,7 +467,7 @@ class cvUtils:
 
         centroid1 = l3.centroid
         centroid2 = l4.centroid
-        return
+        return pp0, pp1, centroid1, centroid2, pp2
     
     def Add(firstPoint, secondPoint, addFactor):
         x2 = firstPoint.x +(secondPoint.x - firstPoint.x) + addFactor
