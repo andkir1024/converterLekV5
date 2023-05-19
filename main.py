@@ -15,7 +15,7 @@ from drawUtils import cvDraw
 
 ################################### andy 
 testName = None
-filesDir = '../popular_graphs_interesting/'
+filesDir = '../popular/'
 filesSrc = None
 svgDir = '../outSvg/'
 updateImage = False

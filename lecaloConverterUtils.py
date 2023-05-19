@@ -368,24 +368,9 @@ class cvUtils:
         lines = lines[::-1]
         cvUtils.createMainContours(lines, mainRect)
 
-        # ii=3
-        # cv2.line(img, lines[ii][0], lines[ii][1], (255,0,0), thickness=12)
-        # cv2.line(img, lines[1][0], lines[1][1], (255,0,0), thickness=2)
-
         for line in lines:
             cv2.line(img, line[0], line[1], (255,0,0), thickness=12)
         
-        # last_point = None
-        # for point in sel_countour:
-        #     curr_point=point[0]
-        #     if not(last_point is None):
-        #         cvDraw.testLine(img, last_point,curr_point, 10)
-        #     last_point=curr_point
-        # # cvDraw.testLine(img, last_point,sel_countour[0][0], 10)
-    
-        # approx = cv2.approxPolyDP(contours[1],0.2,True)
-        # cv2.drawContours(img,contours[1],-1,(255,0,0),16)
-        # cv2.drawContours(img,[approx],-1,(0,255,0),6)
         if draw:
             for con in finalCountours:
                 approx = cv2.approxPolyDP(con[4],0.2,True)
@@ -399,39 +384,21 @@ class cvUtils:
         width = int((mainRect[1][0]-mainRect[0][0]) * 1.5)
         height = int((mainRect[1][1]-mainRect[0][1]) * 1.5)
         d = drawSvg.Drawing(width, height, origin=(0,0))
-        # d = drawSvg.Drawing(200, 100, origin='center')
-        # d = drawSvg.Drawing(5000, 3000, origin=(0,0))
         p = drawSvg.Path(stroke='red', stroke_width=2, fill='none')  # Add an arrow to the end of a path
-        # p.M(0, 0) 
-        # p.C(50, 0, 100,50,100,100) 
-        # d.append(p)        
         for index in range(len(lines)-1):
-            # angleCur = cvDraw.angleLine( lines[index] )
-            # angleNext = cvDraw.angleLine( lines[index+1] )
-            # start = lines[index][0]
-            # finish = lines[index][1]
-            # finishA = lines[index+1][1]
-            # p.M(start[0],start[1]).L(finish[0],finish[1]) 
             pp0, pp1, centroid1, centroid2, pp2 = cvUtils.createAngle(lines[index][0], lines[index][1],lines[index+1][0], lines[index+1][1])
+            if pp0 is None:
+                continue
             p.M(pp0.x,pp0.y).L(pp1.x,pp1.y) 
             p.C(centroid1.x, centroid1.y, centroid2.x,centroid2.y,pp2.x,pp2.y)
-            
-            # if angleCur == "h" and angleCur == "v":
-                # p.M(0, 0).C(50, 0, 100,50,100,100) 
-        
-            # p.M(0, 0).C(500, 0, 1000,500,1000,1000)  # Chain multiple path commands
-            # p.M(0, 0).C(50,0, 100,50, 100,100)  # Chain multiple path commands
             d.append(p)
-            # break
 
         index = len(lines)-1
         pp0, pp1, centroid1, centroid2, pp2 = cvUtils.createAngle(lines[index][0], lines[index][1],lines[0][0], lines[0][1])
-        p.M(pp0.x,pp0.y).L(pp1.x,pp1.y) 
-        p.C(centroid1.x, centroid1.y, centroid2.x,centroid2.y,pp2.x,pp2.y)
-        d.append(p)
-        #     line =  lines[index]
-        # for line in lines:
-        #     angle = cvDraw.angleLine( line )
+        if pp0 is not None:
+            p.M(pp0.x,pp0.y).L(pp1.x,pp1.y) 
+            p.C(centroid1.x, centroid1.y, centroid2.x,centroid2.y,pp2.x,pp2.y)
+            d.append(p)
         d.save_svg('example.svg')     
         
     def createAngle(pointA, pointB,pointC, pointD):
@@ -451,6 +418,8 @@ class cvUtils:
             point1 = pointA
             point2 = pointD
             point3 = pointC
+        else:
+            zz=0
             
         # deltaX = point1[0]-point2[0]
         # deltaY = point1[1]-point2[1]
@@ -459,12 +428,15 @@ class cvUtils:
         pp2 = Point(point2[0],point2[1])
         pp3 = Point(point3[0],point3[1])
 
-        pp0s, pp1s = cvUtils.scale(pp0, pp1, 3)
-        pp2s, pp3s = cvUtils.scale(pp2, pp3, 3)
+        pp0s, pp1s = cvUtils.scale(pp0, pp1, 30)
+        pp2s, pp3s = cvUtils.scale(pp2, pp3, 30)
 
         l1 = LineString([pp0s, pp1s])
         l2 = LineString([pp2s, pp3s])
         result = l1.intersection(l2)
+        testOut = str(result)
+        if testOut.find("EMPTY") > 0:
+            return None, None, None, None, None
         
         l3 = LineString([pp1, result])
         l4 = LineString([pp2, result])
