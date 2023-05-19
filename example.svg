@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
-     width="200" height="100" viewBox="-100.0 -50.0 200 100">
+     width="1553" height="3133" viewBox="0 0 1553 3133">
 <defs>
 </defs>
-<path d="M0,0 C50,0,10,50,100,100" stroke="red" stroke-width="2" fill="none" />
+<path d="M1909,3621 L1909,893 M516,3823 L1734,3823 M356,880 L356,3634" stroke="red" stroke-width="2" fill="none" id="d0" />
+<use xlink:href="#d0" />
+<use xlink:href="#d0" />
 </svg>

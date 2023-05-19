@@ -3,6 +3,8 @@ import numpy as np
 import math
 from drawUtils import cvDraw
 import drawsvg as drawSvg
+from shapely import Point
+from shapely import *
 
 class cvUtils:
     def findLines(img_grey, img_Draw, draw_conrure):
@@ -366,11 +368,12 @@ class cvUtils:
         lines = lines[::-1]
         cvUtils.createMainContours(lines, mainRect)
 
-        # cv2.line(img, lines[0][0], lines[0][1], (255,0,0), thickness=2)
+        # ii=3
+        # cv2.line(img, lines[ii][0], lines[ii][1], (255,0,0), thickness=12)
         # cv2.line(img, lines[1][0], lines[1][1], (255,0,0), thickness=2)
 
         for line in lines:
-            cv2.line(img, line[0], line[1], (255,0,0), thickness=2)
+            cv2.line(img, line[0], line[1], (255,0,0), thickness=12)
         
         # last_point = None
         # for point in sel_countour:
@@ -393,8 +396,8 @@ class cvUtils:
         return img, finalCountours
     
     def createMainContours(lines, mainRect):
-        # d = drawSvg.Drawing(mainRect[1][0]-mainRect[0][0], mainRect[1][1]-mainRect[0][1], origin=(0,0))
-        d = drawSvg.Drawing(200, 100, origin='center')
+        d = drawSvg.Drawing(mainRect[1][0]-mainRect[0][0], mainRect[1][1]-mainRect[0][1], origin=(0,0))
+        # d = drawSvg.Drawing(200, 100, origin='center')
         # d = drawSvg.Drawing(5000, 3000, origin=(0,0))
         p = drawSvg.Path(stroke='red', stroke_width=2, fill='none')  # Add an arrow to the end of a path
         # p.M(0, 0) 
@@ -406,16 +409,101 @@ class cvUtils:
             start = lines[index][0]
             finish = lines[index][1]
             finishA = lines[index+1][1]
-            # p.M(start[0],start[1]).L(finish[0],finish[1]) 
+            cvUtils.createAngle(lines[index][0], lines[index][1],lines[index+1][0], lines[index+1][1], 0)
+            p.M(start[0],start[1]).L(finish[0],finish[1]) 
+            
             # p.C(500, 0, 1000,500,finishA[0],finishA[1])
             # p.M(lines[index][0], lines[index][1]) 
             # if angleCur == "h" and angleCur == "v":
                 # p.M(0, 0).C(50, 0, 100,50,100,100) 
+        
             # p.M(0, 0).C(500, 0, 1000,500,1000,1000)  # Chain multiple path commands
-            p.M(0, 0).C(50,0, 10,50, 100,100)  # Chain multiple path commands
+            # p.M(0, 0).C(50,0, 100,50, 100,100)  # Chain multiple path commands
             d.append(p)
             break
         #     line =  lines[index]
         # for line in lines:
         #     angle = cvDraw.angleLine( line )
-        d.save_svg('example.svg')                
+        d.save_svg('example.svg')     
+        
+    def createAngle(pointA, pointB,pointC, pointD, type):
+        distAC = cvUtils.distancePoint(pointA, pointC) 
+        distAD = cvUtils.distancePoint(pointA, pointD)
+        distBC = cvUtils.distancePoint(pointB, pointC)
+        distBD = cvUtils.distancePoint(pointB, pointD)
+        
+        a = np.array([distAC,distAD,distBC,distBD])
+        index = np.where(a == a.min())[0][0]
+        point0 = None
+        point1 = None
+        point2 = None
+        point3 = None
+        if index == 1:
+            point0 = pointB
+            point1 = pointA
+            point2 = pointD
+            point3 = pointC
+            
+        deltaX = point1[0]-point2[0]
+        deltaY = point1[1]-point2[1]
+        pp0 = Point(point0[0],point0[1])
+        pp1 = Point(point1[0],point1[1])
+        pp2 = Point(point2[0],point2[1])
+        pp3 = Point(point3[0],point3[1])
+        ppA = cvUtils.Add(pp0, pp1, deltaX/2)
+        ppB = cvUtils.Add(pp3, pp2, deltaY/2)
+
+        pp0s, pp1s = cvUtils.scale(pp0, pp1, 3)
+        pp2s, pp3s = cvUtils.scale(pp2, pp3, 3)
+
+        l1 = LineString([pp0s, pp1s])
+        l2 = LineString([pp2s, pp3s])
+        result = l1.intersection(l2)
+        
+        l3 = LineString([pp1, result])
+        l4 = LineString([pp2, result])
+
+        centroid1 = l3.centroid
+        centroid2 = l4.centroid
+        return
+    
+    def Add(firstPoint, secondPoint, addFactor):
+        x2 = firstPoint.x +(secondPoint.x - firstPoint.x) + addFactor
+        y2 = firstPoint.y +(secondPoint.y - firstPoint.y) + addFactor
+        secondPoint = Point(x2, y2)
+        return secondPoint
+
+    def scale(firstPoint, secondPoint, factor):
+        t0=0.5*(1.0-factor)
+        t1=0.5*(1.0+factor)
+        x1 = firstPoint.x +(secondPoint.x - firstPoint.x) * t0
+        y1 = firstPoint.y +(secondPoint.y - firstPoint.y) * t0
+        x2 = firstPoint.x +(secondPoint.x - firstPoint.x) * t1
+        y2 = firstPoint.y +(secondPoint.y - firstPoint.y) * t1
+
+        # x2 = firstPoint.x +(secondPoint.x - firstPoint.x) + 100
+        # y2 = firstPoint.y +(secondPoint.y - firstPoint.y)  + 100
+        firstPoint = Point(x1, y1)
+        secondPoint = Point(x2, y2)
+        return firstPoint, secondPoint
+    
+    def distancePoint(pointA, pointB):
+        deltaX = pointA[0]-pointB[0]
+        deltaY = pointA[1]-pointB[1]
+        lenLine = math.sqrt( (deltaX**2)+(deltaY**2))
+        return lenLine
+                   
+    def createMainContours2(lines, mainRect):
+        # d = drawSvg.Drawing(200, 100, origin='center')
+        d = drawSvg.Drawing(200, 100, origin=(0,0))
+        p = drawSvg.Path(stroke='red', stroke_width=1, fill='none')  # Add an arrow to the end of a path
+        for index in range(len(lines)-1):
+            angleCur = cvDraw.angleLine( lines[index] )
+            angleNext = cvDraw.angleLine( lines[index+1] )
+            p.M(0, 0).C(50, 0, 100,50,100,100)  # Chain multiple path commands
+            d.append(p)
+            break
+        #     line =  lines[index]
+        # for line in lines:
+        #     angle = cvDraw.angleLine( line )
+        d.save_svg('example.svg')     
