@@ -414,15 +414,13 @@ class cvUtils:
             p.M(pp0.x,pp0.y).L(pp1.x,pp1.y) 
             p.C(centroid1.x, centroid1.y, centroid2.x,centroid2.y,pp2.x,pp2.y)
             
-            # p.C(500, 0, 1000,500,finishA[0],finishA[1])
-            # p.M(lines[index][0], lines[index][1]) 
             # if angleCur == "h" and angleCur == "v":
                 # p.M(0, 0).C(50, 0, 100,50,100,100) 
         
             # p.M(0, 0).C(500, 0, 1000,500,1000,1000)  # Chain multiple path commands
             # p.M(0, 0).C(50,0, 100,50, 100,100)  # Chain multiple path commands
             d.append(p)
-            break
+            # break
         #     line =  lines[index]
         # for line in lines:
         #     angle = cvDraw.angleLine( line )
