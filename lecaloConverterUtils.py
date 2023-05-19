@@ -39,21 +39,22 @@ class cvUtils:
     def findCircles(img_grey, img_Draw, draw_conrure):
         rows = img_grey.shape[0]
         circles = cv2.HoughCircles(img_grey, cv2.HOUGH_GRADIENT, 1, rows / (64),
-                                param1=40, param2=40,
+                                param1=160, param2=110,
+                                # param1=40, param2=40,
                                 # param1=200, param2=10,
                                 # param1=100, param2=30,
                                 minRadius=3, maxRadius=1000)            
         if draw_conrure == True:
             if circles is not None :
-                circles = np.uint16(np.around(circles))
-                for i in circles[0, :]:
+                circlesDraw = np.uint16(np.around(circles))
+                for i in circlesDraw[0, :]:
                     center = (i[0], i[1])
                     # circle center
                     # cv2.circle(img_Draw, center, 1, (0, 100, 100), 3)
                     # circle outline
                     radius = i[2]
                     cv2.circle(img_Draw, center, radius, (255, 0, 255), 2)
-        return
+        return circles
     def findCircles2(img_grey, img_Draw, draw_conrure):
         # detector = cv2.SimpleBlobDetector()
         # keypoints = detector.detect(img_grey)
@@ -101,8 +102,6 @@ class cvUtils:
         img_Draw = cv2.drawKeypoints(img_Draw, keypoints, np.array([]), (0,0,255), cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
      
         return
-
-
     def getContours1(imgGray, img,cThr=[100,100],showCanny=False,minArea=0,filter=0,draw =True):
         d = drawSvg.Drawing(200, 100, origin='center')
         # imgGray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
@@ -165,7 +164,6 @@ class cvUtils:
         # d.save_svg('example.svg')                
         # d.save_png('example.png')
         return img, finalCountours
-
     def getContours(imgGray, img,cThr=[100,100],showCanny=False,minArea=0,filter=0,draw =True):
         # imgGray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
         imgBlur = cv2.GaussianBlur(imgGray,(5,5),1)
@@ -196,7 +194,6 @@ class cvUtils:
             for con in finalCountours:
                 cv2.drawContours(img,con[4],-1,(0,255,255),6)
         return img, finalCountours
-
     def reorder(myPoints):
         #print(myPoints.shape)
         myPointsNew = np.zeros_like(myPoints)
@@ -208,7 +205,6 @@ class cvUtils:
         myPointsNew[1]= myPoints[np.argmin(diff)]
         myPointsNew[2] = myPoints[np.argmax(diff)]
         return myPointsNew
-
     def warpImg (img,points,w,h,pad=20):
         # print(points)
         points =reorder(points)
@@ -218,17 +214,13 @@ class cvUtils:
         imgWarp = cv2.warpPerspective(img,matrix,(w,h))
         imgWarp = imgWarp[pad:imgWarp.shape[0]-pad,pad:imgWarp.shape[1]-pad]
         return imgWarp
-
     def findDis(pts1,pts2):
         return ((pts2[0]-pts1[0])**2 + (pts2[1]-pts1[1])**2)**0.5
-
     def custom_key(extCtr):
         return extCtr[1]
-
     def sort_contures(contours):
         contours.sort(key=custom_key, reverse=True)
         return
-
     # выделение главного контура телефона
     def detect_main_conture(aligmentedImgGrayBase, minArea):
         '''
@@ -261,7 +253,6 @@ class cvUtils:
         if allContures > 0:
             return objects_contours[0][0], aligmentedImgGray
         return None, aligmentedImgGray
-
     def detect_contures(aligmentedImgGray, minArea = 10000, maxArea = 100000000):
         mask = aligmentedImgGray.copy()
         # mask = cv2.GaussianBlur(mask,(15,15),0)
@@ -278,7 +269,6 @@ class cvUtils:
         lines = findLines(mask)
         # circles = findCircles(mask)
         return objects_contours, mask, lines, contours
-
     def prepareContours(contours, minArea, maxArea):
         objects_contours = []
         for cnt in contours:
@@ -293,7 +283,6 @@ class cvUtils:
         # objtours = sorted(objects_contours, key=cv2.contourArea)[-1]
         objects_contours.sort(key=custom_key, reverse=True)
         return objects_contours
-
     def detect_contures_for_mainConture(aligmentedImgGray, minArea = 10000, maxArea = 100000000):
         mask = aligmentedImgGray.copy()
         # mask = cv2.GaussianBlur(mask,(15,15),0)
@@ -308,7 +297,6 @@ class cvUtils:
         objects_contours = prepareContoursByAreaLen(contours, minArea, maxArea)
 
         return objects_contours
-
     def prepareContoursByAreaLen(contours, minArea, maxArea):
         objects_contours = []
         for cnt in contours:
@@ -324,8 +312,9 @@ class cvUtils:
         # objtours = sorted(objects_contours, key=cv2.contourArea)[-1]
         objects_contours.sort(key=custom_key, reverse=True)
         return objects_contours
-
     def getMainContours(imgGray, img,cThr=[100,100],showCanny=False,minArea=0,filter=0,draw =True):
+        circles = cvUtils.findCircles(imgGray, img, True)
+        
         imgBlur = cv2.GaussianBlur(imgGray,(5,5),1)
         imgCanny = cv2.Canny(imgBlur,cThr[0],cThr[1])
         kernel = np.ones((5,5))
@@ -366,7 +355,7 @@ class cvUtils:
         if line is not None:
             lines.insert(0,line)
         lines = lines[::-1]
-        cvUtils.createMainContours(lines, mainRect)
+        cvUtils.createMainContours(lines, mainRect, circles)
 
         for line in lines:
             cv2.line(img, line[0], line[1], (255,0,0), thickness=12)
@@ -380,11 +369,11 @@ class cvUtils:
                 
         return img, finalCountours
     
-    def createMainContours(lines, mainRect):
+    def createMainContours(lines, mainRect, circles):
         width = int((mainRect[1][0]-mainRect[0][0]) * 1.5)
         height = int((mainRect[1][1]-mainRect[0][1]) * 1.5)
         d = drawSvg.Drawing(width, height, origin=(0,0))
-        p = drawSvg.Path(stroke='red', stroke_width=2, fill='none')  # Add an arrow to the end of a path
+        p = drawSvg.Path(stroke='red', stroke_width=2, fill='none') 
         for index in range(len(lines)-1):
             pp0, pp1, centroid1, centroid2, pp2 = cvUtils.createAngle(lines[index][0], lines[index][1],lines[index+1][0], lines[index+1][1])
             if pp0 is None:
@@ -399,6 +388,27 @@ class cvUtils:
             p.M(pp0.x,pp0.y).L(pp1.x,pp1.y) 
             p.C(centroid1.x, centroid1.y, centroid2.x,centroid2.y,pp2.x,pp2.y)
             d.append(p)
+
+        circles = np.uint16(np.around(circles))
+        all=0
+        for i in circles[0, :]:
+# <svg:path d="M100,200
+# C100,100 250,100 250,200 
+# C250,300 100,300 100,200 
+# Z" 
+            center = Point(i[0], i[1])
+            radius = i[2]
+            coffRadius = radius *1.36
+            start = Point(center.x-radius, center.y)
+            finish = Point(center.x+radius, center.y)
+            all = all+1
+            # cv2.circle(img_Draw, center, radius, (255, 0, 255), 2)
+            p = drawSvg.Path(stroke='blue', stroke_width=2, fill='none') 
+            p.M(start.x, start.y)
+            p.C(start.x, start.y-coffRadius, finish.x,finish.y-coffRadius, finish.x,finish.y)
+            p.C(finish.x, finish.y+coffRadius, start.x,start.y+coffRadius, start.x,start.y)
+            d.append(p)
+        
         d.save_svg('example.svg')     
         
     def createAngle(pointA, pointB,pointC, pointD):
@@ -421,8 +431,6 @@ class cvUtils:
         else:
             zz=0
             
-        # deltaX = point1[0]-point2[0]
-        # deltaY = point1[1]-point2[1]
         pp0 = Point(point0[0],point0[1])
         pp1 = Point(point1[0],point1[1])
         pp2 = Point(point2[0],point2[1])
@@ -444,13 +452,11 @@ class cvUtils:
         centroid1 = l3.centroid
         centroid2 = l4.centroid
         return pp0, pp1, centroid1, centroid2, pp2
-    
     def Add(firstPoint, secondPoint, addFactor):
         x2 = firstPoint.x +(secondPoint.x - firstPoint.x) + addFactor
         y2 = firstPoint.y +(secondPoint.y - firstPoint.y) + addFactor
         secondPoint = Point(x2, y2)
         return secondPoint
-
     def scale(firstPoint, secondPoint, factor):
         t0=0.5*(1.0-factor)
         t1=0.5*(1.0+factor)
@@ -459,18 +465,14 @@ class cvUtils:
         x2 = firstPoint.x +(secondPoint.x - firstPoint.x) * t1
         y2 = firstPoint.y +(secondPoint.y - firstPoint.y) * t1
 
-        # x2 = firstPoint.x +(secondPoint.x - firstPoint.x) + 100
-        # y2 = firstPoint.y +(secondPoint.y - firstPoint.y)  + 100
         firstPoint = Point(x1, y1)
         secondPoint = Point(x2, y2)
         return firstPoint, secondPoint
-    
     def distancePoint(pointA, pointB):
         deltaX = pointA[0]-pointB[0]
         deltaY = pointA[1]-pointB[1]
         lenLine = math.sqrt( (deltaX**2)+(deltaY**2))
         return lenLine
-                   
     def createMainContours2(lines, mainRect):
         # d = drawSvg.Drawing(200, 100, origin='center')
         d = drawSvg.Drawing(200, 100, origin=(0,0))

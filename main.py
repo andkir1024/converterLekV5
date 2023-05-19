@@ -205,11 +205,11 @@ def show_frame():
             imgDraw = imgOk.copy()
             param0 = frame2control.param0.get()
             imgGrey =cvDraw.createGray(imgOk, slider1.get())
-            cvUtils.findCircles(imgGrey, imgDraw, draw_conrure = param0)
+            # cvUtils.findCircles(imgGrey, imgDraw, draw_conrure = param0)
             # выделение глапвного контура
             cvUtils.getMainContours(imgGrey, imgDraw)
             # cvUtils.getContours1(imgGrey, imgDraw)
-            cvUtils.findLines(imgGrey, imgDraw, draw_conrure = param0)
+            # cvUtils.findLines(imgGrey, imgDraw, draw_conrure = param0)
 
 
             scale, dispX, dispY = calkViewParam(rmainImage, imgDraw)

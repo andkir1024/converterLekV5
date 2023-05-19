@@ -7,4 +7,6 @@
 <use xlink:href="#d0" />
 <use xlink:href="#d0" />
 <use xlink:href="#d0" />
+<path d="M969.0,3582.0 C969.0,3360.32,1295.0,3360.32,1295.0,3582.0 C1295.0,3803.68,969.0,3803.68,969.0,3582.0" stroke="blue" stroke-width="2" fill="none" />
+<path d="M808.0,938.0 C808.0,872.72,904.0,872.72,904.0,938.0 C904.0,1003.28,808.0,1003.28,808.0,938.0" stroke="blue" stroke-width="2" fill="none" />
 </svg>
