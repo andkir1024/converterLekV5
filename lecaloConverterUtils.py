@@ -134,9 +134,9 @@ class cvUtils:
         for point in sel_countour:
             curr_point=point[0]
             if not(last_point is None):
-                cvDraw.testLine(img, last_point,curr_point, 100)
+                cvDraw.testLine(img, last_point,curr_point, 10)
             last_point=curr_point
-        cvDraw.testLine(img, last_point,sel_countour[0][0], 100)
+        cvDraw.testLine(img, last_point,sel_countour[0][0], 10)
     
         # approx = cv2.approxPolyDP(contours[1],0.2,True)
         # cv2.drawContours(img,contours[1],-1,(255,0,0),16)
@@ -160,8 +160,8 @@ class cvUtils:
 
         # d.set_pixel_scale(2)  # Set number of pixels per geometry unit
         #d.set_render_size(400, 200)  # Alternative to set_pixel_scale
-        d.save_svg('example.svg')                
-
+        # d.save_svg('example.svg')                
+        # d.save_png('example.png')
         return img, finalCountours
 
     def getContours(imgGray, img,cThr=[100,100],showCanny=False,minArea=0,filter=0,draw =True):
@@ -322,3 +322,86 @@ class cvUtils:
         # objtours = sorted(objects_contours, key=cv2.contourArea)[-1]
         objects_contours.sort(key=custom_key, reverse=True)
         return objects_contours
+
+    def getMainContours(imgGray, img,cThr=[100,100],showCanny=False,minArea=0,filter=0,draw =True):
+        imgBlur = cv2.GaussianBlur(imgGray,(5,5),1)
+        imgCanny = cv2.Canny(imgBlur,cThr[0],cThr[1])
+        kernel = np.ones((5,5))
+        imgDial = cv2.dilate(imgCanny,kernel,iterations=3)
+        imgThre = cv2.erode(imgDial,kernel,iterations=3)
+        # imgCanny = imgGray
+        contours,hiearchy = cv2.findContours(imgCanny,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
+        # contours,hiearchy = cv2.findContours(imgCanny,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_NONE)
+        finalCountours = []
+        for i in contours:
+            area = cv2.contourArea(i)
+            if area > minArea:
+                peri = cv2.arcLength(i,True)
+                approx = cv2.approxPolyDP(i,0.02*peri,True)
+                bbox = cv2.boundingRect(approx)
+                finalCountours.append([len(approx),area,approx,bbox,i])
+                
+        max=0                
+        sel_countour=None
+        for countour in contours:
+            if countour.shape[0]>max:
+                sel_countour=countour
+                max=countour.shape[0]
+                
+        mainRect  =cvDraw.calkSize(sel_countour)
+        # получение линий
+        lines = []
+        last_point = None
+        for point in sel_countour:
+            curr_point=point[0]
+
+            if not(last_point is None):
+                line =cvDraw.packLine(last_point,curr_point, 100)
+                if line is not None:
+                    lines.append(line)
+            last_point=curr_point
+        line =cvDraw.packLine(last_point,sel_countour[0][0], 100)
+        if line is not None:
+            lines.insert(0,line)
+        lines = lines[::-1]
+        cvUtils.createMainContours(lines, mainRect)
+
+        # cv2.line(img, lines[0][0], lines[0][1], (255,0,0), thickness=2)
+        # cv2.line(img, lines[1][0], lines[1][1], (255,0,0), thickness=2)
+
+        for line in lines:
+            cv2.line(img, line[0], line[1], (255,0,0), thickness=2)
+        
+        # last_point = None
+        # for point in sel_countour:
+        #     curr_point=point[0]
+        #     if not(last_point is None):
+        #         cvDraw.testLine(img, last_point,curr_point, 10)
+        #     last_point=curr_point
+        # # cvDraw.testLine(img, last_point,sel_countour[0][0], 10)
+    
+        # approx = cv2.approxPolyDP(contours[1],0.2,True)
+        # cv2.drawContours(img,contours[1],-1,(255,0,0),16)
+        # cv2.drawContours(img,[approx],-1,(0,255,0),6)
+        if draw:
+            for con in finalCountours:
+                approx = cv2.approxPolyDP(con[4],0.2,True)
+                # cv2.drawContours(img,con[4],-1,(255,0,0),16)
+                # cv2.drawContours(img,[approx],-1,(0,255,0),6)
+                # cv2.drawContours(img,con[4],-1,(0,255,0),16)
+                
+        return img, finalCountours
+    
+    def createMainContours(lines, mainRect):
+        d = drawSvg.Drawing(200, 100, origin='center')
+        p = drawSvg.Path(stroke='red', stroke_width=1, fill='none')  # Add an arrow to the end of a path
+        for index in range(len(lines)-1):
+            angleCur = cvDraw.angleLine( lines[index] )
+            angleNext = cvDraw.angleLine( lines[index+1] )
+            # p.M(0, 0).C(50, 0, 100,50,100,100)  # Chain multiple path commands
+            # d.append(p)
+            continue
+        #     line =  lines[index]
+        # for line in lines:
+        #     angle = cvDraw.angleLine( line )
+        d.save_svg('example.svg')                
