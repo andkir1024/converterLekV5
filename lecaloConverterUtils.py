@@ -39,7 +39,8 @@ class cvUtils:
     def findCircles(img_grey, img_Draw, draw_conrure):
         rows = img_grey.shape[0]
         circles = cv2.HoughCircles(img_grey, cv2.HOUGH_GRADIENT, 1, rows / (64),
-                                param1=160, param2=110,
+                                param1=160, param2=80,
+                                # param1=160, param2=110,
                                 # param1=40, param2=40,
                                 # param1=200, param2=10,
                                 # param1=100, param2=30,
@@ -410,9 +411,13 @@ class cvUtils:
                 all = all+1
                 # cv2.circle(img_Draw, center, radius, (255, 0, 255), 2)
                 p = drawSvg.Path(stroke='blue', stroke_width=2, fill='none') 
-                p.M(start.x, start.y)
-                p.C(start.x, start.y-coffRadius, finish.x,finish.y-coffRadius, finish.x,finish.y)
-                p.C(finish.x, finish.y+coffRadius, start.x,start.y+coffRadius, start.x,start.y)
+                p.M(finish.x, finish.y)
+                p.C(finish.x, finish.y-coffRadius, start.x,start.y-coffRadius, start.x,start.y)
+                p.C(start.x, start.y+coffRadius, finish.x,finish.y+coffRadius, finish.x,finish.y)
+                
+                # p.M(start.x, start.y)
+                # p.C(start.x, start.y-coffRadius, finish.x,finish.y-coffRadius, finish.x,finish.y)
+                # p.C(finish.x, finish.y+coffRadius, start.x,start.y+coffRadius, start.x,start.y)
                 d.append(p)
         
         d.save_svg('example.svg')     
@@ -435,6 +440,11 @@ class cvUtils:
             point1 = pointA
             point2 = pointD
             point3 = pointC
+        elif index == 2:
+            point0 = pointA
+            point1 = pointB
+            point2 = pointC
+            point3 = pointD
         else:
             zz=0
             
@@ -450,7 +460,7 @@ class cvUtils:
         l2 = LineString([pp2s, pp3s])
         result = l1.intersection(l2)
         testOut = str(result)
-        if testOut.find("EMPTY") > 0:
+        if testOut.find("EMPTY") >= 0 or testOut.find("LINE") >= 0:
             return None, None, None, None, None
         
         l3 = LineString([pp1, result])
