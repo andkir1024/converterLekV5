@@ -12,6 +12,9 @@ import os
 import lecaloConverterUtils
 from lecaloConverterUtils import cvUtils
 from drawUtils import cvDraw
+# import matplotlib.path as mpath
+# import matplotlib.patches as mpatches
+# import matplotlib.pyplot as plt
 
 ################################### andy 
 testName = None
@@ -248,7 +251,42 @@ def show_frame():
             rzoomImage.imgtk = imgtkZoom
             rzoomImage.configure(image=imgtkZoom)
             updateImageZoom = False
+            
+            # Path = mpath.Path
+            # fig, ax = plt.subplots()
+            # pp1 = mpatches.PathPatch( Path([(0, 0), (1, 0), (1, 1), (0, 0)],
+            #     [Path.MOVETO, Path.CURVE3, Path.CURVE3, Path.CLOSEPOLY]),
+            #     fc="none", transform=ax.transData)
+            
+            # ax.add_patch(pp1)
+            # ax.plot([0.75], [0.25], "ro")
+            # ax.set_title('The red point should be on the path')
 
+            # plt.show()
+
+            im = Image.new('RGBA', (100, 100), (0, 0, 0, 0)) 
+            draw = ImageDraw.Draw(im)
+            ts = [t/100.0 for t in range(101)]
+
+            xys = [(50, 100), (80, 80), (100, 50)]
+            bezier = cvDraw.make_bezier(xys)
+            points = bezier(ts)
+
+            xys = [(100, 50), (100, 0), (50, 0), (50, 35)]
+            bezier = cvDraw.make_bezier(xys)
+            points.extend(bezier(ts))
+
+            xys = [(50, 35), (50, 0), (0, 0), (0, 50)]
+            bezier = cvDraw.make_bezier(xys)
+            points.extend(bezier(ts))
+
+            xys = [(0, 50), (20, 80), (50, 100)]
+            bezier = cvDraw.make_bezier(xys)
+            points.extend(bezier(ts))
+
+            draw.polygon(points, fill = 'red')
+            im.save('out.png')
+            
     rmainImage.after(100, show_frame)
 
 show_frame()
