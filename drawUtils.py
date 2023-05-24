@@ -172,10 +172,10 @@ class cvDraw:
         zz3 = ((a * scaleL)+xPos, (0 * scaleR)+yPos)
         return  zz0, zz1, zz2, zz3
 
-    def createSector(path, sector, radius, xPos, yPos, start = False):
-        # path = drawSvg.Path(stroke='blue', stroke_width=5, fill='none') 
+    def createCircle(drawPath, radius, xPos, yPos):
+        path = drawSvg.Path(stroke='blue', stroke_width=5, fill='none') 
+
         p0,p1,p2,p3 = cvDraw.corner(0, radius, xPos, yPos)
-        # if start == True:
         path.M(p0[0], p0[1])
         path.C(p1[0], p1[1],  p2[0], p2[1],  p3[0], p3[1])
 
@@ -189,15 +189,6 @@ class cvDraw:
         path.C(k1[0], k1[1],  k2[0], k2[1],  k3[0], k3[1])
         
         path.Z()
-        # drawPath.append(path)
 
-    def createCircle(drawPath, radius, xPos, yPos):
-        path = drawSvg.Path(stroke='blue', stroke_width=5, fill='none') 
-        cvDraw.createSector(path, 0, radius, xPos, yPos)
-        # cvDraw.createSector(path, 3, radius, xPos, yPos)
-        # cvDraw.createSector(path, 0, radius, xPos, yPos, True)
-        # cvDraw.createSector(path, 1, radius, xPos, yPos)
-        # cvDraw.createSector(path, 2, radius, xPos, yPos)
-        # cvDraw.createSector(path, 3, radius, xPos, yPos)
         drawPath.append(path)
         

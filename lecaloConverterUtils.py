@@ -380,67 +380,37 @@ class cvUtils:
         height = shape[0]
         d = drawSvg.Drawing(width, height, origin=(0,0))
         p = drawSvg.Path(stroke='red', stroke_width=2, fill='none') 
-        for index in range(len(lines)-1):
-            pp0, pp1, centroid1, centroid2, pp2 = cvUtils.createAngle(lines[index][0], lines[index][1],lines[index+1][0], lines[index+1][1])
-            if pp0 is None:
-                continue
-            p.M(pp0.x,pp0.y).L(pp1.x,pp1.y) 
-            p.C(centroid1.x, centroid1.y, centroid2.x,centroid2.y,pp2.x,pp2.y)
-            d.append(p)
+        # for index in range(len(lines)-1):
+        #     pp0, pp1, centroid1, centroid2, pp2 = cvUtils.createAngle(lines[index][0], lines[index][1],lines[index+1][0], lines[index+1][1])
+        #     if pp0 is None:
+        #         continue
+        #     p.M(pp0.x,pp0.y).L(pp1.x,pp1.y) 
+        #     p.C(centroid1.x, centroid1.y, centroid2.x,centroid2.y,pp2.x,pp2.y)
+        # p.Z()
+        # d.append(p)
 
         index = len(lines)-1
         pp0, pp1, centroid1, centroid2, pp2 = cvUtils.createAngle(lines[index][0], lines[index][1],lines[0][0], lines[0][1])
         if pp0 is not None:
             p.M(pp0.x,pp0.y).L(pp1.x,pp1.y) 
             p.C(centroid1.x, centroid1.y, centroid2.x,centroid2.y,pp2.x,pp2.y)
-            d.append(p)
+
+        p.Z()
+        d.append(p)
 
         if circles is not None:
             circles = np.uint16(np.around(circles))
             all=0
             for i in circles[0, :]:
-    # <svg:path d="M100,200
-    # C100,100 250,100 250,200 
-    # C250,300 100,300 100,200 
-    # Z" 
                 center = Point(i[0], i[1])
                 radius = i[2]
-                coffRadius = radius *1.36
-                start = Point(center.x-radius, center.y)
-                finish = Point(center.x+radius, center.y)
                 all = all+1
-                # cv2.circle(img_Draw, center, radius, (255, 0, 255), 2)
-                
-                # p0,p1,p2,p3 = cvDraw.corner(0, 300)
-                # p = drawSvg.Path(stroke='blue', stroke_width=5, fill='none') 
-                # p.M(p0[0], p0[1])
-                # p.C(p1[0], p1[1],  p2[0], p2[1],  p3[0], p3[1])
-                # d.append(p)
-                # cvDraw.createCircle(d, radius, center.x, center.y)
 
                 cvDraw.createCircle(d, int(radius), int(center.x), int(center.y))
                 # cvDraw.createCircle(d, 800,0,0)
-                
-                '''
-                p = drawSvg.Path(stroke='blue', stroke_width=2, fill='none') 
-                p.M(finish.x, finish.y)
-                p.C(finish.x, finish.y-coffRadius, start.x,start.y-coffRadius, start.x,start.y)
-                p.C(start.x, start.y+coffRadius, finish.x,finish.y+coffRadius, finish.x,finish.y)
-                '''
-                # p.M(start.x, start.y)
-                # p.C(start.x, start.y-coffRadius, finish.x,finish.y-coffRadius, finish.x,finish.y)
-                # p.C(finish.x, finish.y+coffRadius, start.x,start.y+coffRadius, start.x,start.y)
-                # d.append(p)
         
         d.save_svg('example.svg')     
-        d.save_png('example.png')
-
-    # def createCircle(pointA, pointB,pointC, pointD):
-    #     p0,p1,p2,p3 = cvDraw.corner(0, 300)
-    #     p = drawSvg.Path(stroke='blue', stroke_width=5, fill='none') 
-    #     p.M(p0[0], p0[1])
-    #     p.C(p1[0], p1[1],  p2[0], p2[1],  p3[0], p3[1])
-    #     d.append(p)
+        # d.save_png('example.png')
         
     def createAngle(pointA, pointB,pointC, pointD):
         distAC = cvUtils.distancePoint(pointA, pointC) 
@@ -509,17 +479,3 @@ class cvUtils:
         deltaY = pointA[1]-pointB[1]
         lenLine = math.sqrt( (deltaX**2)+(deltaY**2))
         return lenLine
-    def createMainContours2(lines, mainRect):
-        # d = drawSvg.Drawing(200, 100, origin='center')
-        d = drawSvg.Drawing(200, 100, origin=(0,0))
-        p = drawSvg.Path(stroke='red', stroke_width=1, fill='none')  # Add an arrow to the end of a path
-        for index in range(len(lines)-1):
-            angleCur = cvDraw.angleLine( lines[index] )
-            angleNext = cvDraw.angleLine( lines[index+1] )
-            p.M(0, 0).C(50, 0, 100,50,100,100)  # Chain multiple path commands
-            d.append(p)
-            break
-        #     line =  lines[index]
-        # for line in lines:
-        #     angle = cvDraw.angleLine( line )
-        d.save_svg('example.svg')     
