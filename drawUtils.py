@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 import math
+import drawsvg as drawSvg
 
 class cvDraw:
     def show_testImage(nameImage, container, scale):
@@ -133,12 +134,39 @@ class cvDraw:
         memo[n] = result
         return result
     
-    def corner(angle, scale):
+    def corner(sector, scale, xPos, yPos):
+        scaleL = scaleR = scale
+        if sector==1:
+            scaleL = -scaleL
+            scaleR = -scaleR
+        if sector==2:
+            scaleR = -scaleR
+        if sector==3:
+            scaleL = -scaleL
         a = 1.00005519
         b = 0.55342686
         c = 0.99873585
-        zz0 = (0 * scale, a * scale)
-        zz1 = (b * scale, c * scale)
-        zz2 = (c * scale, b * scale)
-        zz3 = (a * scale, 0 * scale)
+        # zz0 = (0 * scale, a * scale)
+        # zz1 = (b * scale, c * scale)
+        # zz2 = (c * scale, b * scale)
+        # zz3 = (a * scale, 0 * scale)
+
+        zz0 = ((0 * scaleL)+xPos, (a * scaleR)+yPos)
+        zz1 = ((b * scaleL)+xPos, (c * scaleR)+yPos)
+        zz2 = ((c * scaleL)+xPos, (b * scaleR)+yPos)
+        zz3 = ((a * scaleL)+xPos, (0 * scaleR)+yPos)
         return  zz0, zz1, zz2, zz3
+
+    def createSector(drawPath, sector, radius, xPos, yPos):
+        path = drawSvg.Path(stroke='blue', stroke_width=5, fill='none') 
+        p0,p1,p2,p3 = cvDraw.corner(sector, radius, xPos, yPos)
+        path.M(p0[0], p0[1])
+        path.C(p1[0], p1[1],  p2[0], p2[1],  p3[0], p3[1])
+        drawPath.append(path)
+
+    def createCircle(drawPath, radius, xPos, yPos):
+        cvDraw.createSector(drawPath, 0, radius, xPos, yPos)
+        cvDraw.createSector(drawPath, 1, radius, xPos, yPos)
+        cvDraw.createSector(drawPath, 2, radius, xPos, yPos)
+        cvDraw.createSector(drawPath, 3, radius, xPos, yPos)
+        
