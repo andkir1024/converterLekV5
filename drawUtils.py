@@ -132,3 +132,13 @@ class cvDraw:
             result.extend(reversed(result))
         memo[n] = result
         return result
+    
+    def corner(angle, scale):
+        a = 1.00005519
+        b = 0.55342686
+        c = 0.99873585
+        zz0 = (0 * scale, a * scale)
+        zz1 = (b * scale, c * scale)
+        zz2 = (c * scale, b * scale)
+        zz3 = (a * scale, 0 * scale)
+        return  zz0, zz1, zz2, zz3

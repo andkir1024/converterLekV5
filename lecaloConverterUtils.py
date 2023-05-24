@@ -410,11 +410,18 @@ class cvUtils:
                 finish = Point(center.x+radius, center.y)
                 all = all+1
                 # cv2.circle(img_Draw, center, radius, (255, 0, 255), 2)
+                
+                p0,p1,p2,p3 = cvDraw.corner(0, 300)
+                p = drawSvg.Path(stroke='blue', stroke_width=5, fill='none') 
+                p.M(p0[0], p0[1])
+                p.C(p1[0], p1[1],  p2[0], p2[1],  p3[0], p3[1])
+                
+                '''
                 p = drawSvg.Path(stroke='blue', stroke_width=2, fill='none') 
                 p.M(finish.x, finish.y)
                 p.C(finish.x, finish.y-coffRadius, start.x,start.y-coffRadius, start.x,start.y)
                 p.C(start.x, start.y+coffRadius, finish.x,finish.y+coffRadius, finish.x,finish.y)
-                
+                '''
                 # p.M(start.x, start.y)
                 # p.C(start.x, start.y-coffRadius, finish.x,finish.y-coffRadius, finish.x,finish.y)
                 # p.C(finish.x, finish.y+coffRadius, start.x,start.y+coffRadius, start.x,start.y)
