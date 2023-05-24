@@ -380,32 +380,44 @@ class cvUtils:
         height = shape[0]
         d = drawSvg.Drawing(width, height, origin=(0,0))
         p = drawSvg.Path(stroke='red', stroke_width=2, fill='none') 
-        # for index in range(len(lines)-1):
-        #     pp0, pp1, centroid1, centroid2, pp2 = cvUtils.createAngle(lines[index][0], lines[index][1],lines[index+1][0], lines[index+1][1])
-        #     if pp0 is None:
-        #         continue
-        #     p.M(pp0.x,pp0.y).L(pp1.x,pp1.y) 
-        #     p.C(centroid1.x, centroid1.y, centroid2.x,centroid2.y,pp2.x,pp2.y)
-        # p.Z()
-        # d.append(p)
-
+        
         index = len(lines)-1
         pp0, pp1, centroid1, centroid2, pp2 = cvUtils.createAngle(lines[index][0], lines[index][1],lines[0][0], lines[0][1])
         if pp0 is not None:
             p.M(pp0.x,pp0.y).L(pp1.x,pp1.y) 
             p.C(centroid1.x, centroid1.y, centroid2.x,centroid2.y,pp2.x,pp2.y)
 
+        all=0        
+        # p.M(0,0)
+        for index in range(len(lines)-1):
+            pp0, pp1, centroid1, centroid2, pp2 = cvUtils.createAngle(lines[index][0], lines[index][1],lines[index+1][0], lines[index+1][1])
+            if pp0 is None:
+                continue
+            # p.M(pp0.x,pp0.y).L(pp1.x,pp1.y) 
+            # if index == 0:
+                # p.M(pp0.x,pp0.y)
+            p.L(pp1.x,pp1.y) 
+            p.C(centroid1.x, centroid1.y, centroid2.x,centroid2.y,pp2.x,pp2.y)
+            all = all +1
+            # if all > 1:
+                # break 
         p.Z()
         d.append(p)
 
+        # index = len(lines)-1
+        # pp0, pp1, centroid1, centroid2, pp2 = cvUtils.createAngle(lines[index][0], lines[index][1],lines[0][0], lines[0][1])
+        # if pp0 is not None:
+        #     p.M(pp0.x,pp0.y).L(pp1.x,pp1.y) 
+        #     p.C(centroid1.x, centroid1.y, centroid2.x,centroid2.y,pp2.x,pp2.y)
+
+        # p.Z()
+        # d.append(p)
+
         if circles is not None:
             circles = np.uint16(np.around(circles))
-            all=0
             for i in circles[0, :]:
                 center = Point(i[0], i[1])
                 radius = i[2]
-                all = all+1
-
                 cvDraw.createCircle(d, int(radius), int(center.x), int(center.y))
                 # cvDraw.createCircle(d, 800,0,0)
         
