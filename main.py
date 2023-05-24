@@ -210,7 +210,7 @@ def show_frame():
             imgGrey =cvDraw.createGray(imgOk, slider1.get())
             # cvUtils.findCircles(imgGrey, imgDraw, draw_conrure = param0)
             # выделение глапвного контура
-            cvUtils.getMainContours(imgGrey, imgDraw)
+            imgTst,finalCountours = cvUtils.getMainContours(imgGrey, imgDraw)
             # cvUtils.getContours1(imgGrey, imgDraw)
             # cvUtils.findLines(imgGrey, imgDraw, draw_conrure = param0)
 
@@ -241,8 +241,8 @@ def show_frame():
                 viewX = right-widthZoom
 
             # imgDraw = cv2.imdecode(np.fromfile("example.png", dtype=np.uint8), cv2.IMREAD_COLOR)
-            im_crop = imgDraw[viewY:viewY+heightZoom, viewX:right]
-            # im_crop = imgGrey[viewY:viewY+heightZoom, viewX:right]
+            # im_crop = imgDraw[viewY:viewY+heightZoom, viewX:right]
+            im_crop = imgTst[viewY:viewY+heightZoom, viewX:right]
 
             # im_crop = img[0:200, 50:500]
             # crop_img = img[y:y+h, x:x+w]

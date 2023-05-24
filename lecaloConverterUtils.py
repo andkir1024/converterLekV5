@@ -322,7 +322,8 @@ class cvUtils:
         imgDial = cv2.dilate(imgCanny,kernel,iterations=3)
         imgThre = cv2.erode(imgDial,kernel,iterations=3)
         # imgCanny = imgGray
-        contours,hiearchy = cv2.findContours(imgCanny,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
+        imgTst = imgCanny
+        contours,hiearchy = cv2.findContours(imgTst,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
         # contours,hiearchy = cv2.findContours(imgCanny,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_NONE)
         finalCountours = []
         for i in contours:
@@ -361,16 +362,16 @@ class cvUtils:
         for line in lines:
             cv2.line(img, line[0], line[1], (255,0,0), thickness=12)
         
-        if draw:
-            for con in finalCountours:
-                approx = cv2.approxPolyDP(con[4],0.2,True)
-                # cv2.drawContours(img,con[4],-1,(255,0,0),16)
-                # cv2.drawContours(img,[approx],-1,(0,255,0),6)
-                # cv2.drawContours(img,con[4],-1,(0,255,0),16)
+        # if draw:
+        for con in finalCountours:
+            approx = cv2.approxPolyDP(con[4],0.2,True)
+            # cv2.drawContours(img,con[4],-1,(255,0,0),16)
+            # cv2.drawContours(img,[approx],-1,(0,255,0),6)
+            # cv2.drawContours(img,con[4],-1,(0,255,0),16)
                 
         # img = cv2.imdecode(np.fromfile("example.png", dtype=np.uint8), cv2.IMREAD_COLOR)
 
-        return img, finalCountours
+        return imgTst, finalCountours
     
     def createMainContours(lines, mainRect, circles, img):
         shape = img.shape
