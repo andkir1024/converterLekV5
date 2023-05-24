@@ -146,10 +146,6 @@ class cvDraw:
         a = 1.00005519
         b = 0.55342686
         c = 0.99873585
-        # zz0 = (0 * scale, a * scale)
-        # zz1 = (b * scale, c * scale)
-        # zz2 = (c * scale, b * scale)
-        # zz3 = (a * scale, 0 * scale)
 
         zz0 = ((0 * scaleL)+xPos, (a * scaleR)+yPos)
         zz1 = ((b * scaleL)+xPos, (c * scaleR)+yPos)

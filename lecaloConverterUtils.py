@@ -416,7 +416,8 @@ class cvUtils:
                 # p.M(p0[0], p0[1])
                 # p.C(p1[0], p1[1],  p2[0], p2[1],  p3[0], p3[1])
                 # d.append(p)
-                cvDraw.createCircle(d, 800, 0, 800)
+                # cvDraw.createCircle(d, radius, center.x, center.y)
+                cvDraw.createCircle(d, int(radius), int(center.x), int(center.y))
                 
                 '''
                 p = drawSvg.Path(stroke='blue', stroke_width=2, fill='none') 
