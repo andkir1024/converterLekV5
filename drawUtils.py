@@ -153,18 +153,51 @@ class cvDraw:
         zz3 = ((a * scaleL)+xPos, (0 * scaleR)+yPos)
         return  zz0, zz1, zz2, zz3
 
-    def createSector(path, sector, radius, xPos, yPos):
+    def corner1(sector, scale, xPos, yPos):
+        scaleL = scaleR = scale
+        if sector==1:
+            scaleL = -scaleL
+            scaleR = -scaleR
+        if sector==2:
+            scaleR = -scaleR
+        if sector==3:
+            scaleL = -scaleL
+        a = 1.00005519
+        b = 0.55342686
+        c = 0.99873585
+
+        zz0 = ((0 * scaleL)+xPos, (a * scaleR)+yPos)
+        zz1 = ((b * scaleL)+xPos, (c * scaleR)+yPos)
+        zz2 = ((c * scaleL)+xPos, (b * scaleR)+yPos)
+        zz3 = ((a * scaleL)+xPos, (0 * scaleR)+yPos)
+        return  zz0, zz1, zz2, zz3
+
+    def createSector(path, sector, radius, xPos, yPos, start = False):
         # path = drawSvg.Path(stroke='blue', stroke_width=5, fill='none') 
-        p0,p1,p2,p3 = cvDraw.corner(sector, radius, xPos, yPos)
+        p0,p1,p2,p3 = cvDraw.corner(0, radius, xPos, yPos)
+        # if start == True:
         path.M(p0[0], p0[1])
         path.C(p1[0], p1[1],  p2[0], p2[1],  p3[0], p3[1])
+
+        n3,n2,n1,n0 = cvDraw.corner(2, radius, xPos, yPos)
+        path.C(n1[0], n1[1],  n2[0], n2[1],  n3[0], n3[1])
+
+        m0,m1,m2,m3 = cvDraw.corner(1, radius, xPos, yPos)
+        path.C(m1[0], m1[1],  m2[0], m2[1],  m3[0], m3[1])
+
+        k3,k2,k1,k0 = cvDraw.corner(3, radius, xPos, yPos)
+        path.C(k1[0], k1[1],  k2[0], k2[1],  k3[0], k3[1])
+        
+        path.Z()
         # drawPath.append(path)
 
     def createCircle(drawPath, radius, xPos, yPos):
         path = drawSvg.Path(stroke='blue', stroke_width=5, fill='none') 
         cvDraw.createSector(path, 0, radius, xPos, yPos)
-        cvDraw.createSector(path, 1, radius, xPos, yPos)
-        cvDraw.createSector(path, 2, radius, xPos, yPos)
-        cvDraw.createSector(path, 3, radius, xPos, yPos)
+        # cvDraw.createSector(path, 3, radius, xPos, yPos)
+        # cvDraw.createSector(path, 0, radius, xPos, yPos, True)
+        # cvDraw.createSector(path, 1, radius, xPos, yPos)
+        # cvDraw.createSector(path, 2, radius, xPos, yPos)
+        # cvDraw.createSector(path, 3, radius, xPos, yPos)
         drawPath.append(path)
         
