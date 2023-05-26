@@ -210,7 +210,8 @@ def show_frame():
             imgGrey =cvDraw.createGray(imgOk, slider1.get())
             # cvUtils.findCircles(imgGrey, imgDraw, draw_conrure = param0)
             # выделение глапвного контура
-            imgTst,finalCountours = cvUtils.getMainContours(imgGrey, imgDraw)
+            imgTst = cvUtils.doContours(imgGrey, imgDraw)
+            # imgTst,finalCountours = cvUtils.getMainContours(imgGrey, imgDraw)
             # cvUtils.getContours1(imgGrey, imgDraw)
             # cvUtils.findLines(imgGrey, imgDraw, draw_conrure = param0)
 

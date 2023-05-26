@@ -59,6 +59,8 @@ class cvDraw:
         return
     
     def packLine( last_point, curr_point, border = 100):
+        # if len(last_point) == 1:
+            # return None
         x1=int(last_point[0])
         y1=int(last_point[1])
         x2=int(curr_point[0])
@@ -134,6 +136,7 @@ class cvDraw:
         memo[n] = result
         return result
     
+    # создание сектора для круга
     def corner(sector, scale, xPos, yPos):
         scaleL = scaleR = scale
         if sector==1:
@@ -153,25 +156,7 @@ class cvDraw:
         zz3 = ((a * scaleL)+xPos, (0 * scaleR)+yPos)
         return  zz0, zz1, zz2, zz3
 
-    def corner1(sector, scale, xPos, yPos):
-        scaleL = scaleR = scale
-        if sector==1:
-            scaleL = -scaleL
-            scaleR = -scaleR
-        if sector==2:
-            scaleR = -scaleR
-        if sector==3:
-            scaleL = -scaleL
-        a = 1.00005519
-        b = 0.55342686
-        c = 0.99873585
-
-        zz0 = ((0 * scaleL)+xPos, (a * scaleR)+yPos)
-        zz1 = ((b * scaleL)+xPos, (c * scaleR)+yPos)
-        zz2 = ((c * scaleL)+xPos, (b * scaleR)+yPos)
-        zz3 = ((a * scaleL)+xPos, (0 * scaleR)+yPos)
-        return  zz0, zz1, zz2, zz3
-
+    # создание круга в svg
     def createCircle(drawPath, radius, xPos, yPos):
         path = drawSvg.Path(stroke='blue', stroke_width=5, fill='none') 
 

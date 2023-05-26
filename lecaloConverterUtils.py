@@ -313,6 +313,88 @@ class cvUtils:
         # objtours = sorted(objects_contours, key=cv2.contourArea)[-1]
         objects_contours.sort(key=custom_key, reverse=True)
         return objects_contours
+
+    def doContours(imgGray, img):
+        # -------------------------------------
+        # нахождение круговых вырезов
+        circles = cvUtils.findCircles(imgGray, img, True)
+        # -------------------------------------
+        # фильтр изображения
+        throu = 20
+        cThr=[throu,throu]
+        imgBlur = cv2.GaussianBlur(imgGray,(5,5),1)
+        imgCanny = cv2.Canny(imgBlur,cThr[0],cThr[1])
+        kernel = np.ones((5,5))
+        imgDial = cv2.dilate(imgCanny,kernel,iterations=3)
+        imgThre = cv2.erode(imgDial,kernel,iterations=3)
+        # imgCanny = imgGray
+        imgTst = imgCanny
+        # imgTst = imgGray
+        # -------------------------------------
+        # поиск главного контура
+        # contours,hiearchy = cv2.findContours(imgCanny,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_NONE)
+        # contours,hiearchy = cv2.findContours(imgTst,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
+        contours,hiearchy = cv2.findContours(imgTst,cv2.RETR_LIST ,cv2.CHAIN_APPROX_SIMPLE)
+        # сортировка котуров по размеру
+        max=0              
+        minArea=0  
+        sel_countour=None
+        finalCountours = []
+        for iCon in contours:
+            area = cv2.contourArea(iCon)
+            if area > minArea:
+                peri = cv2.arcLength(iCon,True)
+                approx = cv2.approxPolyDP(iCon,0.02*peri,True)
+                bbox = cv2.boundingRect(approx)
+                finalCountours.append([len(approx),area,approx,bbox,iCon])
+        finalCountours = sorted(finalCountours,key = lambda x:x[1] ,reverse= True)                
+        
+        # indexMax = finalCountours[0][4]
+        sel_countour = finalCountours[7][4]
+
+        '''
+        for countour in contours:
+            # area = cv2.countour
+            # finalCountours.append([countour,area])
+            if countour.shape[0]>max:
+                sel_countour=countour
+                max=countour.shape[0]
+        for i in contours:
+            area = cv2.contourArea(i)
+            if area > minArea:
+                peri = cv2.arcLength(i,True)
+                approx = cv2.approxPolyDP(i,0.02*peri,True)
+                bbox = cv2.boundingRect(approx)
+                if filter > 0:
+                    if len(approx) == filter:
+                        finalCountours.append([len(approx),area,approx,bbox,i])
+                else:
+                    finalCountours.append([len(approx),area,approx,bbox,i])
+        # finalCountours = sorted(finalCountours,key = lambda x:x[1] ,reverse= True)
+        '''
+        mainRect  =cvDraw.calkSize(sel_countour)
+        # sel_countour = countour[5]
+        lines = []
+        last_point = None
+        for point in sel_countour:
+            curr_point=point[0]
+
+            if not(last_point is None):
+                line =cvDraw.packLine(last_point,curr_point, 100)
+                if line is not None:
+                    lines.append(line)
+            last_point=curr_point
+        line =cvDraw.packLine(last_point,sel_countour[0][0], 100)
+        if line is not None:
+            lines.insert(0,line)
+        lines = lines[::-1]
+        # cvUtils.createMainContours(lines, mainRect, circles, img)
+
+        for line in lines:
+            cv2.line(img, line[0], line[1], (255,0,0), thickness=12)
+        
+        return imgTst
+    
     def getMainContours(imgGray, img, cThr=[100,100],showCanny=False,minArea=0,filter=0,draw =True):
         circles = cvUtils.findCircles(imgGray, img, True)
         
