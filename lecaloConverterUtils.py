@@ -335,9 +335,8 @@ class cvUtils:
         # contours,hiearchy = cv2.findContours(imgCanny,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_NONE)
         # contours,hiearchy = cv2.findContours(imgTst,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
         contours,hiearchy = cv2.findContours(imgTst,cv2.RETR_LIST ,cv2.CHAIN_APPROX_SIMPLE)
-        # сортировка котуров по размеру
-        max=0              
-        minArea=0  
+        # сортировка котуров по площади (максимальный первый)
+        minArea=1000  
         sel_countour=None
         finalCountours = []
         for iCon in contours:
@@ -349,31 +348,8 @@ class cvUtils:
                 finalCountours.append([len(approx),area,approx,bbox,iCon])
         finalCountours = sorted(finalCountours,key = lambda x:x[1] ,reverse= True)                
         
-        # indexMax = finalCountours[0][4]
         sel_countour = finalCountours[7][4]
-
         '''
-        for countour in contours:
-            # area = cv2.countour
-            # finalCountours.append([countour,area])
-            if countour.shape[0]>max:
-                sel_countour=countour
-                max=countour.shape[0]
-        for i in contours:
-            area = cv2.contourArea(i)
-            if area > minArea:
-                peri = cv2.arcLength(i,True)
-                approx = cv2.approxPolyDP(i,0.02*peri,True)
-                bbox = cv2.boundingRect(approx)
-                if filter > 0:
-                    if len(approx) == filter:
-                        finalCountours.append([len(approx),area,approx,bbox,i])
-                else:
-                    finalCountours.append([len(approx),area,approx,bbox,i])
-        # finalCountours = sorted(finalCountours,key = lambda x:x[1] ,reverse= True)
-        '''
-        mainRect  =cvDraw.calkSize(sel_countour)
-        # sel_countour = countour[5]
         lines = []
         last_point = None
         for point in sel_countour:
@@ -388,12 +364,38 @@ class cvUtils:
         if line is not None:
             lines.insert(0,line)
         lines = lines[::-1]
-        # cvUtils.createMainContours(lines, mainRect, circles, img)
-
         for line in lines:
             cv2.line(img, line[0], line[1], (255,0,0), thickness=12)
+        '''
+        lines = cvUtils.drawContureLines(img, finalCountours[0][4],(255,0,0),5)
+        cvUtils.drawContureLines(img, finalCountours[11][4],(0,0,255),5)
+        # mainRect  =cvDraw.calkSize(sel_countour)
+        # cvUtils.createMainContours(lines, mainRect, circles, img)
         
         return imgTst
+
+    def drawContureLines(img, sel_countour, color, thickness=12):
+        cv2.drawContours(image=img, contours=sel_countour, contourIdx=-1, color=color, thickness=thickness, lineType=cv2.LINE_AA)
+        return None
+        
+        lines = []
+        last_point = None
+        for point in sel_countour:
+            curr_point=point[0]
+
+            if not(last_point is None):
+                line =cvDraw.packLine(last_point,curr_point, 100)
+                if line is not None:
+                    lines.append(line)
+            last_point=curr_point
+        line =cvDraw.packLine(last_point,sel_countour[0][0], 100)
+        if line is not None:
+            lines.insert(0,line)
+        lines = lines[::-1]
+
+        for line in lines:
+            cv2.line(img, line[0], line[1], color, thickness)
+        return lines
     
     def getMainContours(imgGray, img, cThr=[100,100],showCanny=False,minArea=0,filter=0,draw =True):
         circles = cvUtils.findCircles(imgGray, img, True)
