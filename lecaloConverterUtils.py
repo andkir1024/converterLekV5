@@ -379,7 +379,8 @@ class cvUtils:
         height = int((mainRect[1][1]-mainRect[0][1]) * 1.5)
         width = shape[1]
         height = shape[0]
-        d = drawSvg.Drawing(width, height, origin=(0,0))
+        d = drawSvg.Drawing(width, height, origin=(0,0), id_prefix='d11')
+        # d = drawSvg.Drawing(8.2, 11.6, origin=(10,10), id_prefix='d11')
         p = drawSvg.Path(stroke='red', stroke_width=2, fill='none') 
         
         index = len(lines)-1
