@@ -58,9 +58,8 @@ class cvDraw:
             cv2.line(img, (x1, y1), (x2, y2), (255,0,0), thickness=2)
         return
     
+    # вырезаем короткие линии
     def packLine( last_point, curr_point, border = 100):
-        # if len(last_point) == 1:
-            # return None
         x1=int(last_point[0])
         y1=int(last_point[1])
         x2=int(curr_point[0])
@@ -85,6 +84,8 @@ class cvDraw:
         return angle    
     
     def calkSize( countour ):
+        if countour is None:
+            return None
         minX = 100000
         maxX = 0
         minY = minX

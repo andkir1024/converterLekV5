@@ -348,7 +348,8 @@ class cvUtils:
                 finalCountours.append([len(approx),area,approx,bbox,iCon])
         finalCountours = sorted(finalCountours,key = lambda x:x[1] ,reverse= True)                
         
-        sel_countour = finalCountours[7][4]
+        # sel_countour = finalCountours[7][4]
+        sel_countour = finalCountours[0][4]
         '''
         lines = []
         last_point = None
@@ -367,16 +368,16 @@ class cvUtils:
         for line in lines:
             cv2.line(img, line[0], line[1], (255,0,0), thickness=12)
         '''
-        lines = cvUtils.drawContureLines(img, finalCountours[0][4],(255,0,0),5)
-        cvUtils.drawContureLines(img, finalCountours[11][4],(0,0,255),5)
-        # mainRect  =cvDraw.calkSize(sel_countour)
-        # cvUtils.createMainContours(lines, mainRect, circles, img)
+        lines = cvUtils.drawContureLines(img, finalCountours[0][4],(255,0,0),5, 100)
+        # cvUtils.drawContureLines(img, finalCountours[11][4],(0,0,255),5,100)
+        mainRect  =cvDraw.calkSize(sel_countour)
+        cvUtils.createMainContours(lines, mainRect, circles, img)
         
         return imgTst
-
-    def drawContureLines(img, sel_countour, color, thickness=12):
+    # border граница длин линий
+    def drawContureLines(img, sel_countour, color, thickness=12, border=100):
         cv2.drawContours(image=img, contours=sel_countour, contourIdx=-1, color=color, thickness=thickness, lineType=cv2.LINE_AA)
-        return None
+        # return None
         
         lines = []
         last_point = None
@@ -384,17 +385,17 @@ class cvUtils:
             curr_point=point[0]
 
             if not(last_point is None):
-                line =cvDraw.packLine(last_point,curr_point, 100)
+                line =cvDraw.packLine(last_point,curr_point, border)
                 if line is not None:
                     lines.append(line)
             last_point=curr_point
-        line =cvDraw.packLine(last_point,sel_countour[0][0], 100)
+        line =cvDraw.packLine(last_point,sel_countour[0][0], border)
         if line is not None:
             lines.insert(0,line)
         lines = lines[::-1]
 
         for line in lines:
-            cv2.line(img, line[0], line[1], color, thickness)
+            cv2.line(img, line[0], line[1], color=(0,0,255), thickness=thickness)
         return lines
     
     def getMainContours(imgGray, img, cThr=[100,100],showCanny=False,minArea=0,filter=0,draw =True):

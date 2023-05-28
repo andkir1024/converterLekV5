@@ -1,3 +1,5 @@
+import getopt, sys
+import argparse
 import cv2
 import lekaloMain
 from tkinter import *
@@ -16,11 +18,23 @@ from drawUtils import cvDraw
 # import matplotlib.patches as mpatches
 # import matplotlib.pyplot as plt
 
-################################### andy 
+################################### разборка аргументов
 testName = None
 filesDir = '../popular/'
 filesSrc = None
 svgDir = '../outSvg/'
+doConsole = False
+
+argumentList = sys.argv[1:]
+options = "hmo:"
+long_options = ["Help", "console", "dirSrc="]
+arguments, values = getopt.getopt(argumentList, options, long_options)
+for currentArgument, currentValue in arguments:
+        if currentArgument in ("-d", "--dirSrc"):
+            filesDir = currentValue
+        elif currentArgument in ("--console"):
+            doConsole = True
+    
 updateImage = False
 updateImageZoom = False
 imgOk = None
