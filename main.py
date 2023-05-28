@@ -1,5 +1,4 @@
 import getopt, sys
-import argparse
 import cv2
 import lekaloMain
 from tkinter import *
@@ -14,26 +13,24 @@ import os
 import lecaloConverterUtils
 from lecaloConverterUtils import cvUtils
 from drawUtils import cvDraw
-# import matplotlib.path as mpath
-# import matplotlib.patches as mpatches
-# import matplotlib.pyplot as plt
+import datetime
 
 ################################### разборка аргументов
 testName = None
 filesDir = '../popular1/'
 filesSrc = None
 svgDir = '../outSvg/'
-doConsole = False
+doConsole = True
 
 argumentList = sys.argv[1:]
 options = "hmo:"
-long_options = ["Help", "console", "dirSrc="]
+long_options = ["Help", "wnd", "dirSrc="]
 arguments, values = getopt.getopt(argumentList, options, long_options)
 for currentArgument, currentValue in arguments:
         if currentArgument in ("-d", "--dirSrc"):
             filesDir = currentValue
-        elif currentArgument in ("-c","--console"):
-            doConsole = True
+        elif currentArgument in ("-w","--wnd"):
+            doConsole = False
     
 updateImage = False
 updateImageZoom = False
@@ -277,10 +274,11 @@ else:
     if listFiles is None:
         print(filesDir + " - директория пуста или отсутсявует")
     else:
+        nowStart = datetime.datetime.now()
         for f in listFiles:
-            # imgOk = cv2.imdecode(np.fromfile(f, dtype=np.uint8), cv2.IMREAD_COLOR)
+            imgOk = cv2.imdecode(np.fromfile(f, dtype=np.uint8), cv2.IMREAD_COLOR)
             # do_frame(imgOk)
             print(f)
-    # exit()
-    # show_frame()
-    # root.mainloop()
+        now = datetime.datetime.now()
+        tdelta = (now - nowStart).total_seconds()
+        print(f"Завершена за: {tdelta} сек")

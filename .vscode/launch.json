@@ -10,15 +10,15 @@
             "request": "launch",
             "program": "main.py",
             "console": "integratedTerminal",
-            "args": ["--dirSrc=../popular/"],
-        }
+            "args": ["--wnd", "--dirSrc=../popular/"],
+        },
         {
             "name": "Python: Console",
             "type": "python",
             "request": "launch",
             "program": "main.py",
             "console": "externalTerminal",
-            "args": ["--console"],
+            "args": ["--dirSrc=../popular/"],
         }        
     ]
 }

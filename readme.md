@@ -12,4 +12,12 @@ git config --global user.email "andkir@mail.ru"
 git config --global user.name "andkir1024"
 
 pip install PyInstaller
+
+создание выполняемого файла
 pyinstaller --onefile main.py
+
+параметры запуска с командной строкой
+1. источник файлов png для обработки
+--dirSrc=../popular/
+2. включение оконного режима иначи консоль отрабатывает всю заданную директорию dirSrc
+--wnd
