@@ -20,7 +20,7 @@ from drawUtils import cvDraw
 
 ################################### разборка аргументов
 testName = None
-filesDir = '../popular/'
+filesDir = '../popular1/'
 filesSrc = None
 svgDir = '../outSvg/'
 doConsole = False
@@ -32,7 +32,7 @@ arguments, values = getopt.getopt(argumentList, options, long_options)
 for currentArgument, currentValue in arguments:
         if currentArgument in ("-d", "--dirSrc"):
             filesDir = currentValue
-        elif currentArgument in ("--console"):
+        elif currentArgument in ("-c","--console"):
             doConsole = True
     
 updateImage = False
@@ -72,37 +72,38 @@ def press_mouse(event):
     yZoom = event.y
     updateImageZoom = True
 ###################################
-root = Tk()
-root.bind('<Escape>', lambda e: root.quit())
-root.title("Лекала тестер")
-root.geometry("1700x900+0+0")
+if doConsole == False:
+    root = Tk()
+    root.bind('<Escape>', lambda e: root.quit())
+    root.title("Лекала тестер")
+    root.geometry("1700x900+0+0")
 
-frame1original = Frame(master=root, bg="red")
-frame1original.pack()
-frame2control = Frame(master=root, bg="blue")
-frame2control.pack()
+    frame1original = Frame(master=root, bg="red")
+    frame1original.pack()
+    frame2control = Frame(master=root, bg="blue")
+    frame2control.pack()
 
-# верхняя полоса экранов
-# выбор файла
-listFiles = getFiles()
-lmainListImages = Listbox(frame1original, listvariable=Variable(value=listFiles), width=60, height=50, selectmode=SINGLE)
-lmainListImages.pack(expand=1, side="left", anchor=NW, fill=X, padx=5, pady=5)
+    # верхняя полоса экранов
+    # выбор файла
+    listFiles = getFiles()
+    lmainListImages = Listbox(frame1original, listvariable=Variable(value=listFiles), width=60, height=50, selectmode=SINGLE)
+    lmainListImages.pack(expand=1, side="left", anchor=NW, fill=X, padx=5, pady=5)
 
-# собственно картинка в реальном размере
-rzoomImage = Label(frame1original, width=800, height=800)
-rzoomImage.pack(side="right", padx=5, pady=5, anchor=NE)
+    # собственно картинка в реальном размере
+    rzoomImage = Label(frame1original, width=800, height=800)
+    rzoomImage.pack(side="right", padx=5, pady=5, anchor=NE)
 
-# собственно картинка
-rmainImage = Label(frame1original, width=512, height=800)
-rmainImage.pack(side="right", padx=0, pady=5, anchor=N,expand=False)
-rmainImage.bind("<ButtonPress-1>", press_mouse)
+    # собственно картинка
+    rmainImage = Label(frame1original, width=512, height=800)
+    rmainImage.pack(side="right", padx=0, pady=5, anchor=N,expand=False)
+    rmainImage.bind("<ButtonPress-1>", press_mouse)
 
-# slider current value
-current_value1 = DoubleVar()
+    # slider current value
+    current_value1 = DoubleVar()
+    current_value2 = DoubleVar()
 def slider_changed1(event):
     update_image()
     return
-current_value2 = DoubleVar()
 def slider_changed2(event):
     update_image()
     return
@@ -133,34 +134,35 @@ def handle_configure(event):
     text="window geometry:\n" + root.geometry()
     return
 
-rmainImage.bind("<Configure>", handle_configure)
+if doConsole == False:
+    rmainImage.bind("<Configure>", handle_configure)
 
-frame2control.param0 = BooleanVar()
-frame2control.param1 = BooleanVar()
+    frame2control.param0 = BooleanVar()
+    frame2control.param1 = BooleanVar()
 
-btnParam0 = Checkbutton(frame2control, text="Показывать контур", variable=frame2control.param0, onvalue=1, offvalue=0, command=update_image)
-btnParam0.pack(side="left",  padx="10", pady="1")
-btnParam1 = Checkbutton(frame2control, text="Параметр 1", variable=frame2control.param1, onvalue=1, offvalue=0, )
-btnParam1.pack(side="left",  padx="10", pady="1")
+    btnParam0 = Checkbutton(frame2control, text="Показывать контур", variable=frame2control.param0, onvalue=1, offvalue=0, command=update_image)
+    btnParam0.pack(side="left",  padx="10", pady="1")
+    btnParam1 = Checkbutton(frame2control, text="Параметр 1", variable=frame2control.param1, onvalue=1, offvalue=0, )
+    btnParam1.pack(side="left",  padx="10", pady="1")
 
-btnExit = Button(frame2control, text="Exit", command=exit, width= 20)
-btnExit.pack(side="right",  padx="10", pady="1")
+    btnExit = Button(frame2control, text="Exit", command=exit, width= 20)
+    btnExit.pack(side="right",  padx="10", pady="1")
 
-btnSvg = Button(frame2control, text="Export to SVG", command=export_svg, width= 20)
-btnSvg.pack(side="right",  padx="10", pady="1")
+    btnSvg = Button(frame2control, text="Export to SVG", command=export_svg, width= 20)
+    btnSvg.pack(side="right",  padx="10", pady="1")
 
-slider1 = Scale( frame2control,from_=1, to=250, orient='horizontal',  command=slider_changed1, variable=current_value1, length = 200)
-slider1.set(200)
-slider1.pack(side="left",  padx="10", pady="1")
+    slider1 = Scale( frame2control,from_=1, to=250, orient='horizontal',  command=slider_changed1, variable=current_value1, length = 200)
+    slider1.set(200)
+    slider1.pack(side="left",  padx="10", pady="1")
 
-slider2 = Scale( frame2control,from_=1, to=100, orient='horizontal',  command=slider_changed2, variable=current_value2, length = 200)
-slider2.set(30)
-slider2.pack(side="left",  padx="10", pady="1")
+    slider2 = Scale( frame2control,from_=1, to=100, orient='horizontal',  command=slider_changed2, variable=current_value2, length = 200)
+    slider2.set(30)
+    slider2.pack(side="left",  padx="10", pady="1")
 
-# генерация выбора первого элемента в списке каритнок
-lmainListImages.bind("<<ListboxSelect>>", selected)
-lmainListImages.select_set(first=0)
-lmainListImages.event_generate("<<ListboxSelect>>")
+    # генерация выбора первого элемента в списке каритнок
+    lmainListImages.bind("<<ListboxSelect>>", selected)
+    lmainListImages.select_set(first=0)
+    lmainListImages.event_generate("<<ListboxSelect>>")
 
 def calkViewParam( label, image):
     dispX = 0
@@ -208,7 +210,17 @@ def convertScreenToImageCoord(rmainImage, imgOk, xZoom, yZoom):
     # viewX = 440
     # viewY = 934
     return viewX, viewY
-
+def do_frame(imgOk):
+    imgDraw = imgOk.copy()
+    param0 = frame2control.param0.get()
+    imgGrey =cvDraw.createGray(imgOk, slider1.get())
+    # cvUtils.findCircles(imgGrey, imgDraw, draw_conrure = param0)
+    # выделение глапвного контура
+    imgTst = cvUtils.doContours(imgGrey, imgDraw)
+    # imgTst,finalCountours = cvUtils.getMainContours(imgGrey, imgDraw)
+    # cvUtils.getContours1(imgGrey, imgDraw)
+    # cvUtils.findLines(imgGrey, imgDraw, draw_conrure = param0)
+    return imgDraw
 def show_frame():
     global imgOk
     global updateImage
@@ -219,26 +231,16 @@ def show_frame():
     if updateImage == True or updateImageZoom == True:
         updateImage = False
         if imgOk is not None:
-            imgDraw = imgOk.copy()
-            param0 = frame2control.param0.get()
-            imgGrey =cvDraw.createGray(imgOk, slider1.get())
-            # cvUtils.findCircles(imgGrey, imgDraw, draw_conrure = param0)
-            # выделение глапвного контура
-            imgTst = cvUtils.doContours(imgGrey, imgDraw)
-            # imgTst,finalCountours = cvUtils.getMainContours(imgGrey, imgDraw)
-            # cvUtils.getContours1(imgGrey, imgDraw)
-            # cvUtils.findLines(imgGrey, imgDraw, draw_conrure = param0)
-
+            imgDraw = do_frame(imgOk)
 
             scale, dispX, dispY = calkViewParam(rmainImage, imgDraw)
-            # img = cv2.resize(imgDraw, (0, 0), interpolation=cv2.INTER_LINEAR, fx=scale, fy=scale)
             img = cv2.resize(imgDraw, (0, 0), interpolation=cv2.INTER_AREA, fx=scale, fy=scale)
             rectView = calkSizeViewRect(xZoom, yZoom, rzoomImage, scale, dispX, dispY)
             if rectView is not None:
                 img = cv2.rectangle(img, rectView[0], rectView[1], (0, 255, 0), 2)
             
-            kernel = np.ones((3,3))
-            img = cv2.erode(img,kernel,iterations=1)
+            # kernel = np.ones((3,3))
+            # img = cv2.erode(img,kernel,iterations=1)
             
             imgR = Image.fromarray(img)
             imgtkR = ImageTk.PhotoImage(image=imgR)
@@ -259,8 +261,6 @@ def show_frame():
             im_crop = imgDraw[viewY:viewY+heightZoom, viewX:right]
             # im_crop = imgTst[viewY:viewY+heightZoom, viewX:right]
 
-            # im_crop = img[0:200, 50:500]
-            # crop_img = img[y:y+h, x:x+w]
             imgR = Image.fromarray(im_crop)
             imgtkZoom = ImageTk.PhotoImage(image=imgR)
             rzoomImage.imgtk = imgtkZoom
@@ -269,9 +269,18 @@ def show_frame():
             
     rmainImage.after(100, show_frame)
 
-if doConsole:
+if doConsole == False:
     show_frame()
     root.mainloop()
 else:
-    show_frame()
-    root.mainloop()
+    listFiles = getFiles()
+    if listFiles is None:
+        print(filesDir + " - директория пуста или отсутсявует")
+    else:
+        for f in listFiles:
+            # imgOk = cv2.imdecode(np.fromfile(f, dtype=np.uint8), cv2.IMREAD_COLOR)
+            # do_frame(imgOk)
+            print(f)
+    # exit()
+    # show_frame()
+    # root.mainloop()
