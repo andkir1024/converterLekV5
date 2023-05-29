@@ -166,36 +166,6 @@ class cvUtils:
         # d.save_svg('example.svg')                
         # d.save_png('example.png')
         return img, finalCountours
-    def getContours(imgGray, img,cThr=[100,100],showCanny=False,minArea=0,filter=0,draw =True):
-        # imgGray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
-        imgBlur = cv2.GaussianBlur(imgGray,(5,5),1)
-        imgCanny = cv2.Canny(imgBlur,cThr[0],cThr[1])
-        kernel = np.ones((5,5))
-        imgDial = cv2.dilate(imgCanny,kernel,iterations=3)
-        imgThre = cv2.erode(imgDial,kernel,iterations=3)
-        # imgCanny = imgGray
-        # if showCanny:cv2.imshow('Canny',imgCanny)
-        # contours,hiearchy = cv2.findContours(imgThre,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
-        # imgCanny = imgGray
-        # contours,hiearchy = cv2.findContours(imgCanny,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
-        contours,hiearchy = cv2.findContours(imgCanny,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_NONE)
-        finalCountours = []
-        for i in contours:
-            area = cv2.contourArea(i)
-            if area > minArea:
-                peri = cv2.arcLength(i,True)
-                approx = cv2.approxPolyDP(i,0.02*peri,True)
-                bbox = cv2.boundingRect(approx)
-                if filter > 0:
-                    if len(approx) == filter:
-                        finalCountours.append([len(approx),area,approx,bbox,i])
-                else:
-                    finalCountours.append([len(approx),area,approx,bbox,i])
-        # finalCountours = sorted(finalCountours,key = lambda x:x[1] ,reverse= True)
-        if draw:
-            for con in finalCountours:
-                cv2.drawContours(img,con[4],-1,(0,255,255),6)
-        return img, finalCountours
     def reorder(myPoints):
         #print(myPoints.shape)
         myPointsNew = np.zeros_like(myPoints)
@@ -351,10 +321,15 @@ class cvUtils:
         finalCountours = cvUtils.extractContours(finalCountours, circles)
         
         # sel_countour = finalCountours[7][4]
-        sel_countour = finalCountours[0][4]
-        lines = cvUtils.drawContureLines(img, finalCountours[0][4],(255,0,0),5, 100)
-        mainRect  =cvDraw.calkSize(sel_countour)
-        cvUtils.createMainContours(lines, mainRect, circles, img)
+        # проход по главным контурам (1 000 000) 
+        for countour in finalCountours:
+            if countour[1] > 1000000:
+                lines = cvUtils.drawContureLines(img, countour[4],(255,0,0),5, 100)
+            
+        # sel_countour = finalCountours[0][4]
+        # lines = cvUtils.drawContureLines(img, finalCountours[0][4],(255,0,0),5, 100)
+        # mainRect  =cvDraw.calkSize(sel_countour)
+        # cvUtils.createMainContours(lines, mainRect, circles, img)
 
         # sel_countour = finalCountours[4][4]
         # lines = cvUtils.drawContureLines(img, finalCountours[1][4],(255,0,0),5, 100)
@@ -398,9 +373,13 @@ class cvUtils:
             if index == 0:
                 result.append(counter)  
                 continue
-            testedCounter = finalCountours[index-1]
-            testedCounter = result[-1]
-            ok = cvUtils.compareContours(counter, testedCounter, circles)
+            # testedCounter = finalCountours[index-1]
+            # testedCounter = result[-1]
+            ok = False
+            for counterForTest in result:
+                if cvUtils.compareContours(counter, counterForTest, circles) == True:
+                    ok = True
+            # ok = cvUtils.compareContours(counter, testedCounter, circles)
             if ok == False:
               result.append(counter)  
         return result
