@@ -325,6 +325,8 @@ class cvUtils:
         for countour in finalCountours:
             if countour[1] > 1000000:
                 lines = cvUtils.drawContureLines(img, countour[4],(255,0,0),5, 100)
+            else:
+                lines = cvUtils.drawContureLines(img, countour[4],(0,255,0),5, 100)
             
         # sel_countour = finalCountours[0][4]
         # lines = cvUtils.drawContureLines(img, finalCountours[0][4],(255,0,0),5, 100)
