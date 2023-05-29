@@ -324,24 +324,11 @@ class cvUtils:
         for countour in finalCountours:
             if countour[0] == 1:
                 # главный контур
-                lines = cvUtils.drawContureLines(img, countour[4],(255,0,0),5, 100)
+                lines = cvUtils.drawContureLines(img, countour[4],(255,0,0),15, 20)
             else:
                 # отверстия в лекале
                 lines = cvUtils.drawContureLines(img, countour[4],(0,255,0),5, 100)
         cvUtils.createMainContours(finalCountours, circles)  
-        
-        
-        # sel_countour = finalCountours[0][4]
-        # lines = cvUtils.drawContureLines(img, finalCountours[0][4],(255,0,0),5, 100)
-        # mainRect  =cvDraw.calkSize(sel_countour)
-        # cvUtils.createMainContours(lines, mainRect, circles, img)
-
-        # sel_countour = finalCountours[4][4]
-        # lines = cvUtils.drawContureLines(img, finalCountours[1][4],(255,0,0),5, 100)
-        # lines = cvUtils.drawContureLines(img, finalCountours[2][4],(0,255,0),5, 100)
-        # lines = cvUtils.drawContureLines(img, finalCountours[10][4],(0,255,0),50, 100)
-        # cvUtils.createMainContours(lines, mainRect, circles, img)
-        
         return imgTst
     # border граница длин линий
     def drawContureLines(img, sel_countour, color, thickness=12, border=100):
@@ -362,7 +349,7 @@ class cvUtils:
         if line is not None:
             lines.insert(0,line)
         lines = lines[::-1]
-        # lines = lines[1:5]
+        # lines = lines[0:2]
 
         if img is not None:
             for line in lines:
@@ -497,7 +484,7 @@ class cvUtils:
             if countour[0] == 1:
                 # главный контур
                 p = drawSvg.Path(stroke='red', stroke_width=2, fill='none') 
-                lines = cvUtils.drawContureLines(None, countour[4],None,None, 100)
+                lines = cvUtils.drawContureLines(None, countour[4],None,None, 20)
                 cvDraw.createConture(lines, d, p, 1)
             else:
                 # отверстия в лекале
