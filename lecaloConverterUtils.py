@@ -5,6 +5,7 @@ from drawUtils import cvDraw
 import drawsvg as drawSvg
 from shapely import Point
 from shapely import *
+import svgwrite
 
 class cvUtils:
     def findLines(img_grey, img_Draw, draw_conrure):
@@ -475,14 +476,10 @@ class cvUtils:
             p.C(centroid1.x, centroid1.y, centroid2.x,centroid2.y,pp2.x,pp2.y)
 
         all=0        
-        # p.M(0,0)
         for index in range(len(lines)-1):
             pp0, pp1, centroid1, centroid2, pp2 = cvUtils.createAngle(lines[index][0], lines[index][1],lines[index+1][0], lines[index+1][1])
             if pp0 is None:
                 continue
-            # p.M(pp0.x,pp0.y).L(pp1.x,pp1.y) 
-            # if index == 0:
-                # p.M(pp0.x,pp0.y)
             p.L(pp1.x,pp1.y) 
             p.C(centroid1.x, centroid1.y, centroid2.x,centroid2.y,pp2.x,pp2.y)
             all = all +1
@@ -505,10 +502,22 @@ class cvUtils:
             for i in circles[0, :]:
                 center = Point(i[0], i[1])
                 radius = i[2]
-                cvDraw.createCircle(d, int(radius), int(center.x), int(center.y))
+                cvDraw.createCircle(d, int(radius), int(center.x), int(center.y),1)
                 # cvDraw.createCircle(d, 800,0,0)
         
         d.save_svg('example.svg')     
+        
+        # dwg = svgwrite.Drawing('test.svg', profile='tiny')
+        # dwg.add(dwg.line((0, 0), (10, 0), stroke=svgwrite.rgb(10, 10, 16, '%')))
+        # dwg.add(dwg.text('Test', insert=(0, 0.2), fill='red'))
+        # dwg.save()
+        
+        # dwg = svgwrite.Drawing('myDrawing.svg', size=('170in', '130in'), viewBox=('0 0 170 130'))
+        # dwg.add(dwg.line((0, 0), (10, 0), stroke=svgwrite.rgb(10, 10, 16, '%')))
+        # dwg.save()        
+        # dwg.im.Image('myDrawing.png')
+        return
+
         # d.save_png('example.png')
         
     def createAngle(pointA, pointB,pointC, pointD):
