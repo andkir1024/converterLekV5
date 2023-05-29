@@ -348,7 +348,7 @@ class cvUtils:
                 bbox = cv2.boundingRect(approx)
                 finalCountours.append([len(approx),area,approx,bbox,iCon])
         finalCountours = sorted(finalCountours,key = lambda x:x[1] ,reverse= True)                
-        cvUtils.extractContours(finalCountours)
+        finalCountours = cvUtils.extractContours(finalCountours, circles)
         
         # sel_countour = finalCountours[7][4]
         sel_countour = finalCountours[0][4]
@@ -356,9 +356,9 @@ class cvUtils:
         mainRect  =cvDraw.calkSize(sel_countour)
         cvUtils.createMainContours(lines, mainRect, circles, img)
 
-        sel_countour = finalCountours[4][4]
-        # lines = cvUtils.drawContureLines(img, finalCountours[4][4],(255,0,0),50, 100)
-        # lines = cvUtils.drawContureLines(img, finalCountours[9][4],(255,0,0),50, 100)
+        # sel_countour = finalCountours[4][4]
+        lines = cvUtils.drawContureLines(img, finalCountours[1][4],(255,0,0),5, 100)
+        # lines = cvUtils.drawContureLines(img, finalCountours[2][4],(0,255,0),5, 100)
         # lines = cvUtils.drawContureLines(img, finalCountours[10][4],(0,255,0),50, 100)
         # cvUtils.createMainContours(lines, mainRect, circles, img)
         
@@ -387,7 +387,7 @@ class cvUtils:
         for line in lines:
             cv2.line(img, line[0], line[1], color=(0,0,255), thickness=thickness)
         return lines
-    def extractContours(finalCountours):
+    def extractContours(finalCountours, circles):
         result =[]
         for index in range(len(finalCountours)-1):
             counter = finalCountours[index]
@@ -396,17 +396,17 @@ class cvUtils:
                 continue
             testedCounter = finalCountours[index-1]
             # testedCounter = result[::-1]
-            ok = cvUtils.compareContours(counter, testedCounter)
+            ok = cvUtils.compareContours(counter, testedCounter, circles)
             if ok == False:
               result.append(counter)  
         return result
-    def compareContours(countourA, countourB):
+    # True добавлять не надо
+    def compareContours(countourA, countourB, circles):
         areaA = countourA[1]
         areaB = countourB[1]
         delta = abs(areaA- areaB)
         coff = delta / areaA
-        if coff > 1:
-            return False
+
         M = cv2.moments(countourA[4])
         cAX = int(M["m10"] / M["m00"])
         cAY = int(M["m01"] / M["m00"])
@@ -415,10 +415,25 @@ class cvUtils:
         cBY = int(M["m01"] / M["m00"])
         border = 10
         len = math.sqrt( ((cAX - cBX)**2)+(cAY - cBY)**2)
+
+        isCircle = cvUtils.isContourCircle(cAX, cAY, circles)
+        if isCircle == True:
+            return True
+        if coff > 1:
+            return False
         if len > border:
             return False
         
         return True
+    def isContourCircle(x, y, circles):
+        circlesDraw = np.uint16(np.around(circles))
+        for i in circlesDraw[0, :]:
+            center = (i[0], i[1])
+            radius = i[2]
+            len = math.sqrt( ((x - center[0])**2)+((y - center[1])**2))
+            if len < 10:
+                return True
+        return False
     
     def getMainContours(imgGray, img, cThr=[100,100],showCanny=False,minArea=0,filter=0,draw =True):
         circles = cvUtils.findCircles(imgGray, img, True)
