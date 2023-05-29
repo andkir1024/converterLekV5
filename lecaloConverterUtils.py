@@ -357,7 +357,9 @@ class cvUtils:
         cvUtils.createMainContours(lines, mainRect, circles, img)
 
         sel_countour = finalCountours[4][4]
-        lines = cvUtils.drawContureLines(img, finalCountours[5][4],(255,0,0),5, 100)
+        # lines = cvUtils.drawContureLines(img, finalCountours[4][4],(255,0,0),50, 100)
+        # lines = cvUtils.drawContureLines(img, finalCountours[9][4],(255,0,0),50, 100)
+        # lines = cvUtils.drawContureLines(img, finalCountours[10][4],(0,255,0),50, 100)
         # cvUtils.createMainContours(lines, mainRect, circles, img)
         
         return imgTst
@@ -387,23 +389,36 @@ class cvUtils:
         return lines
     def extractContours(finalCountours):
         result =[]
-        for index in range(len(finalCountours)-2):
-            conter = finalCountours[index]
-            area = conter[1]
-
-            conterN = finalCountours[index+1]
-            areaN = conterN[1]
-            delta = abs(area- areaN)
-            coff = delta / area
-
-            M = cv2.moments(conter[4])
-            cX = int(M["m10"] / M["m00"])
-            cY = int(M["m01"] / M["m00"])
-
-            if coff < 0.01:
-              result.append(conter)  
-            continue
+        for index in range(len(finalCountours)-1):
+            counter = finalCountours[index]
+            if index == 0:
+                result.append(counter)  
+                continue
+            testedCounter = finalCountours[index-1]
+            # testedCounter = result[::-1]
+            ok = cvUtils.compareContours(counter, testedCounter)
+            if ok == False:
+              result.append(counter)  
         return result
+    def compareContours(countourA, countourB):
+        areaA = countourA[1]
+        areaB = countourB[1]
+        delta = abs(areaA- areaB)
+        coff = delta / areaA
+        if coff > 1:
+            return False
+        M = cv2.moments(countourA[4])
+        cAX = int(M["m10"] / M["m00"])
+        cAY = int(M["m01"] / M["m00"])
+        M = cv2.moments(countourA[4])
+        cBX = int(M["m10"] / M["m00"])
+        cBY = int(M["m01"] / M["m00"])
+        border = 10
+        len = math.sqrt( ((cAX - cBX)**2)+(cAY - cBY)**2)
+        if len > border:
+            return False
+        
+        return True
     
     def getMainContours(imgGray, img, cThr=[100,100],showCanny=False,minArea=0,filter=0,draw =True):
         circles = cvUtils.findCircles(imgGray, img, True)
