@@ -357,7 +357,7 @@ class cvUtils:
         cvUtils.createMainContours(lines, mainRect, circles, img)
 
         # sel_countour = finalCountours[4][4]
-        lines = cvUtils.drawContureLines(img, finalCountours[1][4],(255,0,0),5, 100)
+        # lines = cvUtils.drawContureLines(img, finalCountours[1][4],(255,0,0),5, 100)
         # lines = cvUtils.drawContureLines(img, finalCountours[2][4],(0,255,0),5, 100)
         # lines = cvUtils.drawContureLines(img, finalCountours[10][4],(0,255,0),50, 100)
         # cvUtils.createMainContours(lines, mainRect, circles, img)
@@ -388,6 +388,10 @@ class cvUtils:
             cv2.line(img, line[0], line[1], color=(0,0,255), thickness=thickness)
         return lines
     def extractContours(finalCountours, circles):
+        cX, cY = cvUtils.calkCenter(finalCountours[0])
+        cX, cY = cvUtils.calkCenter(finalCountours[1])
+        cX, cY = cvUtils.calkCenter(finalCountours[2])
+        cX, cY = cvUtils.calkCenter(finalCountours[3])
         result =[]
         for index in range(len(finalCountours)-1):
             counter = finalCountours[index]
@@ -395,7 +399,7 @@ class cvUtils:
                 result.append(counter)  
                 continue
             testedCounter = finalCountours[index-1]
-            # testedCounter = result[::-1]
+            testedCounter = result[-1]
             ok = cvUtils.compareContours(counter, testedCounter, circles)
             if ok == False:
               result.append(counter)  
@@ -410,7 +414,7 @@ class cvUtils:
         M = cv2.moments(countourA[4])
         cAX = int(M["m10"] / M["m00"])
         cAY = int(M["m01"] / M["m00"])
-        M = cv2.moments(countourA[4])
+        M = cv2.moments(countourB[4])
         cBX = int(M["m10"] / M["m00"])
         cBY = int(M["m01"] / M["m00"])
         border = 10
@@ -425,7 +429,14 @@ class cvUtils:
             return False
         
         return True
+    def calkCenter(countour):
+        M = cv2.moments(countour[4])
+        cX = int(M["m10"] / M["m00"])
+        cY = int(M["m01"] / M["m00"])
+        return cX, cY
     def isContourCircle(x, y, circles):
+        if circles is None:
+            return False
         circlesDraw = np.uint16(np.around(circles))
         for i in circlesDraw[0, :]:
             center = (i[0], i[1])
