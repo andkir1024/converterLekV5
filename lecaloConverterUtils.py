@@ -348,31 +348,17 @@ class cvUtils:
                 bbox = cv2.boundingRect(approx)
                 finalCountours.append([len(approx),area,approx,bbox,iCon])
         finalCountours = sorted(finalCountours,key = lambda x:x[1] ,reverse= True)                
+        cvUtils.extractContours(finalCountours)
         
         # sel_countour = finalCountours[7][4]
         sel_countour = finalCountours[0][4]
-        '''
-        lines = []
-        last_point = None
-        for point in sel_countour:
-            curr_point=point[0]
-
-            if not(last_point is None):
-                line =cvDraw.packLine(last_point,curr_point, 100)
-                if line is not None:
-                    lines.append(line)
-            last_point=curr_point
-        line =cvDraw.packLine(last_point,sel_countour[0][0], 100)
-        if line is not None:
-            lines.insert(0,line)
-        lines = lines[::-1]
-        for line in lines:
-            cv2.line(img, line[0], line[1], (255,0,0), thickness=12)
-        '''
         lines = cvUtils.drawContureLines(img, finalCountours[0][4],(255,0,0),5, 100)
-        # cvUtils.drawContureLines(img, finalCountours[11][4],(0,0,255),5,100)
         mainRect  =cvDraw.calkSize(sel_countour)
         cvUtils.createMainContours(lines, mainRect, circles, img)
+
+        sel_countour = finalCountours[4][4]
+        lines = cvUtils.drawContureLines(img, finalCountours[5][4],(255,0,0),5, 100)
+        # cvUtils.createMainContours(lines, mainRect, circles, img)
         
         return imgTst
     # border граница длин линий
@@ -394,11 +380,30 @@ class cvUtils:
         if line is not None:
             lines.insert(0,line)
         lines = lines[::-1]
-        lines = lines[1:5]
+        # lines = lines[1:5]
 
         for line in lines:
             cv2.line(img, line[0], line[1], color=(0,0,255), thickness=thickness)
         return lines
+    def extractContours(finalCountours):
+        result =[]
+        for index in range(len(finalCountours)-2):
+            conter = finalCountours[index]
+            area = conter[1]
+
+            conterN = finalCountours[index+1]
+            areaN = conterN[1]
+            delta = abs(area- areaN)
+            coff = delta / area
+
+            M = cv2.moments(conter[4])
+            cX = int(M["m10"] / M["m00"])
+            cY = int(M["m01"] / M["m00"])
+
+            if coff < 0.01:
+              result.append(conter)  
+            continue
+        return result
     
     def getMainContours(imgGray, img, cThr=[100,100],showCanny=False,minArea=0,filter=0,draw =True):
         circles = cvUtils.findCircles(imgGray, img, True)
@@ -472,25 +477,6 @@ class cvUtils:
         
         # добавление главного контура
         cvDraw.createConture(lines, d, p, 1)
-
-        # index = len(lines)-1
-        # pp0, pp1, centroid1, centroid2, pp2 = cvDraw.createAngle(lines[index][0], lines[index][1],lines[0][0], lines[0][1])
-        # if pp0 is not None:
-        #     p.M(pp0.x,pp0.y).L(pp1.x,pp1.y) 
-        #     p.C(centroid1.x, centroid1.y, centroid2.x,centroid2.y,pp2.x,pp2.y)
-
-        # all=0        
-        # for index in range(len(lines)-1):
-        #     pp0, pp1, centroid1, centroid2, pp2 = cvDraw.createAngle(lines[index][0], lines[index][1],lines[index+1][0], lines[index+1][1])
-        #     if pp0 is None:
-        #         continue
-        #     p.L(pp1.x,pp1.y) 
-        #     p.C(centroid1.x, centroid1.y, centroid2.x,centroid2.y,pp2.x,pp2.y)
-        #     all = all +1
-        #     # if all > 1:
-        #         # break 
-        # p.Z()
-        # d.append(p)
 
         # добавление кругов
         if circles is not None:

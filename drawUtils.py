@@ -204,6 +204,11 @@ class cvDraw:
             point1 = pointB
             point2 = pointC
             point3 = pointD
+        elif index == 0:
+            point0 = pointA
+            point1 = pointB
+            point2 = pointC
+            point3 = pointD
         else:
             zz=0
             
