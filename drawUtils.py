@@ -2,9 +2,14 @@ import cv2
 import numpy as np
 import math
 import drawsvg as drawSvg
+import enum
 from shapely import Point
 from shapely import *
-
+class LineStatus(enum.Enum):
+    round = 0
+    sequest = 1
+    parallel = 2
+    undefined = 3
 class cvDraw:
     def createGray(imgOk, param0):
         imgGray = cv2.cvtColor(imgOk,cv2.COLOR_BGR2GRAY)
@@ -45,14 +50,14 @@ class cvDraw:
         return
     
     # вырезаем короткие линии
-    def packLine( last_point, curr_point, border = 100):
+    def packLine( last_point, curr_point, border, index):
         x1=int(last_point[0])
         y1=int(last_point[1])
         x2=int(curr_point[0])
         y2=int(curr_point[1])
         lenLine = math.sqrt( ((x1-x2)**2)+((y1-y2)**2))
         if lenLine > border:
-            return  [(x1, y1), (x2, y2)]
+            return  [(x1, y1), (x2, y2), LineStatus.undefined, lenLine, index]
         return None
     
     def calkSize( countour ):
@@ -164,7 +169,7 @@ class cvDraw:
         for index in range(indexMax):
             lineA = lines[index]
             lineB = lines[index+1]
-            pp0, pp1, centroid1, centroid2, pp2 = cvDraw.createAngle(lines[index][0], lines[index][1],lines[index+1][0], lines[index+1][1])
+            pp0, pp1, centroid1, centroid2, pp2 = cvDraw.createAngle(lineA[0], lineA[1],lineB[0], lineB[1])
             if pp0 is None:
                 cvDraw.createHalfCircle(lineA, lineB)
             else:
