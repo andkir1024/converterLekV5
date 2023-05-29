@@ -316,18 +316,21 @@ class cvUtils:
                 peri = cv2.arcLength(iCon,True)
                 approx = cv2.approxPolyDP(iCon,0.02*peri,True)
                 bbox = cv2.boundingRect(approx)
-                finalCountours.append([len(approx),area,approx,bbox,iCon])
+                finalCountours.append([0, area, approx, bbox, iCon])
         finalCountours = sorted(finalCountours,key = lambda x:x[1] ,reverse= True)                
         finalCountours = cvUtils.extractContours(finalCountours, circles)
         
-        # sel_countour = finalCountours[7][4]
         # проход по главным контурам (1 000 000) 
         for countour in finalCountours:
-            if countour[1] > 1000000:
+            if countour[0] == 1:
+                # главный контур
                 lines = cvUtils.drawContureLines(img, countour[4],(255,0,0),5, 100)
             else:
+                # отверстия в лекале
                 lines = cvUtils.drawContureLines(img, countour[4],(0,255,0),5, 100)
-            
+        cvUtils.createMainContours(finalCountours, circles)  
+        
+        
         # sel_countour = finalCountours[0][4]
         # lines = cvUtils.drawContureLines(img, finalCountours[0][4],(255,0,0),5, 100)
         # mainRect  =cvDraw.calkSize(sel_countour)
@@ -342,8 +345,8 @@ class cvUtils:
         return imgTst
     # border граница длин линий
     def drawContureLines(img, sel_countour, color, thickness=12, border=100):
-        cv2.drawContours(image=img, contours=sel_countour, contourIdx=-1, color=color, thickness=thickness, lineType=cv2.LINE_AA)
-        # return None
+        if img is not None:
+            cv2.drawContours(image=img, contours=sel_countour, contourIdx=-1, color=color, thickness=thickness, lineType=cv2.LINE_AA)
         
         lines = []
         last_point = None
@@ -361,28 +364,25 @@ class cvUtils:
         lines = lines[::-1]
         # lines = lines[1:5]
 
-        for line in lines:
-            cv2.line(img, line[0], line[1], color=(0,0,255), thickness=thickness)
+        if img is not None:
+            for line in lines:
+                cv2.line(img, line[0], line[1], color=(0,0,255), thickness=thickness)
         return lines
     def extractContours(finalCountours, circles):
-        cX, cY = cvUtils.calkCenter(finalCountours[0])
-        cX, cY = cvUtils.calkCenter(finalCountours[1])
-        cX, cY = cvUtils.calkCenter(finalCountours[2])
-        cX, cY = cvUtils.calkCenter(finalCountours[3])
         result =[]
         for index in range(len(finalCountours)-1):
             counter = finalCountours[index]
             if index == 0:
+                counter[0] = 1
                 result.append(counter)  
                 continue
-            # testedCounter = finalCountours[index-1]
-            # testedCounter = result[-1]
             ok = False
             for counterForTest in result:
                 if cvUtils.compareContours(counter, counterForTest, circles) == True:
                     ok = True
-            # ok = cvUtils.compareContours(counter, testedCounter, circles)
             if ok == False:
+              if counter[1] > 1000000:
+                  counter[0] = 1
               result.append(counter)  
         return result
     # True добавлять не надо
@@ -487,7 +487,34 @@ class cvUtils:
 
         return imgTst, finalCountours
     
-    def createMainContours(lines, mainRect, circles, img):
+    def createMainContours(finalCountours, circles):
+        # width = int((mainRect[1][0]-mainRect[0][0]) * 1.5)
+        # height = int((mainRect[1][1]-mainRect[0][1]) * 1.5)
+        width = 4000
+        height = 8000
+        d = drawSvg.Drawing(width, height, origin=(0,0))
+        for countour in finalCountours:
+            if countour[0] == 1:
+                # главный контур
+                p = drawSvg.Path(stroke='red', stroke_width=2, fill='none') 
+                lines = cvUtils.drawContureLines(None, countour[4],None,None, 100)
+                cvDraw.createConture(lines, d, p, 1)
+            else:
+                # отверстия в лекале
+                continue
+
+        # добавление кругов
+        if circles is not None:
+            circles = np.uint16(np.around(circles))
+            for i in circles[0, :]:
+                center = Point(i[0], i[1])
+                radius = i[2]
+                cvDraw.createCircle(d, int(radius), int(center.x), int(center.y),1)
+        
+        d.save_svg('example.svg')     
+        return
+
+    def createMainContoursOld(lines, mainRect, circles, img):
         shape = img.shape
         width = int((mainRect[1][0]-mainRect[0][0]) * 1.5)
         height = int((mainRect[1][1]-mainRect[0][1]) * 1.5)
@@ -521,4 +548,4 @@ class cvUtils:
         # dwg.im.Image('myDrawing.png')
         return
         # d.save_png('example.png')
-        
+                
