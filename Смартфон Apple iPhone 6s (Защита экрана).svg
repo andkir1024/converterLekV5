@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   version="1.1"
+   width="8.2677in"
+   height="11.6929in"
+   viewBox="0 0 595.2756 841.8898"
+   id="svg10"
+   sodipodi:docname="Смартфон Apple iPhone 6s (Защита экрана).svg"
+   inkscape:version="1.1 (c68e22c387, 2021-05-23)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs14" />
+  <sodipodi:namedview
+     id="namedview12"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:document-units="in"
+     showgrid="false"
+     inkscape:current-layer="svg10" />
+  <path
+     d="  M194.9034,430.1008 C207.5647,430.5546 216.9862,439.4503 217.2263,452.4239 L217.2263,784.3601 C216.9825,797.0505 207.5672,806.4388 194.9034,806.6832 L62.7384,806.6832 C50.1579,806.4575 40.6500,796.9961 40.4152,784.3601 L40.4152,452.4239 C40.6607,439.7236 50.1290,430.3440 62.7384,430.1008 L194.9034,430.1008 Z"
+     style="stroke-width: 1; stroke: #050109; stroke-dasharray: none; stroke-linecap: butt; stroke-linejoin: miter; fill: none; "
+     id="path2" />
+	 <line stroke-width = "10" stroke="rgb(10%,10%,16%)" x1="0" x2="100" y1="0" y2="0" />
+	 <line stroke-width = "10" stroke="rgb(10%,10%,16%)" x1="194" x2="370" y1="430" y2="430" />
+</svg>

@@ -117,8 +117,6 @@ def export_svg():
     filename = fileDst[0].split('/')
     fileDst = svgDir + filename[-1] + ".svg"
     lekaloSvg.saveToSvg(imgOk,fileDst)
-    
-
 def update_image():
     global updateImage
     updateImage = True

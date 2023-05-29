@@ -2,6 +2,8 @@ import cv2
 import numpy as np
 import math
 import drawsvg as drawSvg
+from shapely import Point
+from shapely import *
 
 class cvDraw:
     def createGray(imgOk, param0):
@@ -52,20 +54,6 @@ class cvDraw:
         if lenLine > border:
             return  [(x1, y1), (x2, y2)]
         return None
-    
-    def angleLine( line):
-        deltaX = abs(line[0][0] - line[1][0])
-        deltaY = abs(line[0][1] - line[1][1])
-        if cvDraw.testAngle( deltaX ) is None:
-            return "v"
-        if cvDraw.testAngle( deltaY ) is None:
-            return "h"
-        return deltaX / deltaY
-    
-    def testAngle( angle ):
-        if angle < 10:
-            return None
-        return angle    
     
     def calkSize( countour ):
         if countour is None:
@@ -122,7 +110,7 @@ class cvDraw:
         return result
     
     # создание сектора для круга
-    def corner(sector, scale, xPos, yPos):
+    def corner(sector, scale, xPos, yPos, dpi):
         scaleL = scaleR = scale
         if sector==1:
             scaleL = -scaleL
@@ -135,30 +123,123 @@ class cvDraw:
         b = 0.55342686
         c = 0.99873585
 
-        zz0 = ((0 * scaleL)+xPos, (a * scaleR)+yPos)
-        zz1 = ((b * scaleL)+xPos, (c * scaleR)+yPos)
-        zz2 = ((c * scaleL)+xPos, (b * scaleR)+yPos)
-        zz3 = ((a * scaleL)+xPos, (0 * scaleR)+yPos)
+        zz0 = (((0 * scaleL)+xPos) / dpi, ((a * scaleR)+yPos) / dpi)
+        zz1 = (((b * scaleL)+xPos) / dpi, ((c * scaleR)+yPos) / dpi)
+        zz2 = (((c * scaleL)+xPos) / dpi, ((b * scaleR)+yPos) / dpi)
+        zz3 = (((a * scaleL)+xPos) / dpi, ((0 * scaleR)+yPos) / dpi)
         return  zz0, zz1, zz2, zz3
 
     # создание круга в svg
-    def createCircle(drawPath, radius, xPos, yPos):
+    def createCircle(drawPath, radius, xPos, yPos, dpi = 96.0):
+        
         path = drawSvg.Path(stroke='blue', stroke_width=5, fill='none') 
 
-        p0,p1,p2,p3 = cvDraw.corner(0, radius, xPos, yPos)
+        p0,p1,p2,p3 = cvDraw.corner(0, radius, xPos, yPos, dpi)
         path.M(p0[0], p0[1])
         path.C(p1[0], p1[1],  p2[0], p2[1],  p3[0], p3[1])
 
-        n3,n2,n1,n0 = cvDraw.corner(2, radius, xPos, yPos)
+        n3,n2,n1,n0 = cvDraw.corner(2, radius, xPos, yPos, dpi)
         path.C(n1[0], n1[1],  n2[0], n2[1],  n3[0], n3[1])
 
-        m0,m1,m2,m3 = cvDraw.corner(1, radius, xPos, yPos)
+        m0,m1,m2,m3 = cvDraw.corner(1, radius, xPos, yPos, dpi)
         path.C(m1[0], m1[1],  m2[0], m2[1],  m3[0], m3[1])
 
-        k3,k2,k1,k0 = cvDraw.corner(3, radius, xPos, yPos)
+        k3,k2,k1,k0 = cvDraw.corner(3, radius, xPos, yPos, dpi)
         path.C(k1[0], k1[1],  k2[0], k2[1],  k3[0], k3[1])
         
         path.Z()
 
         drawPath.append(path)
+        
+    # создание контура
+    def createConture(lines, draw, path, dpi):
+        # добавление главного контура
+        index = len(lines)-1
+        pp0, pp1, centroid1, centroid2, pp2 = cvDraw.createAngle(lines[index][0], lines[index][1],lines[0][0], lines[0][1])
+        if pp0 is not None:
+            path.M(pp0.x,pp0.y).L(pp1.x,pp1.y) 
+            path.C(centroid1.x, centroid1.y, centroid2.x,centroid2.y,pp2.x,pp2.y)
+
+        all=0        
+        for index in range(len(lines)-1):
+            pp0, pp1, centroid1, centroid2, pp2 = cvDraw.createAngle(lines[index][0], lines[index][1],lines[index+1][0], lines[index+1][1])
+            if pp0 is None:
+                continue
+            path.L(pp1.x,pp1.y) 
+            path.C(centroid1.x, centroid1.y, centroid2.x,centroid2.y,pp2.x,pp2.y)
+            all = all +1
+            # if all > 1:
+                # break 
+        path.Z()
+        draw.append(path)
+        return
+    
+    # создание зхакругления для контура
+    def createAngle(pointA, pointB,pointC, pointD):
+        distAC = cvDraw.distancePoint(pointA, pointC) 
+        distAD = cvDraw.distancePoint(pointA, pointD)
+        distBC = cvDraw.distancePoint(pointB, pointC)
+        distBD = cvDraw.distancePoint(pointB, pointD)
+        
+        a = np.array([distAC,distAD,distBC,distBD])
+        index = np.where(a == a.min())[0][0]
+        point0 = None
+        point1 = None
+        point2 = None
+        point3 = None
+        if index == 1:
+            point0 = pointB
+            point1 = pointA
+            point2 = pointD
+            point3 = pointC
+        elif index == 2:
+            point0 = pointA
+            point1 = pointB
+            point2 = pointC
+            point3 = pointD
+        else:
+            zz=0
+            
+        pp0 = Point(point0[0],point0[1])
+        pp1 = Point(point1[0],point1[1])
+        pp2 = Point(point2[0],point2[1])
+        pp3 = Point(point3[0],point3[1])
+
+        pp0s, pp1s = cvDraw.scale(pp0, pp1, 30)
+        pp2s, pp3s = cvDraw.scale(pp2, pp3, 30)
+
+        l1 = LineString([pp0s, pp1s])
+        l2 = LineString([pp2s, pp3s])
+        result = l1.intersection(l2)
+        testOut = str(result)
+        if testOut.find("EMPTY") >= 0 or testOut.find("LINE") >= 0:
+            return None, None, None, None, None
+        
+        l3 = LineString([pp1, result])
+        l4 = LineString([pp2, result])
+
+        centroid1 = l3.centroid
+        centroid2 = l4.centroid
+        return pp0, pp1, centroid1, centroid2, pp2
+    def Add(firstPoint, secondPoint, addFactor):
+        x2 = firstPoint.x +(secondPoint.x - firstPoint.x) + addFactor
+        y2 = firstPoint.y +(secondPoint.y - firstPoint.y) + addFactor
+        secondPoint = Point(x2, y2)
+        return secondPoint
+    def scale(firstPoint, secondPoint, factor):
+        t0=0.5*(1.0-factor)
+        t1=0.5*(1.0+factor)
+        x1 = firstPoint.x +(secondPoint.x - firstPoint.x) * t0
+        y1 = firstPoint.y +(secondPoint.y - firstPoint.y) * t0
+        x2 = firstPoint.x +(secondPoint.x - firstPoint.x) * t1
+        y2 = firstPoint.y +(secondPoint.y - firstPoint.y) * t1
+
+        firstPoint = Point(x1, y1)
+        secondPoint = Point(x2, y2)
+        return firstPoint, secondPoint
+    def distancePoint(pointA, pointB):
+        deltaX = pointA[0]-pointB[0]
+        deltaY = pointA[1]-pointB[1]
+        lenLine = math.sqrt( (deltaX**2)+(deltaY**2))
+        return lenLine
         

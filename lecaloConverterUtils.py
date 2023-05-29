@@ -4,7 +4,7 @@ import math
 from drawUtils import cvDraw
 import drawsvg as drawSvg
 from shapely import Point
-from shapely import *
+# from shapely import *
 import svgwrite
 
 class cvUtils:
@@ -469,41 +469,35 @@ class cvUtils:
         # d = drawSvg.Drawing(8.2, 11.6, origin=(10,10), id_prefix='d11')
         p = drawSvg.Path(stroke='red', stroke_width=2, fill='none') 
         
-        index = len(lines)-1
-        pp0, pp1, centroid1, centroid2, pp2 = cvUtils.createAngle(lines[index][0], lines[index][1],lines[0][0], lines[0][1])
-        if pp0 is not None:
-            p.M(pp0.x,pp0.y).L(pp1.x,pp1.y) 
-            p.C(centroid1.x, centroid1.y, centroid2.x,centroid2.y,pp2.x,pp2.y)
-
-        all=0        
-        for index in range(len(lines)-1):
-            pp0, pp1, centroid1, centroid2, pp2 = cvUtils.createAngle(lines[index][0], lines[index][1],lines[index+1][0], lines[index+1][1])
-            if pp0 is None:
-                continue
-            p.L(pp1.x,pp1.y) 
-            p.C(centroid1.x, centroid1.y, centroid2.x,centroid2.y,pp2.x,pp2.y)
-            all = all +1
-            # if all > 1:
-                # break 
-        p.Z()
-        d.append(p)
+        # добавление главного контура
+        cvDraw.createConture(lines, d, p, 1)
 
         # index = len(lines)-1
-        # pp0, pp1, centroid1, centroid2, pp2 = cvUtils.createAngle(lines[index][0], lines[index][1],lines[0][0], lines[0][1])
+        # pp0, pp1, centroid1, centroid2, pp2 = cvDraw.createAngle(lines[index][0], lines[index][1],lines[0][0], lines[0][1])
         # if pp0 is not None:
         #     p.M(pp0.x,pp0.y).L(pp1.x,pp1.y) 
         #     p.C(centroid1.x, centroid1.y, centroid2.x,centroid2.y,pp2.x,pp2.y)
 
+        # all=0        
+        # for index in range(len(lines)-1):
+        #     pp0, pp1, centroid1, centroid2, pp2 = cvDraw.createAngle(lines[index][0], lines[index][1],lines[index+1][0], lines[index+1][1])
+        #     if pp0 is None:
+        #         continue
+        #     p.L(pp1.x,pp1.y) 
+        #     p.C(centroid1.x, centroid1.y, centroid2.x,centroid2.y,pp2.x,pp2.y)
+        #     all = all +1
+        #     # if all > 1:
+        #         # break 
         # p.Z()
         # d.append(p)
 
+        # добавление кругов
         if circles is not None:
             circles = np.uint16(np.around(circles))
             for i in circles[0, :]:
                 center = Point(i[0], i[1])
                 radius = i[2]
                 cvDraw.createCircle(d, int(radius), int(center.x), int(center.y),1)
-                # cvDraw.createCircle(d, 800,0,0)
         
         d.save_svg('example.svg')     
         
@@ -517,73 +511,5 @@ class cvUtils:
         # dwg.save()        
         # dwg.im.Image('myDrawing.png')
         return
-
         # d.save_png('example.png')
         
-    def createAngle(pointA, pointB,pointC, pointD):
-        distAC = cvUtils.distancePoint(pointA, pointC) 
-        distAD = cvUtils.distancePoint(pointA, pointD)
-        distBC = cvUtils.distancePoint(pointB, pointC)
-        distBD = cvUtils.distancePoint(pointB, pointD)
-        
-        a = np.array([distAC,distAD,distBC,distBD])
-        index = np.where(a == a.min())[0][0]
-        point0 = None
-        point1 = None
-        point2 = None
-        point3 = None
-        if index == 1:
-            point0 = pointB
-            point1 = pointA
-            point2 = pointD
-            point3 = pointC
-        elif index == 2:
-            point0 = pointA
-            point1 = pointB
-            point2 = pointC
-            point3 = pointD
-        else:
-            zz=0
-            
-        pp0 = Point(point0[0],point0[1])
-        pp1 = Point(point1[0],point1[1])
-        pp2 = Point(point2[0],point2[1])
-        pp3 = Point(point3[0],point3[1])
-
-        pp0s, pp1s = cvUtils.scale(pp0, pp1, 30)
-        pp2s, pp3s = cvUtils.scale(pp2, pp3, 30)
-
-        l1 = LineString([pp0s, pp1s])
-        l2 = LineString([pp2s, pp3s])
-        result = l1.intersection(l2)
-        testOut = str(result)
-        if testOut.find("EMPTY") >= 0 or testOut.find("LINE") >= 0:
-            return None, None, None, None, None
-        
-        l3 = LineString([pp1, result])
-        l4 = LineString([pp2, result])
-
-        centroid1 = l3.centroid
-        centroid2 = l4.centroid
-        return pp0, pp1, centroid1, centroid2, pp2
-    def Add(firstPoint, secondPoint, addFactor):
-        x2 = firstPoint.x +(secondPoint.x - firstPoint.x) + addFactor
-        y2 = firstPoint.y +(secondPoint.y - firstPoint.y) + addFactor
-        secondPoint = Point(x2, y2)
-        return secondPoint
-    def scale(firstPoint, secondPoint, factor):
-        t0=0.5*(1.0-factor)
-        t1=0.5*(1.0+factor)
-        x1 = firstPoint.x +(secondPoint.x - firstPoint.x) * t0
-        y1 = firstPoint.y +(secondPoint.y - firstPoint.y) * t0
-        x2 = firstPoint.x +(secondPoint.x - firstPoint.x) * t1
-        y2 = firstPoint.y +(secondPoint.y - firstPoint.y) * t1
-
-        firstPoint = Point(x1, y1)
-        secondPoint = Point(x2, y2)
-        return firstPoint, secondPoint
-    def distancePoint(pointA, pointB):
-        deltaX = pointA[0]-pointB[0]
-        deltaY = pointA[1]-pointB[1]
-        lenLine = math.sqrt( (deltaX**2)+(deltaY**2))
-        return lenLine
