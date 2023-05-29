@@ -394,6 +394,7 @@ class cvUtils:
         if line is not None:
             lines.insert(0,line)
         lines = lines[::-1]
+        lines = lines[1:5]
 
         for line in lines:
             cv2.line(img, line[0], line[1], color=(0,0,255), thickness=thickness)

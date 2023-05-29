@@ -154,27 +154,34 @@ class cvDraw:
     # создание контура
     def createConture(lines, draw, path, dpi):
         # добавление главного контура
-        index = len(lines)-1
-        pp0, pp1, centroid1, centroid2, pp2 = cvDraw.createAngle(lines[index][0], lines[index][1],lines[0][0], lines[0][1])
+        indexMax = len(lines)-1
+        pp0, pp1, centroid1, centroid2, pp2 = cvDraw.createAngle(lines[indexMax][0], lines[indexMax][1],lines[0][0], lines[0][1])
         if pp0 is not None:
             path.M(pp0.x,pp0.y).L(pp1.x,pp1.y) 
             path.C(centroid1.x, centroid1.y, centroid2.x,centroid2.y,pp2.x,pp2.y)
 
         all=0        
-        for index in range(len(lines)-1):
+        for index in range(indexMax):
+            lineA = lines[index]
+            lineB = lines[index+1]
             pp0, pp1, centroid1, centroid2, pp2 = cvDraw.createAngle(lines[index][0], lines[index][1],lines[index+1][0], lines[index+1][1])
             if pp0 is None:
-                continue
-            path.L(pp1.x,pp1.y) 
-            path.C(centroid1.x, centroid1.y, centroid2.x,centroid2.y,pp2.x,pp2.y)
+                cvDraw.createHalfCircle(lineA, lineB)
+            else:
+                path.L(pp1.x,pp1.y) 
+                path.C(centroid1.x, centroid1.y, centroid2.x,centroid2.y,pp2.x,pp2.y)
             all = all +1
             # if all > 1:
                 # break 
         path.Z()
         draw.append(path)
         return
+
+    def createHalfCircle(lineA, lineB):
+        return
     
     # создание зхакругления для контура
+    # если Nont то паралельны
     def createAngle(pointA, pointB,pointC, pointD):
         distAC = cvDraw.distancePoint(pointA, pointC) 
         distAD = cvDraw.distancePoint(pointA, pointD)
