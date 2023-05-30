@@ -175,12 +175,20 @@ class cvDraw:
         for index in range(indexMax):
             lineA = lines[index]
             lineB = lines[index+1]
-            pp0, pp1, centroid1, centroid2, pp2 = cvDraw.createAngle(lineA[0], lineA[1],lineB[0], lineB[1])
-            if pp0 is None:
-                cvDraw.createHalfCircle(lineA, lineB)
+            typeLine = lineA[2]
+            if typeLine == LineStatus.sequest:
+                path.L(lineB[1][0],lineB[1][1]) 
+                continue
+            elif typeLine == LineStatus.parallel:
+                path.L(lineB[0][0],lineB[0][1]) 
+                continue
             else:
-                path.L(pp1.x,pp1.y) 
-                path.C(centroid1.x, centroid1.y, centroid2.x,centroid2.y,pp2.x,pp2.y)
+                pp0, pp1, centroid1, centroid2, pp2 = cvDraw.createAngle(lineA[0], lineA[1],lineB[0], lineB[1])
+                if pp0 is None:
+                    cvDraw.createHalfCircle(lineA, lineB)
+                else:
+                    path.L(pp1.x,pp1.y) 
+                    path.C(centroid1.x, centroid1.y, centroid2.x,centroid2.y,pp2.x,pp2.y)
             all = all +1
             # if all > 1:
                 # break 
