@@ -297,7 +297,6 @@ class cvUtils:
             lines.append(line)
             # lines.insert(0,line)
         lines = lines[::-1]
-        # lines = lines[0:2]
         lines = cvUtils.aligmentLines(lines)
         return lines
     def aligmentLines(lines):
@@ -526,7 +525,6 @@ class cvUtils:
             os.mkdir(svgDir)
         name = pathlib.Path(filesSrc).stem
         nameSvg = svgDir + name + ".svg"
-        nameDiff = svgDir + name + ".png"
         d.save_svg(nameSvg)     
         d.save_svg('example.svg')     
         d.save_png('example.png')
@@ -537,13 +535,13 @@ class cvUtils:
         out_img = np.zeros(imgSvg.shape,dtype=imgSvg.dtype)
         out_img[:,:,:] = (alpha * imgSvg[:,:,:]) + ((1-alpha) * imgSrc[:,:,:])
         cv2.imwrite('out.png', out_img)
-        cv2.imwrite(nameDiff, out_img)
         sought = [0,0,0]
         result = np.count_nonzero(np.all(out_img==sought,axis=2))
 
-        nameTxt = svgDir + name + "." + str(result) +".txt"
-        fp = open(nameTxt, 'w')
-        fp.close()        
+        nameDiff = svgDir + name +  "." + str(result) + ".png"
+        is_success, im_buf_arr = cv2.imencode(".png", out_img)
+        im_buf_arr.tofile(nameDiff)
+        
         return
 
     def createMainContoursOld(lines, mainRect, circles, img):
