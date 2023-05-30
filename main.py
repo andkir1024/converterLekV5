@@ -205,13 +205,13 @@ def convertScreenToImageCoord(rmainImage, imgOk, xZoom, yZoom):
     # viewX = 440
     # viewY = 934
     return viewX, viewY
-def do_frame(imgOk):
+def do_frame(imgOk, filesSrc, svgDir):
     imgDraw = imgOk.copy()
     param0 = frame2control.param0.get()
     imgGrey =cvDraw.createGray(imgOk, slider1.get())
     # cvUtils.findCircles(imgGrey, imgDraw, draw_conrure = param0)
     # выделение глапвного контура
-    imgTst = cvUtils.doContours(imgGrey, imgDraw)
+    imgTst = cvUtils.doContours(imgGrey, imgDraw, filesSrc, svgDir)
     # imgTst,finalCountours = cvUtils.getMainContours(imgGrey, imgDraw)
     # cvUtils.getContours1(imgGrey, imgDraw)
     # cvUtils.findLines(imgGrey, imgDraw, draw_conrure = param0)
@@ -222,11 +222,12 @@ def show_frame():
     global testName
     global updateImageZoom
     global xZoom,yZoom
+    global filesSrc, svgDir
 
     if updateImage == True or updateImageZoom == True:
         updateImage = False
         if imgOk is not None:
-            imgDraw = do_frame(imgOk)
+            imgDraw = do_frame(imgOk, filesSrc, svgDir)
 
             scale, dispX, dispY = calkViewParam(rmainImage, imgDraw)
             img = cv2.resize(imgDraw, (0, 0), interpolation=cv2.INTER_AREA, fx=scale, fy=scale)

@@ -225,7 +225,7 @@ class cvUtils:
         objects_contours.sort(key=custom_key, reverse=True)
         return objects_contours
 
-    def doContours(imgGray, img):
+    def doContours(imgGray, img, filesSrc, svgDir):
         # -------------------------------------
         # нахождение круговых вырезов
         circles = cvUtils.findCircles(imgGray, img, True)
@@ -268,7 +268,7 @@ class cvUtils:
             else:
                 # отверстия в лекале
                 lines = cvUtils.drawContureLines(img, countour[4],(0,255,0),5, cvUtils.MIN_LEN_LINE)
-        cvUtils.createMainContours(finalCountours, circles)  
+        cvUtils.createMainContours(finalCountours, circles, imgGray, filesSrc, svgDir)  
         return imgTst
     # border граница длин линий
     def drawContureLines(img, sel_countour, color, thickness=12, border=100):
@@ -298,19 +298,19 @@ class cvUtils:
             # lines.insert(0,line)
         lines = lines[::-1]
         # lines = lines[0:2]
-        cvUtils.aligmentLines(lines)
+        lines = cvUtils.aligmentLines(lines)
         return lines
     def aligmentLines(lines):
         if lines is None:
             return None
         linesDst = []
-        linesDst.append(lines[0])
+        linesDst.append(lines[0].copy())
         linesDst[-1] = cvUtils.swapPoint(linesDst[-1])
-        for index in range(1, len(lines)-1):
+        for index in range(1, len(lines)-0):
             # последняя точка текущей линии
-            linesDst.append(lines[index])
+            linesDst.append(lines[index].copy())
 
-            pointAF = lines[index-1][1]
+            pointAF = linesDst[-2][1]
             # start
             pointBS = linesDst[-1][0]
             # finish
@@ -320,26 +320,29 @@ class cvUtils:
             distAFBF = cvDraw.distancePoint(pointAF, pointBF)
             if distAFBS > distAFBF:
                 linesDst[-1] = cvUtils.swapPoint(linesDst[-1])
-                # linesDst[-1][0], linesDst[-1][1] = pointBF, pointBS
-                linesDst[-1][5] = distAFBS
+                linesDst[-1][5] = int(distAFBF)
             else:
-                linesDst[-1][5] = distAFBS
+                linesDst[-1][5] = int(distAFBS)
                 
             continue
         # test
-        for index in range(1, len(linesDst)-1):
+        for index in range(0, len(linesDst)-1):
             # последняя точка текущей линии
-            pointAF = linesDst[index-1][1]
+            pointAF = linesDst[index][1]
             # start
-            pointBS = linesDst[-1][0]
+            pointBS = linesDst[index+1][0]
             # finish
-            pointBF = linesDst[-1][1]
+            pointBF = linesDst[index+1][1]
 
             distAFBS = cvDraw.distancePoint(pointAF, pointBS) 
+            pp0, pp1, centroid1, centroid2, pp2 = cvDraw.createAngle(linesDst[index][0], linesDst[index][1],
+                                                                     linesDst[index+1][0], linesDst[index+1][1])
+            
             continue
+        # linesDst = linesDst[0:2]
         return linesDst
     def swapPoint(pointSrc):
-        pointDst = pointSrc.copy()
+        pointDst = pointSrc
         pointDst[0],pointDst[1]=pointDst[1],pointDst[0]
         return pointDst
     def createLinesContoursOld(sel_countour, border):
@@ -487,16 +490,20 @@ class cvUtils:
 
         return imgTst, finalCountours
     
-    def createMainContours(finalCountours, circles):
+    def createMainContours(finalCountours, circles,img, filesSrc, svgDir):
         # width = int((mainRect[1][0]-mainRect[0][0]) * 1.5)
         # height = int((mainRect[1][1]-mainRect[0][1]) * 1.5)
         width = 4000
         height = 8000
+        if img is not None:
+            width = img.shape[1]
+            height = img.shape[0]
+            
         d = drawSvg.Drawing(width, height, origin=(0,0))
         for countour in finalCountours:
             if countour[0] == 1:
                 # главный контур
-                p = drawSvg.Path(stroke='red', stroke_width=2, fill='none') 
+                p = drawSvg.Path(stroke='red', stroke_width=20, fill='none') 
                 lines = cvUtils.drawContureLines(None, countour[4],None,None, cvUtils.MIN_LEN_LINE)
                 cvDraw.createConture(lines, d, p, 1)
             else:
@@ -513,7 +520,18 @@ class cvUtils:
         
         #d.set_pixel_scale(2)  # Set number of pixels per geometry unit
         #d.set_render_size(400, 200)  # Alternative to set_pixel_scale
+        # afterL.img.save('out.png')
+        # cv2.imwrite('out.png', img)
         d.save_svg('example.svg')     
+        d.save_png('example.png')
+        imgSvg = cv2.imread('example.png')
+        imgSrc = cv2.cvtColor(img,cv2.COLOR_GRAY2BGR)
+
+        alpha = 0.4
+        out_img = np.zeros(imgSvg.shape,dtype=imgSvg.dtype)
+        out_img[:,:,:] = (alpha * imgSvg[:,:,:]) + ((1-alpha) * imgSrc[:,:,:])
+        # vis = np.concatenate((imgSvg, imgSrc), axis=1)
+        cv2.imwrite('out.png', out_img)
         return
 
     def createMainContoursOld(lines, mainRect, circles, img):
