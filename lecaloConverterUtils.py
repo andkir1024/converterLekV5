@@ -524,7 +524,8 @@ class cvUtils:
         dpi = 1
         stroke_width=20
         if printSvg == True:
-            dpi =1.3339
+            dpi =6.8
+            # dpi =1.3339
             stroke_width=2
         d = drawSvg.Drawing(width, height, origin=(0,0))
         # d.set_pixel_scale(2)  # Set number of pixels per geometry unit
