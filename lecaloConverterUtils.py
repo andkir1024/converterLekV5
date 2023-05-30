@@ -529,7 +529,12 @@ class cvUtils:
                 radius = i[2]
                 cvDraw.createCircle(d, int(radius), int(center.x), int(center.y),1)
         
-
+        svgTestName = 'example.svg'
+        pngTestName = 'example.png'
+        d.save_svg(svgTestName)     
+        d.save_png(pngTestName)
+        cvUtils.saveResult(img, filesSrc, svgDir,svgTestName,pngTestName)
+        '''
         # сохранение результатов
         if not os.path.isdir(svgDir):
             os.mkdir(svgDir)
@@ -551,8 +556,62 @@ class cvUtils:
         nameDiff = svgDir + name +  "." + str(result) + ".png"
         is_success, im_buf_arr = cv2.imencode(".png", out_img)
         im_buf_arr.tofile(nameDiff)
-        
+        '''
         return
+
+    # сохранение результатов
+    def saveResult(img, filesSrc, svgDir,svgTestName,pngTestName):
+        if not os.path.isdir(svgDir):
+            os.mkdir(svgDir)
+        name = pathlib.Path(filesSrc).stem
+        nameSvg = svgDir + name + ".svg"
+        
+        
+        with open(svgTestName, 'r') as f1, open('filename1.svg', 'w') as f2:
+            lines = f1.readlines()
+
+            for line in lines:
+                line = line.strip() + "\n"
+                key = line.find("viewBox")
+                if key >= 0:
+                    f2.write('width="8.2677in" height="11.6929in" viewBox="0 0 595.2756 841.8898"\n')
+                else:
+                    f2.write(line)
+                    
+        imgSvg = cv2.imread(pngTestName)
+        imgSrc = cv2.cvtColor(img,cv2.COLOR_GRAY2BGR)
+
+        alpha = 0.5
+        out_img = np.zeros(imgSvg.shape,dtype=imgSvg.dtype)
+        out_img[:,:,:] = (alpha * imgSvg[:,:,:]) + ((1-alpha) * imgSrc[:,:,:])
+        cv2.imwrite('out.png', out_img)
+        sought = [0,0,0]
+        result = np.count_nonzero(np.all(out_img==sought,axis=2))
+
+        nameDiff = svgDir + name +  "." + str(result) + ".png"
+        is_success, im_buf_arr = cv2.imencode(".png", out_img)
+        im_buf_arr.tofile(nameDiff)
+
+        return
+        '''
+
+        # d.save_svg(nameSvg)     
+        # d.save_svg('example.svg')     
+        # d.save_png('example.png')
+        imgSvg = cv2.imread('example.png')
+        imgSrc = cv2.cvtColor(img,cv2.COLOR_GRAY2BGR)
+
+        alpha = 0.5
+        out_img = np.zeros(imgSvg.shape,dtype=imgSvg.dtype)
+        out_img[:,:,:] = (alpha * imgSvg[:,:,:]) + ((1-alpha) * imgSrc[:,:,:])
+        cv2.imwrite('out.png', out_img)
+        sought = [0,0,0]
+        result = np.count_nonzero(np.all(out_img==sought,axis=2))
+
+        nameDiff = svgDir + name +  "." + str(result) + ".png"
+        is_success, im_buf_arr = cv2.imencode(".png", out_img)
+        im_buf_arr.tofile(nameDiff)
+        '''
 
     def createMainContoursOld(lines, mainRect, circles, img):
         shape = img.shape
