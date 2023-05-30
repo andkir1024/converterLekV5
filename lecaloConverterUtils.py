@@ -520,18 +520,18 @@ class cvUtils:
         
         #d.set_pixel_scale(2)  # Set number of pixels per geometry unit
         #d.set_render_size(400, 200)  # Alternative to set_pixel_scale
-        # afterL.img.save('out.png')
-        # cv2.imwrite('out.png', img)
+
         d.save_svg('example.svg')     
         d.save_png('example.png')
         imgSvg = cv2.imread('example.png')
         imgSrc = cv2.cvtColor(img,cv2.COLOR_GRAY2BGR)
 
-        alpha = 0.4
+        alpha = 0.5
         out_img = np.zeros(imgSvg.shape,dtype=imgSvg.dtype)
         out_img[:,:,:] = (alpha * imgSvg[:,:,:]) + ((1-alpha) * imgSrc[:,:,:])
-        # vis = np.concatenate((imgSvg, imgSrc), axis=1)
         cv2.imwrite('out.png', out_img)
+        sought = [0,0,0]
+        result = np.count_nonzero(np.all(out_img==sought,axis=2))
         return
 
     def createMainContoursOld(lines, mainRect, circles, img):
