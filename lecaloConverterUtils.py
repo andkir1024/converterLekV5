@@ -507,16 +507,34 @@ class cvUtils:
         if img is not None:
             width = img.shape[1]
             height = img.shape[0]
+
+        dPrn = cvUtils.createSvg(finalCountours, circles, width, height, True)
+        svgTestName = 'example.svg'
+        # dPrn.save_svg('result.svg')     
+        dPrn.save_svg(svgTestName)     
             
+        d = cvUtils.createSvg(finalCountours, circles, width, height, False)
+        # svgTestName = 'example.svg'
+        pngTestName = 'example.png'
+        # d.save_svg(svgTestName)     
+        d.save_png(pngTestName)
+        cvUtils.saveResult(img, filesSrc, svgDir,svgTestName,pngTestName)
+        return
+    def createSvg(finalCountours, circles, width, height, printSvg):
+        dpi = 1
+        stroke_width=20
+        if printSvg == True:
+            dpi =1.3339
+            stroke_width=2
         d = drawSvg.Drawing(width, height, origin=(0,0))
         # d.set_pixel_scale(2)  # Set number of pixels per geometry unit
         # d.set_render_size(400, 200)  # Alternative to set_pixel_scale
         for countour in finalCountours:
             if countour[0] == 1:
                 # главный контур
-                p = drawSvg.Path(stroke='red', stroke_width=20, fill='none') 
+                p = drawSvg.Path(stroke='red', stroke_width=stroke_width, fill='none') 
                 lines = cvUtils.drawContureLines(None, countour[4],None,None, cvUtils.MIN_LEN_LINE)
-                cvDraw.createConture(lines, d, p, 1)
+                cvDraw.createConture(lines, d, p, dpi)
             else:
                 # отверстия в лекале
                 continue
@@ -527,45 +545,14 @@ class cvUtils:
             for i in circles[0, :]:
                 center = Point(i[0], i[1])
                 radius = i[2]
-                cvDraw.createCircle(d, int(radius), int(center.x), int(center.y),1)
-        
-        svgTestName = 'example.svg'
-        pngTestName = 'example.png'
-        d.save_svg(svgTestName)     
-        d.save_png(pngTestName)
-        cvUtils.saveResult(img, filesSrc, svgDir,svgTestName,pngTestName)
-        '''
-        # сохранение результатов
-        if not os.path.isdir(svgDir):
-            os.mkdir(svgDir)
-        name = pathlib.Path(filesSrc).stem
-        nameSvg = svgDir + name + ".svg"
-        d.save_svg(nameSvg)     
-        d.save_svg('example.svg')     
-        d.save_png('example.png')
-        imgSvg = cv2.imread('example.png')
-        imgSrc = cv2.cvtColor(img,cv2.COLOR_GRAY2BGR)
-
-        alpha = 0.5
-        out_img = np.zeros(imgSvg.shape,dtype=imgSvg.dtype)
-        out_img[:,:,:] = (alpha * imgSvg[:,:,:]) + ((1-alpha) * imgSrc[:,:,:])
-        cv2.imwrite('out.png', out_img)
-        sought = [0,0,0]
-        result = np.count_nonzero(np.all(out_img==sought,axis=2))
-
-        nameDiff = svgDir + name +  "." + str(result) + ".png"
-        is_success, im_buf_arr = cv2.imencode(".png", out_img)
-        im_buf_arr.tofile(nameDiff)
-        '''
-        return
-
+                cvDraw.createCircle(d, int(radius), int(center.x), int(center.y),dpi)
+        return d
     # сохранение результатов
     def saveResult(img, filesSrc, svgDir,svgTestName,pngTestName):
         if not os.path.isdir(svgDir):
             os.mkdir(svgDir)
         name = pathlib.Path(filesSrc).stem
         nameSvg = svgDir + name + ".svg"
-        
         
         with open(svgTestName, 'r') as f1, open('filename1.svg', 'w') as f2:
             lines = f1.readlines()
@@ -574,7 +561,7 @@ class cvUtils:
                 line = line.strip() + "\n"
                 key = line.find("viewBox")
                 if key >= 0:
-                    f2.write('width="8.2677in" height="11.6929in" viewBox="0 0 595.2756 841.8898"\n')
+                    f2.write('width="8.2677in" height="11.6929in" viewBox="0 0 595.2756 841.8898">\n')
                 else:
                     f2.write(line)
                     
@@ -593,58 +580,4 @@ class cvUtils:
         im_buf_arr.tofile(nameDiff)
 
         return
-        '''
 
-        # d.save_svg(nameSvg)     
-        # d.save_svg('example.svg')     
-        # d.save_png('example.png')
-        imgSvg = cv2.imread('example.png')
-        imgSrc = cv2.cvtColor(img,cv2.COLOR_GRAY2BGR)
-
-        alpha = 0.5
-        out_img = np.zeros(imgSvg.shape,dtype=imgSvg.dtype)
-        out_img[:,:,:] = (alpha * imgSvg[:,:,:]) + ((1-alpha) * imgSrc[:,:,:])
-        cv2.imwrite('out.png', out_img)
-        sought = [0,0,0]
-        result = np.count_nonzero(np.all(out_img==sought,axis=2))
-
-        nameDiff = svgDir + name +  "." + str(result) + ".png"
-        is_success, im_buf_arr = cv2.imencode(".png", out_img)
-        im_buf_arr.tofile(nameDiff)
-        '''
-
-    def createMainContoursOld(lines, mainRect, circles, img):
-        shape = img.shape
-        width = int((mainRect[1][0]-mainRect[0][0]) * 1.5)
-        height = int((mainRect[1][1]-mainRect[0][1]) * 1.5)
-        width = shape[1]
-        height = shape[0]
-        d = drawSvg.Drawing(width, height, origin=(0,0), id_prefix='d11')
-        # d = drawSvg.Drawing(8.2, 11.6, origin=(10,10), id_prefix='d11')
-        p = drawSvg.Path(stroke='red', stroke_width=2, fill='none') 
-        
-        # добавление главного контура
-        cvDraw.createConture(lines, d, p, 1)
-
-        # добавление кругов
-        if circles is not None:
-            circles = np.uint16(np.around(circles))
-            for i in circles[0, :]:
-                center = Point(i[0], i[1])
-                radius = i[2]
-                cvDraw.createCircle(d, int(radius), int(center.x), int(center.y),1)
-        
-        d.save_svg('example.svg')     
-        
-        # dwg = svgwrite.Drawing('test.svg', profile='tiny')
-        # dwg.add(dwg.line((0, 0), (10, 0), stroke=svgwrite.rgb(10, 10, 16, '%')))
-        # dwg.add(dwg.text('Test', insert=(0, 0.2), fill='red'))
-        # dwg.save()
-        
-        # dwg = svgwrite.Drawing('myDrawing.svg', size=('170in', '130in'), viewBox=('0 0 170 130'))
-        # dwg.add(dwg.line((0, 0), (10, 0), stroke=svgwrite.rgb(10, 10, 16, '%')))
-        # dwg.save()        
-        # dwg.im.Image('myDrawing.png')
-        return
-        # d.save_png('example.png')
-                
