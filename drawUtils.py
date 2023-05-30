@@ -168,8 +168,8 @@ class cvDraw:
         indexMax = len(lines)-1
         pp0, pp1, centroid1, centroid2, pp2 = cvDraw.createAngle(lines[indexMax][0], lines[indexMax][1],lines[0][0], lines[0][1])
         if pp0 is not None:
-            path.M(pp0.x,pp0.y).L(pp1.x,pp1.y) 
-            path.C(centroid1.x, centroid1.y, centroid2.x,centroid2.y,pp2.x,pp2.y)
+            path.M(pp0.x / dpi, pp0.y / dpi).L(pp1.x / dpi, pp1.y / dpi) 
+            path.C(centroid1.x / dpi, centroid1.y / dpi, centroid2.x / dpi,centroid2.y / dpi, pp2.x / dpi, pp2.y / dpi)
 
         all=0        
         for index in range(indexMax):
@@ -177,18 +177,18 @@ class cvDraw:
             lineB = lines[index+1]
             typeLine = lineA[2]
             if typeLine == LineStatus.sequest:
-                path.L(lineB[1][0],lineB[1][1]) 
+                path.L(lineB[1][0] / dpi,lineB[1][1] / dpi) 
                 continue
             elif typeLine == LineStatus.parallel:
-                path.L(lineB[0][0],lineB[0][1]) 
+                path.L(lineB[0][0] / dpi,lineB[0][1] / dpi) 
                 continue
             else:
                 pp0, pp1, centroid1, centroid2, pp2 = cvDraw.createAngle(lineA[0], lineA[1],lineB[0], lineB[1])
                 if pp0 is None:
                     cvDraw.createHalfCircle(lineA, lineB)
                 else:
-                    path.L(pp1.x,pp1.y) 
-                    path.C(centroid1.x, centroid1.y, centroid2.x,centroid2.y,pp2.x,pp2.y)
+                    path.L(pp1.x / dpi, pp1.y / dpi) 
+                    path.C(centroid1.x / dpi, centroid1.y / dpi, centroid2.x / dpi,centroid2.y / dpi, pp2.x / dpi, pp2.y / dpi)
             all = all +1
             # if all > 1:
                 # break 
