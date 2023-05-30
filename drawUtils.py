@@ -57,7 +57,13 @@ class cvDraw:
         y2=int(curr_point[1])
         lenLine = math.sqrt( ((x1-x2)**2)+((y1-y2)**2))
         if lenLine > border:
-            return  [(x1, y1), (x2, y2), LineStatus.undefined, lenLine, index]
+            # 0 кордината начальной точки
+            # 1 кордината конечной
+            # 2 статус
+            # 3 длина линии
+            # 4 индекс точки
+            # 5 расстоячние до предидущей точки
+            return  [(x1, y1), (x2, y2), LineStatus.undefined, lenLine, index, 0]
         return None
     
     def calkSize( countour ):

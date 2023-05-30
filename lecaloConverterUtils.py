@@ -1,3 +1,4 @@
+import copy
 import cv2
 import numpy as np
 import math
@@ -309,23 +310,36 @@ class cvUtils:
             # последняя точка текущей линии
             linesDst.append(lines[index])
 
-            pointA = lines[index-1][0]
+            pointAF = lines[index-1][1]
             # start
             pointBS = linesDst[-1][0]
             # finish
             pointBF = linesDst[-1][1]
 
-            distAC = cvDraw.distancePoint(pointA, pointBS) 
-            distAD = cvDraw.distancePoint(pointA, pointBF)
-            if distAC > distAD:
+            distAFBS = cvDraw.distancePoint(pointAF, pointBS) 
+            distAFBF = cvDraw.distancePoint(pointAF, pointBF)
+            if distAFBS > distAFBF:
                 linesDst[-1] = cvUtils.swapPoint(linesDst[-1])
                 # linesDst[-1][0], linesDst[-1][1] = pointBF, pointBS
-                linesDst[-1][5] = distAC
+                linesDst[-1][5] = distAFBS
+            else:
+                linesDst[-1][5] = distAFBS
                 
+            continue
+        # test
+        for index in range(1, len(linesDst)-1):
+            # последняя точка текущей линии
+            pointAF = linesDst[index-1][1]
+            # start
+            pointBS = linesDst[-1][0]
+            # finish
+            pointBF = linesDst[-1][1]
+
+            distAFBS = cvDraw.distancePoint(pointAF, pointBS) 
             continue
         return linesDst
     def swapPoint(pointSrc):
-        pointDst = pointSrc
+        pointDst = pointSrc.copy()
         pointDst[0],pointDst[1]=pointDst[1],pointDst[0]
         return pointDst
     def createLinesContoursOld(sel_countour, border):
