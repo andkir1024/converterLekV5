@@ -62,7 +62,7 @@ class cvDraw:
             # 2 статус
             # 3 длина линии
             # 4 индекс точки
-            # 5 расстоячние до предидущей точки
+            # 5 расстоячние до следующей точки
             return  [(x1, y1), (x2, y2), LineStatus.undefined, lenLine, index, 0]
         return None
     

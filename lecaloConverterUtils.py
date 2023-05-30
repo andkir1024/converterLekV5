@@ -324,19 +324,29 @@ class cvUtils:
                 linesDst[-1][5] = int(distAFBS)
                 
             continue
+        # mark seq
+        for index in range(0, len(linesDst)-1):
+            distance = linesDst[index+1][5]
+            if distance < 10 and index > 0:
+                linesDst[index][2]=LineStatus.sequest
         # test
         for index in range(0, len(linesDst)-1):
-            # последняя точка текущей линии
-            pointAF = linesDst[index][1]
-            # start
-            pointBS = linesDst[index+1][0]
-            # finish
-            pointBF = linesDst[index+1][1]
+            pp0 = 0
+            seq = linesDst[index][2]
+            if seq != LineStatus.sequest:
+                # последняя точка текущей линии
+                pointAF = linesDst[index][1]
+                # start
+                pointBS = linesDst[index+1][0]
+                # finish
+                pointBF = linesDst[index+1][1]
 
-            distAFBS = cvDraw.distancePoint(pointAF, pointBS) 
-            pp0, pp1, centroid1, centroid2, pp2 = cvDraw.createAngle(linesDst[index][0], linesDst[index][1],
-                                                                     linesDst[index+1][0], linesDst[index+1][1])
-            
+                distAFBS = cvDraw.distancePoint(pointAF, pointBS) 
+                pp0, pp1, centroid1, centroid2, pp2 = cvDraw.createAngle(linesDst[index][0], linesDst[index][1],
+                                                                        linesDst[index+1][0], linesDst[index+1][1])
+                if pp0 is None:
+                    linesDst[index][2]=LineStatus.parallel
+
             continue
         # linesDst = linesDst[0:2]
         return linesDst
