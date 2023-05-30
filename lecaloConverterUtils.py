@@ -5,8 +5,8 @@ import math
 from drawUtils import LineStatus, cvDraw
 import drawsvg as drawSvg
 from shapely import Point
-# from shapely import *
-import svgwrite
+import pathlib
+import os
 
 class cvUtils:
     MIN_LEN_LINE = 20
@@ -521,6 +521,13 @@ class cvUtils:
         #d.set_pixel_scale(2)  # Set number of pixels per geometry unit
         #d.set_render_size(400, 200)  # Alternative to set_pixel_scale
 
+        # сохранение результатов
+        if not os.path.isdir(svgDir):
+            os.mkdir(svgDir)
+        name = pathlib.Path(filesSrc).stem
+        nameSvg = svgDir + name + ".svg"
+        nameDiff = svgDir + name + ".png"
+        d.save_svg(nameSvg)     
         d.save_svg('example.svg')     
         d.save_png('example.png')
         imgSvg = cv2.imread('example.png')
@@ -530,6 +537,7 @@ class cvUtils:
         out_img = np.zeros(imgSvg.shape,dtype=imgSvg.dtype)
         out_img[:,:,:] = (alpha * imgSvg[:,:,:]) + ((1-alpha) * imgSrc[:,:,:])
         cv2.imwrite('out.png', out_img)
+        cv2.imwrite(nameDiff, out_img)
         sought = [0,0,0]
         result = np.count_nonzero(np.all(out_img==sought,axis=2))
         return
