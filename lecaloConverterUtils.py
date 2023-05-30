@@ -300,7 +300,34 @@ class cvUtils:
         cvUtils.aligmentLines(lines)
         return lines
     def aligmentLines(lines):
-        return
+        if lines is None:
+            return None
+        linesDst = []
+        linesDst.append(lines[0])
+        linesDst[-1] = cvUtils.swapPoint(linesDst[-1])
+        for index in range(1, len(lines)-1):
+            # последняя точка текущей линии
+            linesDst.append(lines[index])
+
+            pointA = lines[index-1][0]
+            # start
+            pointBS = linesDst[-1][0]
+            # finish
+            pointBF = linesDst[-1][1]
+
+            distAC = cvDraw.distancePoint(pointA, pointBS) 
+            distAD = cvDraw.distancePoint(pointA, pointBF)
+            if distAC > distAD:
+                linesDst[-1] = cvUtils.swapPoint(linesDst[-1])
+                # linesDst[-1][0], linesDst[-1][1] = pointBF, pointBS
+                linesDst[-1][5] = distAC
+                
+            continue
+        return linesDst
+    def swapPoint(pointSrc):
+        pointDst = pointSrc
+        pointDst[0],pointDst[1]=pointDst[1],pointDst[0]
+        return pointDst
     def createLinesContoursOld(sel_countour, border):
         lines = []
         last_point = None
