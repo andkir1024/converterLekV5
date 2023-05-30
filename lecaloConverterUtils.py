@@ -500,6 +500,8 @@ class cvUtils:
             height = img.shape[0]
             
         d = drawSvg.Drawing(width, height, origin=(0,0))
+        # d.set_pixel_scale(2)  # Set number of pixels per geometry unit
+        # d.set_render_size(400, 200)  # Alternative to set_pixel_scale
         for countour in finalCountours:
             if countour[0] == 1:
                 # главный контур
@@ -518,8 +520,6 @@ class cvUtils:
                 radius = i[2]
                 cvDraw.createCircle(d, int(radius), int(center.x), int(center.y),1)
         
-        #d.set_pixel_scale(2)  # Set number of pixels per geometry unit
-        #d.set_render_size(400, 200)  # Alternative to set_pixel_scale
 
         # сохранение результатов
         if not os.path.isdir(svgDir):
@@ -540,6 +540,10 @@ class cvUtils:
         cv2.imwrite(nameDiff, out_img)
         sought = [0,0,0]
         result = np.count_nonzero(np.all(out_img==sought,axis=2))
+
+        nameTxt = svgDir + name + "." + str(result) +".txt"
+        fp = open(nameTxt, 'w')
+        fp.close()        
         return
 
     def createMainContoursOld(lines, mainRect, circles, img):

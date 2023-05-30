@@ -276,7 +276,7 @@ else:
         nowStart = datetime.datetime.now()
         for f in listFiles:
             imgOk = cv2.imdecode(np.fromfile(f, dtype=np.uint8), cv2.IMREAD_COLOR)
-            # do_frame(imgOk)
+            # do_frame(imgOk, f, svgDir)
             print(f)
         now = datetime.datetime.now()
         tdelta = (now - nowStart).total_seconds()
