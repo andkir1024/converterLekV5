@@ -187,8 +187,10 @@ class cvDraw:
             elif typeLine == LineStatus.parallel:
                 # path.L(lineB[0][0] / dpi,lineB[0][1] / dpi) 
                 
-                path.L(lineA[1][0] / dpi,lineA[1][1] / dpi) 
-                path.L(lineB[0][0] / dpi,lineB[0][1] / dpi) 
+                # path.L(lineB[0][0] / dpi,lineB[0][1] / dpi) 
+                
+                # path.L(lineA[1][0] / dpi,lineA[1][1] / dpi) 
+                # path.L(lineB[0][0] / dpi,lineB[0][1] / dpi) 
                 cvDraw.createHalfCircle(lineA, lineB, path, dpi)
                 continue
             else:
@@ -208,7 +210,18 @@ class cvDraw:
     def createHalfCircle(lineA, lineB, path, dpi):
         pointA = lineA[1]
         pointB = lineB[0]
-        cd_length = cvDraw.distancePoint(pointA, pointB) 
+        cd_length = cvDraw.distancePoint(pointA, pointB) / 2
+        pp0 = Point(pointA[0],pointA[1])
+        pp1 = Point(pointB[0],pointB[1])
+        ab = LineString([pp0, pp1])
+        centroid = ab.centroid.coords
+        x= centroid[0][0]
+        y= centroid[0][1] + cd_length
+        path.L(x / dpi, y / dpi) 
+        # path.L(centroid[0][0] / dpi, centroid[0][1] / dpi) 
+        path.L(lineB[0][0] / dpi,lineB[0][1] / dpi) 
+
+        return
         
         pp0 = Point(pointA[0],pointA[1])
         pp1 = Point(pointB[0],pointB[1])
