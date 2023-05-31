@@ -128,7 +128,7 @@ def exit():
     root.quit()
 # изменение размера гдавного окна
 def handle_configure(event):
-    update_image()
+    # update_image()
     text="window geometry:\n" + root.geometry()
     return
 

@@ -5,6 +5,11 @@ import drawsvg as drawSvg
 import enum
 from shapely import Point
 from shapely import *
+from shapely.geometry import Polygon
+# from shapely.centerline import Centerlinefrom 
+
+
+
 class LineStatus(enum.Enum):
     round = 0
     sequest = 1
@@ -180,13 +185,17 @@ class cvDraw:
                 path.L(lineB[1][0] / dpi,lineB[1][1] / dpi) 
                 continue
             elif typeLine == LineStatus.parallel:
+                # path.L(lineB[0][0] / dpi,lineB[0][1] / dpi) 
+                
+                path.L(lineA[1][0] / dpi,lineA[1][1] / dpi) 
                 path.L(lineB[0][0] / dpi,lineB[0][1] / dpi) 
+                cvDraw.createHalfCircle(lineA, lineB, path, dpi)
                 continue
             else:
                 pp0, pp1, centroid1, centroid2, pp2 = cvDraw.createAngle(lineA[0], lineA[1],lineB[0], lineB[1])
-                if pp0 is None:
-                    cvDraw.createHalfCircle(lineA, lineB)
-                else:
+                if pp0 is not None:
+                    # cvDraw.createHalfCircle(lineA, lineB)
+                # else:
                     path.L(pp1.x / dpi, pp1.y / dpi) 
                     path.C(centroid1.x / dpi, centroid1.y / dpi, centroid2.x / dpi,centroid2.y / dpi, pp2.x / dpi, pp2.y / dpi)
             all = all +1
@@ -196,7 +205,40 @@ class cvDraw:
         draw.append(path)
         return
 
-    def createHalfCircle(lineA, lineB):
+    def createHalfCircle(lineA, lineB, path, dpi):
+        pointA = lineA[1]
+        pointB = lineB[0]
+        cd_length = cvDraw.distancePoint(pointA, pointB) 
+        
+        pp0 = Point(pointA[0],pointA[1])
+        pp1 = Point(pointB[0],pointB[1])
+        ab = LineString([pp0, pp1])
+        centroid = ab.centroid
+        left  = ab.parallel_offset(cd_length / 2, 'left')
+        right = ab.parallel_offset(cd_length / 2, 'right')
+        l= left.coords
+        r= right.coords
+        path.M(l[0][0] / dpi,l[0][1] / dpi) 
+        path.L(r[1][0] / dpi,r[1][1] / dpi) 
+        
+
+        # a = (10, 20)
+        # b = (15, 30)
+        # cd_length = 6
+
+        # ab = LineString([a, b])
+        # left = ab.parallel_offset(cd_length / 2, 'left')
+        # right = ab.parallel_offset(cd_length / 2, 'right')
+        # c = left.boundary
+        # d = right.boundary  # note the different orientation for right offset
+        # cd = LineString([c, d])
+
+
+        # distAC = cvDraw.distancePoint(pointA, pointB) 
+        
+        # polygon = Polygon([pp0, pp1])
+
+        # centerline = Centerline(polygon, **attributes)        
         return
     
     # создание зхакругления для контура
