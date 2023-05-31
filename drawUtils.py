@@ -169,6 +169,7 @@ class cvDraw:
         
     # создание контура
     def createConture(lines, draw, path, dpi):
+        # cvDraw.createSvg(lines, dpi)
         # добавление главного контура
         indexMax = len(lines)-1
         pp0, pp1, centroid1, centroid2, pp2 = cvDraw.createAngle(lines[indexMax][0], lines[indexMax][1],lines[0][0], lines[0][1])
@@ -206,17 +207,40 @@ class cvDraw:
         path.Z()
         draw.append(path)
         return
+    def createSvg(lines, dpi):
+        points=[]
+        for pp in lines:
+            point = Point(pp[0][0] / dpi, pp[0][1] / dpi)
+            points.append(point)
+            point = Point(pp[1][0] / dpi, pp[1][1] / dpi)
+            points.append(point)
+            continue
+        area = Polygon([i for i in points])
+        
+        with open('test.svg', 'w') as f:
+            f.write('<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink= "http://www.w3.org/1999/xlink">')
+            f.write(area.svg())
+            f.write('</svg>')
+            
+        return
 
     def createHalfCircle(lineA, lineB, path, dpi):
         pointA = lineA[1]
         pointB = lineB[0]
-        cd_length = cvDraw.distancePoint(pointA, pointB) / 2
+        cd_length = cvDraw.distancePoint(pointA, pointB)
         pp0 = Point(pointA[0],pointA[1])
         pp1 = Point(pointB[0],pointB[1])
         ab = LineString([pp0, pp1])
-        centroid = ab.centroid.coords
+        # centroid = ab.centroid.coords
+
+        left  = ab.parallel_offset(cd_length / 2, 'left')
+        right = ab.parallel_offset(cd_length / 2, 'right')
+        centroid = left.centroid.coords
+        # centroid = right.centroid.coords
+
         x= centroid[0][0]
-        y= centroid[0][1] + cd_length
+        y= centroid[0][1]
+        # y= centroid[0][1] + cd_length
         path.L(x / dpi, y / dpi) 
         # path.L(centroid[0][0] / dpi, centroid[0][1] / dpi) 
         path.L(lineB[0][0] / dpi,lineB[0][1] / dpi) 
