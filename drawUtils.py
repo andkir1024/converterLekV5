@@ -234,16 +234,19 @@ class cvDraw:
         # centroid = ab.centroid.coords
 
         left  = ab.parallel_offset(cd_length / 2, 'left')
-        right = ab.parallel_offset(cd_length / 2, 'right')
+        # right = ab.parallel_offset(cd_length / 2, 'right')
         centroid = left.centroid.coords
         # centroid = right.centroid.coords
 
         x= centroid[0][0]
         y= centroid[0][1]
-        # y= centroid[0][1] + cd_length
-        path.L(x / dpi, y / dpi) 
-        # path.L(centroid[0][0] / dpi, centroid[0][1] / dpi) 
-        path.L(lineB[0][0] / dpi,lineB[0][1] / dpi) 
+        leftCoords  = left.coords 
+        start = leftCoords[0]
+        fin = leftCoords[1]
+        path.C(start[0] / dpi, start[1] / dpi, start[0] / dpi, start[0] / dpi, x / dpi, y / dpi)
+        path.C(fin[0] / dpi, fin[1] / dpi, fin[0] / dpi, fin[0] / dpi, lineB[0][0] / dpi,lineB[0][1] / dpi)
+        # path.L(x / dpi, y / dpi) 
+        # path.L(lineB[0][0] / dpi,lineB[0][1] / dpi) 
 
         return
         
