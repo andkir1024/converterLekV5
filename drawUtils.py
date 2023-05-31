@@ -192,6 +192,7 @@ class cvDraw:
                 
                 # path.L(lineA[1][0] / dpi,lineA[1][1] / dpi) 
                 # path.L(lineB[0][0] / dpi,lineB[0][1] / dpi) 
+                cvDraw.aligmintParallel(lineA, lineB, True)
                 cvDraw.createHalfCircle(lineA, lineB, path, dpi)
                 continue
             else:
@@ -224,6 +225,23 @@ class cvDraw:
             
         return
 
+    def Average(valA, valB):
+        val = (valA + valB)/2
+        return val
+    def aligmintParallel(lineA, lineB, AlgVert):
+        if AlgVert == True:
+            averageY1 = cvDraw.Average(lineA[0][1], lineB[1][1])
+            averageY2 = cvDraw.Average(lineA[1][1], lineB[0][1])
+
+            averageX1 = cvDraw.Average(lineA[0][0], lineA[1][0])
+            averageX2 = cvDraw.Average(lineB[0][0], lineB[1][0])
+
+            lineA[0] = (averageX1,averageY1)
+            lineA[1] = (averageX1,averageY2)
+            
+            lineB[0] = (averageX2,averageY2)
+            lineB[1] = (averageX2,averageY1)
+        return
     def createHalfCircle(lineA, lineB, path, dpi):
         pointA = lineA[1]
         pointB = lineB[0]
@@ -243,8 +261,8 @@ class cvDraw:
         leftCoords  = left.coords 
         start = leftCoords[0]
         fin = leftCoords[1]
-        path.C(start[0] / dpi, start[1] / dpi, start[0] / dpi, start[0] / dpi, x / dpi, y / dpi)
-        path.C(fin[0] / dpi, fin[1] / dpi, fin[0] / dpi, fin[0] / dpi, lineB[0][0] / dpi,lineB[0][1] / dpi)
+        path.C(start[0] / dpi, start[1] / dpi, start[0] / dpi, start[1] / dpi, x / dpi, y / dpi)
+        path.C(fin[0] / dpi, fin[1] / dpi, fin[0] / dpi, fin[1] / dpi, lineB[0][0] / dpi,lineB[0][1] / dpi)
         # path.L(x / dpi, y / dpi) 
         # path.L(lineB[0][0] / dpi,lineB[0][1] / dpi) 
 
