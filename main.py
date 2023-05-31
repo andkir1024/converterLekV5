@@ -21,16 +21,19 @@ filesDir = '../popular1/'
 filesSrc = None
 svgDir = '../outSvg/'
 doConsole = True
+dpiSvg = 9.066
 
 argumentList = sys.argv[1:]
 options = "hmo:"
-long_options = ["Help", "wnd", "dirSrc="]
+long_options = ["Help", "wnd", "dirSrc=", "svg="]
 arguments, values = getopt.getopt(argumentList, options, long_options)
 for currentArgument, currentValue in arguments:
         if currentArgument in ("-d", "--dirSrc"):
             filesDir = currentValue
         elif currentArgument in ("-w","--wnd"):
             doConsole = False
+        if currentArgument in ("-s", "--svg"):
+            dpiSvg = float(currentValue)
     
 updateImage = False
 updateImageZoom = False
@@ -211,7 +214,7 @@ def do_frame(imgOk, filesSrc, svgDir):
     imgGrey =cvDraw.createGray(imgOk, slider1.get())
     # cvUtils.findCircles(imgGrey, imgDraw, draw_conrure = param0)
     # выделение глапвного контура
-    imgTst = cvUtils.doContours(imgGrey, imgDraw, filesSrc, svgDir)
+    imgTst = cvUtils.doContours(imgGrey, imgDraw, filesSrc, svgDir, dpiSvg)
     # imgTst,finalCountours = cvUtils.getMainContours(imgGrey, imgDraw)
     # cvUtils.getContours1(imgGrey, imgDraw)
     # cvUtils.findLines(imgGrey, imgDraw, draw_conrure = param0)

@@ -10,7 +10,7 @@
             "request": "launch",
             "program": "main.py",
             "console": "integratedTerminal",
-            "args": ["--wnd", "--dirSrc=../popular/"],
+            "args": ["--wnd", "--dirSrc=../popular/","--svg=9.07"],
         },
         {
             "name": "Python: Console",
@@ -18,7 +18,7 @@
             "request": "launch",
             "program": "main.py",
             "console": "externalTerminal",
-            "args": ["--dirSrc=../popular/"],
+            "args": ["--dirSrc=../popular/","--svg=9.07"],
         }        
     ]
 }

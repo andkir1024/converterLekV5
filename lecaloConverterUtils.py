@@ -225,7 +225,7 @@ class cvUtils:
         objects_contours.sort(key=custom_key, reverse=True)
         return objects_contours
 
-    def doContours(imgGray, img, filesSrc, svgDir):
+    def doContours(imgGray, img, filesSrc, svgDir, dpiSvg):
         # -------------------------------------
         # нахождение круговых вырезов
         circles = cvUtils.findCircles(imgGray, img, True)
@@ -268,7 +268,7 @@ class cvUtils:
             else:
                 # отверстия в лекале
                 lines = cvUtils.drawContureLines(img, countour[4],(0,255,0),5, cvUtils.MIN_LEN_LINE)
-        cvUtils.createMainContours(finalCountours, circles, imgGray, filesSrc, svgDir)  
+        cvUtils.createMainContours(finalCountours, circles, imgGray, filesSrc, svgDir, dpiSvg)  
         return imgTst
     # border граница длин линий
     def drawContureLines(img, sel_countour, color, thickness=12, border=100):
@@ -499,7 +499,7 @@ class cvUtils:
 
         return imgTst, finalCountours
     
-    def createMainContours(finalCountours, circles,img, filesSrc, svgDir):
+    def createMainContours(finalCountours, circles,img, filesSrc, svgDir, dpiSvg):
         # width = int((mainRect[1][0]-mainRect[0][0]) * 1.5)
         # height = int((mainRect[1][1]-mainRect[0][1]) * 1.5)
         width = 4000
@@ -508,21 +508,22 @@ class cvUtils:
             width = img.shape[1]
             height = img.shape[0]
 
-        dPrn = cvUtils.createSvg(finalCountours, circles, width, height, True)
+        dPrn = cvUtils.createSvg(finalCountours, circles, width, height, True, dpiSvg)
         svgTestName = 'example.svg'
         dPrn.save_svg(svgTestName)     
             
-        d = cvUtils.createSvg(finalCountours, circles, width, height, False)
+        d = cvUtils.createSvg(finalCountours, circles, width, height, False, dpiSvg)
         pngTestName = 'example.png'
         d.save_png(pngTestName)
         cvUtils.saveResult(img, filesSrc, svgDir,svgTestName,pngTestName)
         return
-    def createSvg(finalCountours, circles, width, height, printSvg):
+    def createSvg(finalCountours, circles, width, height, printSvg, dpiSvg):
         dpi = 1
         stroke_width=20
         if printSvg == True:
-            dpi =6.8
-            dpi = dpi * 1.33
+            # dpi =6.8
+            # dpi = dpi * 1.33
+            dpi = dpiSvg
             stroke_width=1
         d = drawSvg.Drawing(width, height, origin=(0,0))
         # d.set_pixel_scale(2)  # Set number of pixels per geometry unit
