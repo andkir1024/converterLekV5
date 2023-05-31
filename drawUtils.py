@@ -249,7 +249,15 @@ class cvDraw:
             lineB[0] = (averageX2,averageY2)
             lineB[1] = (averageX2,averageY1)
         return
-    def calkControlPoint(lineA, lineB, place):
+    def createLineFromInterction(pointA, pointB, intersectionPoint):
+        l1 = LineString([pointA, intersectionPoint])
+        l2 = LineString([pointB, intersectionPoint])
+        l1length = l1.length
+        l2length = l2.length
+        if l2length < l1length:
+            return l2
+        return l1
+    def calkControlPoints(lineA, lineB, place):
         pointA0, pointA1 = cvDraw.convertToPoint(lineA)
 
         pp0s, pp1s = cvDraw.scale(pointA0, pointA1, 30)
@@ -257,9 +265,16 @@ class cvDraw:
         pp2s, pp3s = cvDraw.scale(Point(coordsB[0][0],coordsB[0][1]), Point(coordsB[1][0],coordsB[1][1]), 30)
         l1 = LineString([pp0s, pp1s])
         l2 = LineString([pp2s, pp3s])
+        # пересечение линий
         result = l1.intersection(l2)
-        centroid = result.centroid
-        return result
+
+        lineResult1 = cvDraw.createLineFromInterction(pointA0,pointA1,result)
+        lineResult1 = lineResult1.centroid
+
+        lineResult2 = cvDraw.createLineFromInterction(coordsB[0],coordsB[1],result)
+        lineResult2 = lineResult2.centroid
+        
+        return lineResult1, result
     def createHalfCircle(lineA, lineB, path, dpi):
         pointA = lineA[1]
         pointB = lineB[0]
@@ -281,15 +296,15 @@ class cvDraw:
         start = coordsA[0]
         fin = coordsA[1]
         
-        bezP1 = cvDraw.calkControlPoint(lineA, shiftedLine, 0.5)
-        bezP2 = cvDraw.calkControlPoint(lineB, shiftedLine, 0.5)
-        # bezP1 = cvDraw.calkCenterPoint(startCur, start, 0.5)
-        # bezP2 = cvDraw.calkCenterPoint(start, startCur, 0.5)
-        
+        bezP1, bezP2 = cvDraw.calkControlPoints(lineA, shiftedLine, 0.5)
         path.C(bezP1.x / dpi, bezP1.y / dpi, bezP2.x / dpi, bezP2.y / dpi, xCenter / dpi, yCenter / dpi)
 
+        bezP1, bezP2 = cvDraw.calkControlPoints(lineB, shiftedLine, 0.5)
+        path.C(bezP2.x / dpi, bezP2.y / dpi, bezP1.x / dpi, bezP1.y / dpi, lineB[0][0] / dpi,lineB[0][1] / dpi)
+        # path.C(bezP1.x / dpi, bezP1.y / dpi, bezP2.x / dpi, bezP2.y / dpi, lineB[0][0] / dpi,lineB[0][1] / dpi)
+
         # path.C(start[0] / dpi, start[1] / dpi, start[0] / dpi, start[1] / dpi, xCenter / dpi, yCenter / dpi)
-        path.C(fin[0] / dpi, fin[1] / dpi, fin[0] / dpi, fin[1] / dpi, lineB[0][0] / dpi,lineB[0][1] / dpi)
+        # path.C(fin[0] / dpi, fin[1] / dpi, fin[0] / dpi, fin[1] / dpi, lineB[0][0] / dpi,lineB[0][1] / dpi)
 
         return
     # создание зхакругления для контура
