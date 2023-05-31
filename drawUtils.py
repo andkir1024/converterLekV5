@@ -224,7 +224,6 @@ class cvDraw:
             f.write('</svg>')
             
         return
-
     def Average(valA, valB):
         val = (valA + valB)/2
         return val
@@ -250,63 +249,35 @@ class cvDraw:
             lineB[0] = (averageX2,averageY2)
             lineB[1] = (averageX2,averageY1)
         return
+    def calkCenterPoint(ptA, ptB, place):
+        return
     def createHalfCircle(lineA, lineB, path, dpi):
         pointA = lineA[1]
         pointB = lineB[0]
         cd_length = cvDraw.distancePoint(pointA, pointB)
-        pp0 = Point(pointA[0],pointA[1])
-        pp1 = Point(pointB[0],pointB[1])
-        ab = LineString([pp0, pp1])
-        # centroid = ab.centroid.coords
-
-        left  = ab.parallel_offset(cd_length / 2, 'left')
+        
+        # начальная и конечная точка кривой
+        startCur = Point(pointA[0],pointA[1])
+        finCur = Point(pointB[0],pointB[1])
+        ab = LineString([startCur, finCur])
+        # сдвиг на половину длины влево
+        leftShift  = ab.parallel_offset(cd_length / 2, 'left')
         # right = ab.parallel_offset(cd_length / 2, 'right')
-        centroid = left.centroid.coords
-        # centroid = right.centroid.coords
-
-        x= centroid[0][0]
-        y= centroid[0][1]
-        leftCoords  = left.coords 
-        start = leftCoords[0]
-        fin = leftCoords[1]
-        path.C(start[0] / dpi, start[1] / dpi, start[0] / dpi, start[1] / dpi, x / dpi, y / dpi)
+        # центральная точка перегиба кривой
+        centroid = leftShift.centroid.coords
+        xCenter = centroid[0][0]
+        yCenter = centroid[0][1]
+        # получение контрольных точек для кривой безье
+        coordsA  = leftShift.coords 
+        start = coordsA[0]
+        fin = coordsA[1]
+        bezP1 = cvDraw.calkCenterPoint(startCur, start, 0.5)
+        bezP2 = cvDraw.calkCenterPoint(start, startCur, 0.5)
+        
+        path.C(start[0] / dpi, start[1] / dpi, start[0] / dpi, start[1] / dpi, xCenter / dpi, yCenter / dpi)
         path.C(fin[0] / dpi, fin[1] / dpi, fin[0] / dpi, fin[1] / dpi, lineB[0][0] / dpi,lineB[0][1] / dpi)
-        # path.L(x / dpi, y / dpi) 
-        # path.L(lineB[0][0] / dpi,lineB[0][1] / dpi) 
 
         return
-        
-        pp0 = Point(pointA[0],pointA[1])
-        pp1 = Point(pointB[0],pointB[1])
-        ab = LineString([pp0, pp1])
-        centroid = ab.centroid
-        left  = ab.parallel_offset(cd_length / 2, 'left')
-        right = ab.parallel_offset(cd_length / 2, 'right')
-        l= left.coords
-        r= right.coords
-        path.M(l[0][0] / dpi,l[0][1] / dpi) 
-        path.L(r[1][0] / dpi,r[1][1] / dpi) 
-        
-
-        # a = (10, 20)
-        # b = (15, 30)
-        # cd_length = 6
-
-        # ab = LineString([a, b])
-        # left = ab.parallel_offset(cd_length / 2, 'left')
-        # right = ab.parallel_offset(cd_length / 2, 'right')
-        # c = left.boundary
-        # d = right.boundary  # note the different orientation for right offset
-        # cd = LineString([c, d])
-
-
-        # distAC = cvDraw.distancePoint(pointA, pointB) 
-        
-        # polygon = Polygon([pp0, pp1])
-
-        # centerline = Centerline(polygon, **attributes)        
-        return
-    
     # создание зхакругления для контура
     # если Nont то паралельны
     def createAngle(pointA, pointB,pointC, pointD):
