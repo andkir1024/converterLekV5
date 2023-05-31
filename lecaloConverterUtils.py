@@ -510,13 +510,10 @@ class cvUtils:
 
         dPrn = cvUtils.createSvg(finalCountours, circles, width, height, True)
         svgTestName = 'example.svg'
-        # dPrn.save_svg('result.svg')     
         dPrn.save_svg(svgTestName)     
             
         d = cvUtils.createSvg(finalCountours, circles, width, height, False)
-        # svgTestName = 'example.svg'
         pngTestName = 'example.png'
-        # d.save_svg(svgTestName)     
         d.save_png(pngTestName)
         cvUtils.saveResult(img, filesSrc, svgDir,svgTestName,pngTestName)
         return
@@ -525,8 +522,8 @@ class cvUtils:
         stroke_width=20
         if printSvg == True:
             dpi =6.8
-            # dpi =1.3339
-            stroke_width=2
+            dpi = dpi * 1.33
+            stroke_width=1
         d = drawSvg.Drawing(width, height, origin=(0,0))
         # d.set_pixel_scale(2)  # Set number of pixels per geometry unit
         # d.set_render_size(400, 200)  # Alternative to set_pixel_scale
@@ -554,8 +551,8 @@ class cvUtils:
             os.mkdir(svgDir)
         name = pathlib.Path(filesSrc).stem
         nameSvg = svgDir + name + ".svg"
-        
-        with open(svgTestName, 'r') as f1, open('filename1.svg', 'w') as f2:
+        nameSvg = "result.svg"
+        with open(svgTestName, 'r') as f1, open(nameSvg, 'w') as f2:
             lines = f1.readlines()
 
             for line in lines:
