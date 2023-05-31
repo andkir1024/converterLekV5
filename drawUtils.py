@@ -249,8 +249,17 @@ class cvDraw:
             lineB[0] = (averageX2,averageY2)
             lineB[1] = (averageX2,averageY1)
         return
-    def calkCenterPoint(ptA, ptB, place):
-        return
+    def calkControlPoint(lineA, lineB, place):
+        pointA0, pointA1 = cvDraw.convertToPoint(lineA)
+
+        pp0s, pp1s = cvDraw.scale(pointA0, pointA1, 30)
+        coordsB = lineB.coords
+        pp2s, pp3s = cvDraw.scale(Point(coordsB[0][0],coordsB[0][1]), Point(coordsB[1][0],coordsB[1][1]), 30)
+        l1 = LineString([pp0s, pp1s])
+        l2 = LineString([pp2s, pp3s])
+        result = l1.intersection(l2)
+        centroid = result.centroid
+        return result
     def createHalfCircle(lineA, lineB, path, dpi):
         pointA = lineA[1]
         pointB = lineB[0]
@@ -261,20 +270,25 @@ class cvDraw:
         finCur = Point(pointB[0],pointB[1])
         ab = LineString([startCur, finCur])
         # сдвиг на половину длины влево
-        leftShift  = ab.parallel_offset(cd_length / 2, 'left')
+        shiftedLine  = ab.parallel_offset(cd_length / 2, 'left')
         # right = ab.parallel_offset(cd_length / 2, 'right')
         # центральная точка перегиба кривой
-        centroid = leftShift.centroid.coords
+        centroid = shiftedLine.centroid.coords
         xCenter = centroid[0][0]
         yCenter = centroid[0][1]
         # получение контрольных точек для кривой безье
-        coordsA  = leftShift.coords 
+        coordsA  = shiftedLine.coords 
         start = coordsA[0]
         fin = coordsA[1]
-        bezP1 = cvDraw.calkCenterPoint(startCur, start, 0.5)
-        bezP2 = cvDraw.calkCenterPoint(start, startCur, 0.5)
         
-        path.C(start[0] / dpi, start[1] / dpi, start[0] / dpi, start[1] / dpi, xCenter / dpi, yCenter / dpi)
+        bezP1 = cvDraw.calkControlPoint(lineA, shiftedLine, 0.5)
+        bezP2 = cvDraw.calkControlPoint(lineB, shiftedLine, 0.5)
+        # bezP1 = cvDraw.calkCenterPoint(startCur, start, 0.5)
+        # bezP2 = cvDraw.calkCenterPoint(start, startCur, 0.5)
+        
+        path.C(bezP1.x / dpi, bezP1.y / dpi, bezP2.x / dpi, bezP2.y / dpi, xCenter / dpi, yCenter / dpi)
+
+        # path.C(start[0] / dpi, start[1] / dpi, start[0] / dpi, start[1] / dpi, xCenter / dpi, yCenter / dpi)
         path.C(fin[0] / dpi, fin[1] / dpi, fin[0] / dpi, fin[1] / dpi, lineB[0][0] / dpi,lineB[0][1] / dpi)
 
         return
@@ -336,6 +350,10 @@ class cvDraw:
         y2 = firstPoint.y +(secondPoint.y - firstPoint.y) + addFactor
         secondPoint = Point(x2, y2)
         return secondPoint
+    def convertToPoint(line):
+        p0 = Point(line[0][0],line[0][1])
+        p1 = Point(line[1][0],line[1][1])
+        return p0, p1
     def scale(firstPoint, secondPoint, factor):
         t0=0.5*(1.0-factor)
         t1=0.5*(1.0+factor)
