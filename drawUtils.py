@@ -6,15 +6,12 @@ import enum
 from shapely import Point
 from shapely import *
 from shapely.geometry import Polygon
+from shapely.ops import split
+from classifier import *
 # from shapely.centerline import Centerlinefrom 
 
 
 
-class LineStatus(enum.Enum):
-    round = 0
-    sequest = 1
-    parallel = 2
-    undefined = 3
 class cvDraw:
     def createGray(imgOk, param0):
         imgGray = cv2.cvtColor(imgOk,cv2.COLOR_BGR2GRAY)
@@ -54,22 +51,6 @@ class cvDraw:
             cv2.line(img, (x1, y1), (x2, y2), (255,0,0), thickness=2)
         return
     
-    # вырезаем короткие линии
-    def packLine( last_point, curr_point, border, index):
-        x1=int(last_point[0])
-        y1=int(last_point[1])
-        x2=int(curr_point[0])
-        y2=int(curr_point[1])
-        lenLine = math.sqrt( ((x1-x2)**2)+((y1-y2)**2))
-        if lenLine > border:
-            # 0 кордината начальной точки
-            # 1 кордината конечной
-            # 2 статус
-            # 3 длина линии
-            # 4 индекс точки
-            # 5 расстоячние до следующей точки
-            return  [(x1, y1), (x2, y2), LineStatus.undefined, lenLine, index, 0]
-        return None
     
     def calkSize( countour ):
         if countour is None:
@@ -168,16 +149,44 @@ class cvDraw:
         drawPath.append(path)
         
     # создание контура
-    def createConture(lines, draw, path, dpi):
+    def createContureSvg(lines, draw, path, dpi):
+        # dpi =1
         # cvDraw.createSvg(lines, dpi)
-        # добавление главного контура
         indexMax = len(lines)-1
+        # добавление овала 
+        if indexMax == 1:
+            lineA = lines[0]
+            lineB = lines[1]
+            
+            disp = 5
+            lineA[0] = (int(lineA[0][0]+disp),int(lineA[0][1]))
+            lineA[1] = (int(lineA[1][0]-disp),int(lineA[1][1]))
+            
+            lineB[0] = (int(lineB[0][0]-disp),int(lineB[0][1]))
+            lineB[1] = (int(lineB[1][0]+disp),int(lineB[1][1]))
+
+            pp0, pp1 = cvDraw.convertToPoint(lineA)
+            pp2, pp3 = cvDraw.convertToPoint(lineB)
+
+            path.M(pp0.x / dpi, pp0.y / dpi).L(pp1.x / dpi, pp1.y / dpi) 
+            cvDraw.createHalfCircle(lineA, lineB, path, dpi, False)
+            path.L(pp2.x / dpi, pp2.y / dpi).L(pp3.x / dpi, pp3.y / dpi) 
+            cvDraw.createHalfCircle(lineB, lineA, path, dpi, False)
+            path.Z()
+            draw.append(path)
+            return
+            
+        # добавление главного контура
         pp0, pp1, centroid1, centroid2, pp2 = cvDraw.createAngle(lines[indexMax][0], lines[indexMax][1],lines[0][0], lines[0][1])
+        # pp0 = None
         if pp0 is not None:
             path.M(pp0.x / dpi, pp0.y / dpi).L(pp1.x / dpi, pp1.y / dpi) 
             path.C(centroid1.x / dpi, centroid1.y / dpi, centroid2.x / dpi,centroid2.y / dpi, pp2.x / dpi, pp2.y / dpi)
+        else:
+            lineA = lines[0]
+            lineB = lines[indexMax]
+            path.M(lineA[0][0] / dpi, lineA[0][1] / dpi)
 
-        all=0        
         for index in range(indexMax):
             lineA = lines[index]
             lineB = lines[index+1]
@@ -192,19 +201,14 @@ class cvDraw:
                 
                 # path.L(lineA[1][0] / dpi,lineA[1][1] / dpi) 
                 # path.L(lineB[0][0] / dpi,lineB[0][1] / dpi) 
-                cvDraw.aligmintParallel(lineA, lineB)
-                cvDraw.createHalfCircle(lineA, lineB, path, dpi)
+                # cvDraw.aligmintParallel(lineA, lineB)
+                cvDraw.createHalfCircle(lineA, lineB, path, dpi, True)
                 continue
             else:
                 pp0, pp1, centroid1, centroid2, pp2 = cvDraw.createAngle(lineA[0], lineA[1],lineB[0], lineB[1])
                 if pp0 is not None:
-                    # cvDraw.createHalfCircle(lineA, lineB)
-                # else:
                     path.L(pp1.x / dpi, pp1.y / dpi) 
                     path.C(centroid1.x / dpi, centroid1.y / dpi, centroid2.x / dpi,centroid2.y / dpi, pp2.x / dpi, pp2.y / dpi)
-            all = all +1
-            # if all > 1:
-                # break 
         path.Z()
         draw.append(path)
         return
@@ -231,7 +235,7 @@ class cvDraw:
         deltaX = abs(line[0][0] - line[1][0])
         deltaY = abs(line[0][1] - line[1][1])
         return deltaX, deltaY
-    def aligmintParallel(lineA, lineB):
+    def aligmentParallel(lineA, lineB):
         deltaX, deltaY = cvDraw.deltaLine(lineA)
         AlgVert = False
         if deltaX < 5: 
@@ -243,12 +247,17 @@ class cvDraw:
             averageX1 = cvDraw.Average(lineA[0][0], lineA[1][0])
             averageX2 = cvDraw.Average(lineB[0][0], lineB[1][0])
 
-            lineA[0] = (averageX1,averageY1)
-            lineA[1] = (averageX1,averageY2)
+            # lineA[0] = (int(averageX1),int(averageY1))
+            lineA[1] = (int(averageX1),int(averageY2))
             
-            lineB[0] = (averageX2,averageY2)
-            lineB[1] = (averageX2,averageY1)
+            lineB[0] = (int(averageX2),int(averageY2))
+            # lineB[1] = (int(averageX2),int(averageY1))
+        else:
+            averageY1 = cvDraw.Average(lineA[0][1], lineB[1][1])
+            averageY2 = cvDraw.Average(lineA[1][1], lineB[0][1])
+            
         return
+    # нахождение отрезка от ближайшей точки из pointA, pointB до intersectionPoint
     def createLineFromInterction(pointA, pointB, intersectionPoint):
         l1 = LineString([pointA, intersectionPoint])
         l2 = LineString([pointB, intersectionPoint])
@@ -257,6 +266,24 @@ class cvDraw:
         if l2length < l1length:
             return l2
         return l1
+    def cut(line, distance):
+        # Cuts a line in two at a distance from its starting point
+        if distance <= 0.0 or distance >= line.length:
+            return [LineString(line)]
+        coords = list(line.coords)
+        for i, p in enumerate(coords):
+            pd = line.project(Point(p))
+            if pd == distance:
+                return [
+                    LineString(coords[:i+1]),
+                    LineString(coords[i:])]
+            if pd > distance:
+                cp = line.interpolate(distance)
+                return [
+                    LineString(coords[:i] + [(cp.x, cp.y)]),
+                    LineString([(cp.x, cp.y)] + coords[i:])]
+          
+    # вычисление контрольных точек для безье
     def calkControlPoints(lineA, lineB, place):
         pointA0, pointA1 = cvDraw.convertToPoint(lineA)
 
@@ -269,13 +296,19 @@ class cvDraw:
         result = l1.intersection(l2)
 
         lineResult1 = cvDraw.createLineFromInterction(pointA0,pointA1,result)
-        lineResult1 = lineResult1.centroid
+        # lineResult1 = lineResult1.centroid
 
         lineResult2 = cvDraw.createLineFromInterction(coordsB[0],coordsB[1],result)
-        lineResult2 = lineResult2.centroid
+        # return lineResult1.centroid, result
         
-        return lineResult1, result
-    def createHalfCircle(lineA, lineB, path, dpi):
+        bez0= cvDraw.divideLine(lineResult1, 0.01)
+        bez1= cvDraw.divideLine(lineResult2, 0.01)
+        return bez0, bez1
+    def divideLine(line, place):
+        splitter = MultiPoint([line.interpolate((place), normalized=True) for i in range(1, 2)])
+        split(line, splitter).wkt
+        return splitter.centroid
+    def createHalfCircle(lineA, lineB, path, dpi, isLeft):
         pointA = lineA[1]
         pointB = lineB[0]
         cd_length = cvDraw.distancePoint(pointA, pointB)
@@ -284,24 +317,25 @@ class cvDraw:
         startCur = Point(pointA[0],pointA[1])
         finCur = Point(pointB[0],pointB[1])
         ab = LineString([startCur, finCur])
-        # сдвиг на половину длины влево
-        shiftedLine  = ab.parallel_offset(cd_length / 2, 'left')
-        # right = ab.parallel_offset(cd_length / 2, 'right')
-        # центральная точка перегиба кривой
+        dir = 'left'
+        if isLeft == False:
+            dir = 'right'
+        # сдвиг на половину длины
+        shiftedLine  = ab.parallel_offset(cd_length / 2, dir)
+                                     
         centroid = shiftedLine.centroid.coords
         xCenter = centroid[0][0]
         yCenter = centroid[0][1]
         # получение контрольных точек для кривой безье
-        coordsA  = shiftedLine.coords 
-        start = coordsA[0]
-        fin = coordsA[1]
+        # coordsA  = shiftedLine.coords 
+        # start = coordsA[0]
+        # fin = coordsA[1]
         
-        bezP1, bezP2 = cvDraw.calkControlPoints(lineA, shiftedLine, 0.5)
+        bezP1, bezP2 = cvDraw.calkControlPoints(lineA, shiftedLine, 0.01)
         path.C(bezP1.x / dpi, bezP1.y / dpi, bezP2.x / dpi, bezP2.y / dpi, xCenter / dpi, yCenter / dpi)
 
-        bezP1, bezP2 = cvDraw.calkControlPoints(lineB, shiftedLine, 0.5)
+        bezP1, bezP2 = cvDraw.calkControlPoints(lineB, shiftedLine, 0.01)
         path.C(bezP2.x / dpi, bezP2.y / dpi, bezP1.x / dpi, bezP1.y / dpi, lineB[0][0] / dpi,lineB[0][1] / dpi)
-        # path.C(bezP1.x / dpi, bezP1.y / dpi, bezP2.x / dpi, bezP2.y / dpi, lineB[0][0] / dpi,lineB[0][1] / dpi)
 
         # path.C(start[0] / dpi, start[1] / dpi, start[0] / dpi, start[1] / dpi, xCenter / dpi, yCenter / dpi)
         # path.C(fin[0] / dpi, fin[1] / dpi, fin[0] / dpi, fin[1] / dpi, lineB[0][0] / dpi,lineB[0][1] / dpi)
@@ -343,7 +377,7 @@ class cvDraw:
         pp1 = Point(point1[0],point1[1])
         pp2 = Point(point2[0],point2[1])
         pp3 = Point(point3[0],point3[1])
-
+        
         pp0s, pp1s = cvDraw.scale(pp0, pp1, 30)
         pp2s, pp3s = cvDraw.scale(pp2, pp3, 30)
 
@@ -353,6 +387,12 @@ class cvDraw:
         testOut = str(result)
         if testOut.find("EMPTY") >= 0 or testOut.find("LINE") >= 0:
             return None, None, None, None, None
+
+        # poly = Polygon([pp0,pp1,pp2,pp3])
+        # containt = poly.contains(result)
+        # if containt == False:
+        #     return None, None, None, None, None
+        # boundary = poly.boundary
         
         l3 = LineString([pp1, result])
         l4 = LineString([pp2, result])
@@ -360,6 +400,26 @@ class cvDraw:
         centroid1 = l3.centroid
         centroid2 = l4.centroid
         return pp0, pp1, centroid1, centroid2, pp2
+
+    def is_eql(a_delta, b_delta, dist):
+        dist = 10
+        if b_delta > a_delta - dist and b_delta < a_delta + dist:
+            return True
+        return False
+    def is_parallel(line1, line2):
+        a_delta_x = abs(line1[1][0] - line1[0][0])
+        a_delta_y = abs(line1[1][1] - line1[0][1])
+        b_delta_x = abs(line2[1][0] - line2[0][0])
+        b_delta_y = abs(line2[1][1] - line2[0][1])
+        
+        eq0 = cvDraw.is_eql(a_delta_x, b_delta_x, 4)
+        eq1 = cvDraw.is_eql(a_delta_y, b_delta_y, 4)
+        # if a_delta_x * b_delta_y == a_delta_y * b_delta_x:
+        if eq0 == True or eq1 == True:
+            return True 
+        else:
+            return False 
+    
     def Add(firstPoint, secondPoint, addFactor):
         x2 = firstPoint.x +(secondPoint.x - firstPoint.x) + addFactor
         y2 = firstPoint.y +(secondPoint.y - firstPoint.y) + addFactor
@@ -385,4 +445,3 @@ class cvDraw:
         deltaY = pointA[1]-pointB[1]
         lenLine = math.sqrt( (deltaX**2)+(deltaY**2))
         return lenLine
-        

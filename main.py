@@ -1,16 +1,12 @@
 import getopt, sys
 import cv2
-import lekaloMain
 from tkinter import *
 from PIL import Image, ImageDraw
 from PIL import ImageTk
 from tkinter import filedialog
 import lekaloSvg
-import lecaloUtils
-import pillow_heif
 import numpy as np
 import os
-import lecaloConverterUtils
 from lecaloConverterUtils import cvUtils
 from drawUtils import cvDraw
 import datetime
@@ -20,19 +16,24 @@ testName = None
 filesDir = '../popular1/'
 filesSrc = None
 svgDir = '../outSvg/'
+cmpDir = '../outSvg/'
 doConsole = True
 dpiSvg = 9.066
 
 argumentList = sys.argv[1:]
 options = "hmo:"
-long_options = ["Help", "wnd", "dirSrc=", "svg="]
+long_options = ["Help", "wnd", "dirSrc=","dirDst=", "svg=", "cmp="]
 arguments, values = getopt.getopt(argumentList, options, long_options)
 for currentArgument, currentValue in arguments:
+        if currentArgument in ("-o", "--dirDst"):
+            svgDir = currentValue
         if currentArgument in ("-d", "--dirSrc"):
             filesDir = currentValue
         elif currentArgument in ("-w","--wnd"):
             doConsole = False
         if currentArgument in ("-s", "--svg"):
+            dpiSvg = float(currentValue)
+        if currentArgument in ("-c", "--cmp"):
             dpiSvg = float(currentValue)
     
 updateImage = False
@@ -208,16 +209,11 @@ def convertScreenToImageCoord(rmainImage, imgOk, xZoom, yZoom):
     # viewX = 440
     # viewY = 934
     return viewX, viewY
-def do_frame(imgOk, filesSrc, svgDir):
+def do_frame(imgOk, filesSrc, svgDir, param0):
     imgDraw = imgOk.copy()
-    param0 = frame2control.param0.get()
-    imgGrey =cvDraw.createGray(imgOk, slider1.get())
-    # cvUtils.findCircles(imgGrey, imgDraw, draw_conrure = param0)
-    # выделение глапвного контура
+    # param0 = frame2control.param0.get()
+    imgGrey =cvDraw.createGray(imgOk, param0)
     imgTst = cvUtils.doContours(imgGrey, imgDraw, filesSrc, svgDir, dpiSvg)
-    # imgTst,finalCountours = cvUtils.getMainContours(imgGrey, imgDraw)
-    # cvUtils.getContours1(imgGrey, imgDraw)
-    # cvUtils.findLines(imgGrey, imgDraw, draw_conrure = param0)
     return imgDraw
 def show_frame():
     global imgOk
@@ -230,7 +226,7 @@ def show_frame():
     if updateImage == True or updateImageZoom == True:
         updateImage = False
         if imgOk is not None:
-            imgDraw = do_frame(imgOk, filesSrc, svgDir)
+            imgDraw = do_frame(imgOk, filesSrc, svgDir, slider1.get())
 
             scale, dispX, dispY = calkViewParam(rmainImage, imgDraw)
             img = cv2.resize(imgDraw, (0, 0), interpolation=cv2.INTER_AREA, fx=scale, fy=scale)
@@ -279,7 +275,7 @@ else:
         nowStart = datetime.datetime.now()
         for f in listFiles:
             imgOk = cv2.imdecode(np.fromfile(f, dtype=np.uint8), cv2.IMREAD_COLOR)
-            # do_frame(imgOk, f, svgDir)
+            do_frame(imgOk, f, svgDir, 0)
             print(f)
         now = datetime.datetime.now()
         tdelta = (now - nowStart).total_seconds()

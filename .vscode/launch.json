@@ -18,7 +18,7 @@
             "request": "launch",
             "program": "main.py",
             "console": "externalTerminal",
-            "args": ["--dirSrc=../popular/","--svg=9.07"],
+            "args": ["--dirSrc=../popular/","--svg=9.07","--dirDst=./out"],
         }        
     ]
 }

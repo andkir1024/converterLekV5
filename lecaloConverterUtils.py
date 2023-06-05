@@ -2,14 +2,20 @@ import copy
 import cv2
 import numpy as np
 import math
-from drawUtils import LineStatus, cvDraw
+from classifier import classifier
+from cornerFig import LineStatus, CircuitSvg
+from drawUtils import cvDraw
 import drawsvg as drawSvg
 from shapely import Point
 import pathlib
 import os
 
 class cvUtils:
-    MIN_LEN_LINE = 20
+    # базовые константы для анализа
+    # минимальная длина линии для выделения непрерывных линий
+    MIN_LEN_LINE = 100
+    # минимальная длина линии для работы в изогнутых фигурах
+    MIN_LEN_CURVE_LINE = 10
     def findLines(img_grey, img_Draw, draw_conrure):
         return
         # rho = 1  # distance resolution in pixels of the Hough grid
@@ -248,7 +254,7 @@ class cvUtils:
         contours,hiearchy = cv2.findContours(imgTst,cv2.RETR_LIST ,cv2.CHAIN_APPROX_SIMPLE)
         # сортировка котуров по площади (максимальный первый)
         minArea=1000  
-        sel_countour=None
+        # sel_countour=None
         finalCountours = []
         for iCon in contours:
             area = cv2.contourArea(iCon)
@@ -256,50 +262,31 @@ class cvUtils:
                 peri = cv2.arcLength(iCon,True)
                 approx = cv2.approxPolyDP(iCon,0.02*peri,True)
                 bbox = cv2.boundingRect(approx)
-                finalCountours.append([0, area, approx, bbox, iCon])
+                finalCountours.append([0, area, approx, bbox, iCon, None])
         finalCountours = sorted(finalCountours,key = lambda x:x[1] ,reverse= True)                
         finalCountours = cvUtils.extractContours(finalCountours, circles)
         
-        # проход по главным контурам (1 000 000) 
+        # генерация параметров контуров
         for countour in finalCountours:
-            if countour[0] == 1:
-                # главный контур
-                lines = cvUtils.drawContureLines(img, countour[4],(255,0,0),15, cvUtils.MIN_LEN_LINE)
-            else:
-                # отверстия в лекале
-                lines = cvUtils.drawContureLines(img, countour[4],(0,255,0),5, cvUtils.MIN_LEN_LINE)
-        cvUtils.createMainContours(finalCountours, circles, imgGray, filesSrc, svgDir, dpiSvg)  
+            lines = classifier.classifieCounter(countour[4],cvUtils.MIN_LEN_LINE, 0, -1)
+            countour[5]=lines
+            continue
+        
+        # отображенипе контуров (1 000 000) 
+        for countour in finalCountours:
+            if img is not None:
+                lines = countour[5]
+                classifier.drawFigRect(img, countour, lines)
+
+        cvUtils.createMainContoursSvg(finalCountours, circles, imgGray, filesSrc, svgDir, dpiSvg)  
         return imgTst
     # border граница длин линий
-    def drawContureLines(img, sel_countour, color, thickness=12, border=100):
+    def drawContureLines(img, sel_countour, color, thickness, border):
+        lines = classifier.classifieCounter(sel_countour,cvUtils.MIN_LEN_LINE, 0, -1)
         if img is not None:
-            cv2.drawContours(image=img, contours=sel_countour, contourIdx=-1, color=color, thickness=thickness, lineType=cv2.LINE_AA)
-        
-        lines = cvUtils.createLinesContours(sel_countour, border)
-
-        if img is not None:
-            for line in lines:
-                cv2.line(img, line[0], line[1], color=(0,0,255), thickness=thickness)
+            classifier.drawFigRect(img, sel_countour, lines)
         return lines
-    def createLinesContours(sel_countour, border):
-        lines = []
-        all_points = len(sel_countour)
-        for index in range(1, all_points):
-            curr_point=sel_countour[index][0]
-            last_point = sel_countour[index-1][0]
-
-            line =cvDraw.packLine(last_point,curr_point, border, index)
-            if line is not None:
-                lines.append(line)
-             
-        line =cvDraw.packLine(last_point,sel_countour[0][0], border, all_points)
-        if line is not None:
-            lines.append(line)
-            # lines.insert(0,line)
-        lines = lines[::-1]
-        lines = cvUtils.aligmentLines(lines)
-        return lines
-    def aligmentLines(lines):
+    def MarkedAndAligmentLinesInConture(lines):
         if lines is None:
             return None
         linesDst = []
@@ -332,54 +319,36 @@ class cvUtils:
         # test
         for index in range(0, len(linesDst)-1):
             pp0 = 0
-            seq = linesDst[index][2]
-            if seq != LineStatus.sequest:
-                # # последняя точка текущей линии
-                # pointAF = linesDst[index][1]
-                # # start
-                # pointBS = linesDst[index+1][0]
-                # # finish
-                # pointBF = linesDst[index+1][1]
-
+            stat = linesDst[index][2]
+            if stat != LineStatus.sequest:
                 distAFBS = cvDraw.distancePoint(pointAF, pointBS) 
                 pp0, pp1, centroid1, centroid2, pp2 = cvDraw.createAngle(linesDst[index][0], linesDst[index][1],
                                                                         linesDst[index+1][0], linesDst[index+1][1])
                 if pp0 is None:
                     linesDst[index][2]=LineStatus.parallel
+                
+                # par = cvDraw.is_parallel(linesDst[index], linesDst[index+1])
+                # if par == True and linesDst[index][3] < 40 :
+                #     linesDst[index][2]=LineStatus.parallel
 
             continue
-        # linesDst = linesDst[0:2]
+        # correction parallel
+        for index in range(0, len(linesDst)-1):
+            stat = linesDst[index][2]
+            if stat == LineStatus.parallel:
+                zz = 1
+                cvDraw.aligmentParallel(linesDst[index], linesDst[index+1])
+
+        # linesDst = linesDst[6:-1]
+        # linesDst = linesDst[0:5]
+        # linesDst = linesDst[0:len(linesDst)-1]
+        # linesDst.insert(0,linesDst[-1])
+        # del linesDst[-1]
         return linesDst
     def swapPoint(pointSrc):
         pointDst = pointSrc
         pointDst[0],pointDst[1]=pointDst[1],pointDst[0]
         return pointDst
-    def createLinesContoursOld(sel_countour, border):
-        lines = []
-        last_point = None
-        continius = False
-        index = 0
-        for point in sel_countour:
-            curr_point=point[0]
-
-            if not(last_point is None):
-                line =cvDraw.packLine(last_point,curr_point, border)
-                if line is not None:
-                    if continius == True:
-                        line[2]=LineStatus.sequest
-                    lines.append(line)
-                    continius = True
-                else:
-                    continius = False
-            index = index + 1       
-            last_point=curr_point
-        line =cvDraw.packLine(last_point,sel_countour[0][0], border)
-        if line is not None:
-            lines.insert(0,line)
-        lines = lines[::-1]
-        # lines = lines[0:2]
-        return lines
-
     def extractContours(finalCountours, circles):
         result =[]
         for index in range(len(finalCountours)-1):
@@ -438,70 +407,8 @@ class cvUtils:
             if len < 10:
                 return True
         return False
-    
-    def getMainContours(imgGray, img, cThr=[100,100],showCanny=False,minArea=0,filter=0,draw =True):
-        circles = cvUtils.findCircles(imgGray, img, True)
-        
-        imgBlur = cv2.GaussianBlur(imgGray,(5,5),1)
-        imgCanny = cv2.Canny(imgBlur,cThr[0],cThr[1])
-        kernel = np.ones((5,5))
-        imgDial = cv2.dilate(imgCanny,kernel,iterations=3)
-        imgThre = cv2.erode(imgDial,kernel,iterations=3)
-        # imgCanny = imgGray
-        imgTst = imgCanny
-        contours,hiearchy = cv2.findContours(imgTst,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
-        # contours,hiearchy = cv2.findContours(imgCanny,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_NONE)
-        finalCountours = []
-        for i in contours:
-            area = cv2.contourArea(i)
-            if area > minArea:
-                peri = cv2.arcLength(i,True)
-                approx = cv2.approxPolyDP(i,0.02*peri,True)
-                bbox = cv2.boundingRect(approx)
-                finalCountours.append([len(approx),area,approx,bbox,i])
-                
-        max=0                
-        sel_countour=None
-        for countour in contours:
-            if countour.shape[0]>max:
-                sel_countour=countour
-                max=countour.shape[0]
-                
-        mainRect  =cvDraw.calkSize(sel_countour)
-        # получение линий
-        lines = []
-        last_point = None
-        for point in sel_countour:
-            curr_point=point[0]
-
-            if not(last_point is None):
-                line =cvDraw.packLine(last_point,curr_point, 100)
-                if line is not None:
-                    lines.append(line)
-            last_point=curr_point
-        line =cvDraw.packLine(last_point,sel_countour[0][0], 100)
-        if line is not None:
-            lines.insert(0,line)
-        lines = lines[::-1]
-        cvUtils.createMainContours(lines, mainRect, circles, img)
-
-        for line in lines:
-            cv2.line(img, line[0], line[1], (255,0,0), thickness=12)
-        
-        # if draw:
-        for con in finalCountours:
-            approx = cv2.approxPolyDP(con[4],0.2,True)
-            # cv2.drawContours(img,con[4],-1,(255,0,0),16)
-            # cv2.drawContours(img,[approx],-1,(0,255,0),6)
-            # cv2.drawContours(img,con[4],-1,(0,255,0),16)
-                
-        # img = cv2.imdecode(np.fromfile("example.png", dtype=np.uint8), cv2.IMREAD_COLOR)
-
-        return imgTst, finalCountours
-    
-    def createMainContours(finalCountours, circles,img, filesSrc, svgDir, dpiSvg):
-        # width = int((mainRect[1][0]-mainRect[0][0]) * 1.5)
-        # height = int((mainRect[1][1]-mainRect[0][1]) * 1.5)
+    def createMainContoursSvg(finalCountours, circles,img, filesSrc, svgDir, dpiSvg):
+        # return
         width = 4000
         height = 8000
         if img is not None:
@@ -519,7 +426,7 @@ class cvUtils:
         return
     def createSvg(finalCountours, circles, width, height, printSvg, dpiSvg):
         dpi = 1
-        stroke_width=20
+        stroke_width=10
         if printSvg == True:
             # dpi =6.8
             # dpi = dpi * 1.33
@@ -532,10 +439,18 @@ class cvUtils:
             if countour[0] == 1:
                 # главный контур
                 p = drawSvg.Path(stroke='red', stroke_width=stroke_width, fill='none') 
-                lines = cvUtils.drawContureLines(None, countour[4],None,None, cvUtils.MIN_LEN_LINE)
-                cvDraw.createConture(lines, d, p, dpi)
+                # lines = cvUtils.drawContureLines(None, countour[4],None,None, cvUtils.MIN_LEN_LINE)
+                lines = countour[5]
+                # cvDraw.createContureSvg(lines, d, p, dpi)
+                CircuitSvg.createContureSvg(lines, d, p, dpi)
+                continue
             else:
                 # отверстия в лекале
+                p = drawSvg.Path(stroke='yellow', stroke_width=stroke_width, fill='none') 
+                # lines = cvUtils.drawContureLines(None, countour[4],None,None, cvUtils.MIN_LEN_LINE)
+                lines = countour[5]
+                # cvDraw.createContureSvg(lines, d, p, dpi)
+                CircuitSvg.createContureSvg(lines, d, p, dpi)
                 continue
 
         # добавление кругов
@@ -551,8 +466,8 @@ class cvUtils:
         if not os.path.isdir(svgDir):
             os.mkdir(svgDir)
         name = pathlib.Path(filesSrc).stem
-        nameSvg = svgDir + name + ".svg"
-        nameSvg = "result.svg"
+        nameSvg = svgDir + "/" + name + ".svg"
+        # nameSvg = "result.svg"
         with open(svgTestName, 'r') as f1, open(nameSvg, 'w') as f2:
             lines = f1.readlines()
 
@@ -574,7 +489,7 @@ class cvUtils:
         sought = [0,0,0]
         result = np.count_nonzero(np.all(out_img==sought,axis=2))
 
-        nameDiff = svgDir + name +  "." + str(result) + ".png"
+        nameDiff = svgDir + "/" + name +  "." + str(result) + ".png"
         is_success, im_buf_arr = cv2.imencode(".png", out_img)
         im_buf_arr.tofile(nameDiff)
 

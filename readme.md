@@ -23,4 +23,8 @@ pyinstaller --onefile main.py
 --wnd
 3. коэффициэнт перемасштабирования для  создания svg (9.066)
 --svg=9.066
+4. директория для результата
+--dirDst=../popular/
 
+пример запуска
+main.exe --dirSrc=./src --svg=9.07 --dirDst=./outSvg

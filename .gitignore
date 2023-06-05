@@ -1,6 +1,10 @@
 .venv
 build
+out
 dist
+*.svg
+*.png
+
 __pycache__
 __pycache__/arucoSize.cpython-311.pyc
 __pycache__/lecaloUtils.cpython-311.pyc
@@ -9,3 +13,5 @@ __pycache__/lekaloDraw.cpython-311.pyc
 __pycache__/lekaloFilter.cpython-311.pyc
 __pycache__/lekaloMain.cpython-311.pyc
 __pycache__/lekaloSvg.cpython-311.pyc
+example.png
+example.svg
