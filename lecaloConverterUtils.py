@@ -269,6 +269,8 @@ class cvUtils:
         # генерация параметров контуров
         for countour in finalCountours:
             lines = classifier.classifieCounter(countour[4],cvUtils.MIN_LEN_LINE, 0, -1)
+            if lines is None:
+                continue
             countour[5]=lines
             continue
         
@@ -276,7 +278,8 @@ class cvUtils:
         for countour in finalCountours:
             if img is not None:
                 lines = countour[5]
-                classifier.drawFigRect(img, countour, lines)
+                if lines is not None:
+                    classifier.drawFigRect(img, countour, lines)
 
         cvUtils.createMainContoursSvg(finalCountours, circles, imgGray, filesSrc, svgDir, dpiSvg)  
         return imgTst
@@ -442,7 +445,8 @@ class cvUtils:
                 # lines = cvUtils.drawContureLines(None, countour[4],None,None, cvUtils.MIN_LEN_LINE)
                 lines = countour[5]
                 # cvDraw.createContureSvg(lines, d, p, dpi)
-                CircuitSvg.createContureSvg(lines, d, p, dpi)
+                if lines is not None:
+                    CircuitSvg.createContureSvg(lines, d, p, dpi)
                 continue
             else:
                 # отверстия в лекале
@@ -450,7 +454,8 @@ class cvUtils:
                 # lines = cvUtils.drawContureLines(None, countour[4],None,None, cvUtils.MIN_LEN_LINE)
                 lines = countour[5]
                 # cvDraw.createContureSvg(lines, d, p, dpi)
-                CircuitSvg.createContureSvg(lines, d, p, dpi)
+                if lines is not None:
+                    CircuitSvg.createContureSvg(lines, d, p, dpi)
                 continue
 
         # добавление кругов

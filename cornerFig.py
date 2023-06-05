@@ -268,14 +268,22 @@ class CircuitSvg:
         shiftedLine  = ab.parallel_offset(cd_length / 2, dir)
                                     
         centroid = shiftedLine.centroid.coords
+        size = len(centroid)
+        if size == 0:
+            return
+        
         xCenter = centroid[0][0]
         yCenter = centroid[0][1]
         # получение контрольных точек для кривой безье
         
         bezP1, bezP2 = CircuitSvg.calkControlPoints(lineA, shiftedLine, 0.01)
+        if bezP1 is None:
+            return
         path.C(bezP1.x / dpi, bezP1.y / dpi, bezP2.x / dpi, bezP2.y / dpi, xCenter / dpi, yCenter / dpi)
 
         bezP1, bezP2 = CircuitSvg.calkControlPoints(lineB, shiftedLine, 0.01)
+        if bezP1 is None:
+            return
         path.C(bezP2.x / dpi, bezP2.y / dpi, bezP1.x / dpi, bezP1.y / dpi, lineB[0][0] / dpi,lineB[0][1] / dpi)
 
         # path.C(start[0] / dpi, start[1] / dpi, start[0] / dpi, start[1] / dpi, xCenter / dpi, yCenter / dpi)
@@ -293,6 +301,9 @@ class CircuitSvg:
         l2 = LineString([pp2s, pp3s])
         # пересечение линий
         result = l1.intersection(l2)
+        size = len(result.coords)
+        if size == 0:
+            return None, None
 
         lineResult1 = CircuitSvg.createLineFromInterction(pointA0,pointA1,result)
         # lineResult1 = lineResult1.centroid

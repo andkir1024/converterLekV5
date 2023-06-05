@@ -52,6 +52,8 @@ class classifier:
     # 1 начало работы класификатора
     def classifieCounter(sel_countour, border, startPoint, finPoint):
         lines =classifier.extractLinesFromCircuit(sel_countour, border, startPoint, finPoint, True)
+        if len(lines) == 0:
+            return None
         lines =classifier.AligmentLinesInConture(lines)
         classifier.doPropertyesFig(sel_countour, lines)
         return lines
