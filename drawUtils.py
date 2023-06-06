@@ -127,9 +127,9 @@ class cvDraw:
         return  zz0, zz1, zz2, zz3
 
     # создание круга в svg
-    def createCircle(drawPath, radius, xPos, yPos, dpi = 96.0):
+    def createCircle(drawPath, radius, xPos, yPos, dpi, stroke_width, color):
         
-        path = drawSvg.Path(stroke='blue', stroke_width=5, fill='none') 
+        path = drawSvg.Path(stroke=color, stroke_width=stroke_width, fill='none') 
 
         p0,p1,p2,p3 = cvDraw.corner(0, radius, xPos, yPos, dpi)
         path.M(p0[0], p0[1])

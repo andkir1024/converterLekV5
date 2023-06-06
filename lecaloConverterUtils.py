@@ -417,24 +417,25 @@ class cvUtils:
         if img is not None:
             width = img.shape[1]
             height = img.shape[0]
-
+        # создам svg для 
         dPrn = cvUtils.createSvg(finalCountours, circles, width, height, True, dpiSvg)
         svgTestName = 'example.svg'
         dPrn.save_svg(svgTestName)     
-            
-        d = cvUtils.createSvg(finalCountours, circles, width, height, False, dpiSvg)
         pngTestName = 'example.png'
+        d = cvUtils.createSvg(finalCountours, circles, width, height, False, dpiSvg)
         d.save_png(pngTestName)
         cvUtils.saveResult(img, filesSrc, svgDir,svgTestName,pngTestName)
         return
     def createSvg(finalCountours, circles, width, height, printSvg, dpiSvg):
         dpi = 1
         stroke_width=10
+        colorCircle = 'blue'
         if printSvg == True:
             # dpi =6.8
             # dpi = dpi * 1.33
             dpi = dpiSvg
             stroke_width=1
+            colorCircle = 'red'
         d = drawSvg.Drawing(width, height, origin=(0,0))
         # d.set_pixel_scale(2)  # Set number of pixels per geometry unit
         # d.set_render_size(400, 200)  # Alternative to set_pixel_scale
@@ -442,18 +443,14 @@ class cvUtils:
             if countour[0] == 1:
                 # главный контур
                 p = drawSvg.Path(stroke='red', stroke_width=stroke_width, fill='none') 
-                # lines = cvUtils.drawContureLines(None, countour[4],None,None, cvUtils.MIN_LEN_LINE)
                 lines = countour[5]
-                # cvDraw.createContureSvg(lines, d, p, dpi)
                 if lines is not None:
                     CircuitSvg.createContureSvg(lines, d, p, dpi)
                 continue
             else:
                 # отверстия в лекале
-                p = drawSvg.Path(stroke='yellow', stroke_width=stroke_width, fill='none') 
-                # lines = cvUtils.drawContureLines(None, countour[4],None,None, cvUtils.MIN_LEN_LINE)
+                p = drawSvg.Path(stroke='red', stroke_width=stroke_width, fill='none') 
                 lines = countour[5]
-                # cvDraw.createContureSvg(lines, d, p, dpi)
                 if lines is not None:
                     CircuitSvg.createContureSvg(lines, d, p, dpi)
                 continue
@@ -464,7 +461,7 @@ class cvUtils:
             for i in circles[0, :]:
                 center = Point(i[0], i[1])
                 radius = i[2]
-                cvDraw.createCircle(d, int(radius), int(center.x), int(center.y),dpi)
+                cvDraw.createCircle(d, int(radius), int(center.x), int(center.y),dpi,stroke_width,colorCircle)
         return d
     # сохранение результатов
     def saveResult(img, filesSrc, svgDir,svgTestName,pngTestName):
