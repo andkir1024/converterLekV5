@@ -80,8 +80,8 @@ class CircuitSvg:
 
             path.M(pp0.x / dpi, pp0.y / dpi).L(pp1.x / dpi, pp1.y / dpi) 
             CircuitSvg.createHalfCircle(lineA, lineB, path, dpi, False)
-            path.L(pp2.x / dpi, pp2.y / dpi).L(pp3.x / dpi, pp3.y / dpi) 
-            CircuitSvg.createHalfCircle(lineB, lineA, path, dpi, False)
+            # path.L(pp2.x / dpi, pp2.y / dpi).L(pp3.x / dpi, pp3.y / dpi) 
+            # CircuitSvg.createHalfCircle(lineB, lineA, path, dpi, False)
             path.Z()
             draw.append(path)
             return
@@ -252,6 +252,74 @@ class CircuitSvg:
 
         return
     # работа с овалами
+    def createHalfCircleByVer2(startCur, finCur, path, dpi, isLeft):
+        # начальная и конечная точка кривой
+        ab = LineString([startCur, finCur])
+        cd_length = ab.length
+        dir = 'left'
+        if isLeft == False:
+            dir = 'right'
+        # сдвиг на половину длины
+        shiftedLine  = ab.parallel_offset(cd_length / 2, dir)
+        s = scale(line, xfact=10.0, yfact=10.0, zfact=1.0)
+                                    
+        centroid = shiftedLine.centroid.coords
+        size = len(centroid)
+        if size == 0:
+            return
+        
+        xCenter = centroid[0][0]
+        yCenter = centroid[0][1]
+        # получение контрольных точек для кривой безье
+        
+        bezP1, bezP2 = CircuitSvg.calkControlPoints(lineA, shiftedLine, 0.101)
+        if bezP1 is None:
+            return
+        path.C(bezP1.x / dpi, bezP1.y / dpi, bezP2.x / dpi, bezP2.y / dpi, xCenter / dpi, yCenter / dpi)
+
+        bezP1, bezP2 = CircuitSvg.calkControlPoints(lineB, shiftedLine, 0.101)
+        if bezP1 is None:
+            return
+        path.C(bezP2.x / dpi, bezP2.y / dpi, bezP1.x / dpi, bezP1.y / dpi, lineB[0][0] / dpi,lineB[0][1] / dpi)
+        return
+    def calkControlPointsVer2(lineA, lineB, place):
+        pointA0, pointA1 = CircuitSvg.convertToPoint(lineA)
+
+        pp0s, pp1s = CircuitSvg.scale(pointA0, pointA1, 30)
+        coordsB = lineB.coords
+        pp2s, pp3s = CircuitSvg.scale(Point(coordsB[0][0],coordsB[0][1]), Point(coordsB[1][0],coordsB[1][1]), 30)
+        l1 = LineString([pp0s, pp1s])
+        l2 = LineString([pp2s, pp3s])
+        # пересечение линий
+        result = l1.intersection(l2)
+        size = len(result.coords)
+        if size == 0:
+            return None, None
+
+        lineResult1 = CircuitSvg.createLineFromInterction(pointA0,pointA1,result)
+        # lineResult1 = lineResult1.centroid
+
+        lineResult2 = CircuitSvg.createLineFromInterction(coordsB[0],coordsB[1],result)
+        # return lineResult1.centroid, result
+        
+        bez0= CircuitSvg.divideLine(lineResult1, 0.101)
+        bez1= CircuitSvg.divideLine(lineResult2, 0.101)
+        return bez0, bez1
+    def get_angle(line: LineString) -> float:
+        'Returns the angle (in radians) of a given line in relation with the X axis.'
+        start, end = line.boundary
+        if end.y - start.y == 0:  # Avoids dividing by zero.
+            return math.acos(0)
+        return -math.atan((end.x - start.x) / (end.y - start.y))
+
+    def resize_line(line: LineString, length: float) -> LineString:
+        'Returns a new line with the same center and angle of a given line, but with different length.'
+        angle = CircuitSvg.get_angle(line)
+        ext_x = round(length / 2 * math.sin(angle), 6)
+        ext_y = round(length / 2 * math.cos(angle), 6)
+        return LineString(([line.centroid.x + ext_x, line.centroid.y - ext_y],
+                        [line.centroid.x - ext_x, line.centroid.y + ext_y]))
+            
     def createHalfCircle(lineA, lineB, path, dpi, isLeft):
         pointA = lineA[1]
         pointB = lineB[0]
@@ -276,12 +344,12 @@ class CircuitSvg:
         yCenter = centroid[0][1]
         # получение контрольных точек для кривой безье
         
-        bezP1, bezP2 = CircuitSvg.calkControlPoints(lineA, shiftedLine, 0.01)
+        bezP1, bezP2 = CircuitSvg.calkControlPoints(lineA, shiftedLine, 0.101)
         if bezP1 is None:
             return
         path.C(bezP1.x / dpi, bezP1.y / dpi, bezP2.x / dpi, bezP2.y / dpi, xCenter / dpi, yCenter / dpi)
 
-        bezP1, bezP2 = CircuitSvg.calkControlPoints(lineB, shiftedLine, 0.01)
+        bezP1, bezP2 = CircuitSvg.calkControlPoints(lineB, shiftedLine, 0.101)
         if bezP1 is None:
             return
         path.C(bezP2.x / dpi, bezP2.y / dpi, bezP1.x / dpi, bezP1.y / dpi, lineB[0][0] / dpi,lineB[0][1] / dpi)
@@ -311,8 +379,8 @@ class CircuitSvg:
         lineResult2 = CircuitSvg.createLineFromInterction(coordsB[0],coordsB[1],result)
         # return lineResult1.centroid, result
         
-        bez0= CircuitSvg.divideLine(lineResult1, 0.01)
-        bez1= CircuitSvg.divideLine(lineResult2, 0.01)
+        bez0= CircuitSvg.divideLine(lineResult1, 0.101)
+        bez1= CircuitSvg.divideLine(lineResult2, 0.101)
         return bez0, bez1
     def distancePoint(pointA, pointB):
         deltaX = pointA[0]-pointB[0]
