@@ -82,6 +82,7 @@ class CircuitSvg:
             CircuitSvg.createHalfCircleVer2(pp0, pp1, pp2, pp3, path, dpi, False)
             # CircuitSvg.createHalfCircle(lineA, lineB, path, dpi, False)
             path.L(pp2.x / dpi, pp2.y / dpi).L(pp3.x / dpi, pp3.y / dpi) 
+            CircuitSvg.createHalfCircleVer2(pp2, pp3, pp0, pp1, path, dpi, False)
             # CircuitSvg.createHalfCircle(lineB, lineA, path, dpi, False)
             path.Z()
             draw.append(path)
