@@ -10,6 +10,8 @@ from shapely import *
 from shapely.geometry import Polygon
 from shapely.ops import split
 
+from bezier import bezier
+
 # статус паралельных линий
 class ParallStatus(enum.Enum):
     # не паралельны
@@ -79,11 +81,9 @@ class CircuitSvg:
             pp0, pp3 = CircuitSvg.aligmentVert(pp0, pp3)
 
             path.M(pp0.x / dpi, pp0.y / dpi).L(pp1.x / dpi, pp1.y / dpi) 
-            CircuitSvg.createHalfCircleVer2(pp0, pp1, pp2, pp3, path, dpi, False)
-            # CircuitSvg.createHalfCircle(lineA, lineB, path, dpi, False)
+            bezier.createHalfCircleVer2(pp0, pp1, pp2, pp3, path, dpi, False)
             path.L(pp2.x / dpi, pp2.y / dpi).L(pp3.x / dpi, pp3.y / dpi) 
-            CircuitSvg.createHalfCircleVer2(pp2, pp3, pp0, pp1, path, dpi, False)
-            # CircuitSvg.createHalfCircle(lineB, lineA, path, dpi, False)
+            bezier.createHalfCircleVer2(pp2, pp3, pp0, pp1, path, dpi, False)
             path.Z()
             draw.append(path)
             return
@@ -101,6 +101,10 @@ class CircuitSvg:
         for index in range(indexMax):
             lineA = lines[index]
             lineB = lines[index+1]
+            lineC = None
+            if index < indexMax - 2:
+                lineC = lines[index+2]
+                
             typeLine = lineA[2]
             corner = lineA[6]
             width = corner.maxX-corner.minX
@@ -174,6 +178,7 @@ class CircuitSvg:
                     path.C(centroid1.x / dpi, centroid1.y / dpi, centroid2.x / dpi,centroid2.y / dpi, pp3.x / dpi, pp3.y / dpi)
                 continue
             if corner.cross == ParallStatus.vert:
+                isFig0 = bezier.testFig0(lineA,lineB, lineC)
                 pp0 = Point(lineA[1][0],lineA[1][1])
                 # pp1 = Point(lineA[1][0],corner.minY)
                 # pp2 = Point(lineB[0][0],corner.minY)
@@ -206,11 +211,6 @@ class CircuitSvg:
         draw.append(path)
         return
     
-    def interpolatePoint(pointA, pointB, coff):
-        line = LineString([pointA, pointB])
-        length = line.length
-        ip = line.interpolate(length * coff)
-        return ip
     def convertToPoint(line):
         p0 = Point(line[0][0],line[0][1])
         p1 = Point(line[1][0],line[1][1])
@@ -253,80 +253,6 @@ class CircuitSvg:
         # path.C(fin[0] / dpi, fin[1] / dpi, fin[0] / dpi, fin[1] / dpi, lineB[0][0] / dpi,lineB[0][1] / dpi)
 
         return
-    # работа с овалами
-    # закруглени sA, fA, sB, fB
-    def createHalfCircleVer2(sA, fA, sB, fB, path, dpi, isLeft):
-        # начальная и конечная точка кривой
-        ab = LineString([fA, sB])
-        cd_length = ab.length
-        dir = 'left' 
-        if isLeft == False:
-            dir = 'right'
-        # сдвиг на половину длины
-        shiftedLine  = ab.parallel_offset(cd_length / 2, dir)
-        shiftedLineScaled  = CircuitSvg.resize_line(shiftedLine, cd_length * 2)
-        centroid = shiftedLineScaled.centroid
-        #  part 0
-        la=  LineString([sA, fA])
-        coff0 = 0.5
-        coff1 = 0.5
-        laScaled  = CircuitSvg.resize_line(la, la.length * 2)
-        result = shiftedLineScaled.intersection(laScaled)
-        bezP1 = CircuitSvg.interpolatePoint(result, fA, coff0)
-        bezP2 = CircuitSvg.interpolatePoint(result, centroid, coff1)
-        # path.L(bezP1.x / dpi, bezP1.y / dpi).L(bezP2.x / dpi, bezP2.y / dpi).L( centroid.x / dpi, centroid.y / dpi)
-        path.C(bezP1.x / dpi, bezP1.y / dpi, bezP2.x / dpi, bezP2.y / dpi, centroid.x / dpi, centroid.y / dpi)
-        
-        #  part 1
-        lb=  LineString([sB, fB])
-        lbScaled  = CircuitSvg.resize_line(lb, lb.length * 2)
-        result = shiftedLineScaled.intersection(lbScaled)
-        bezP1 = CircuitSvg.interpolatePoint(result, centroid, coff1)
-        bezP2 = CircuitSvg.interpolatePoint(result, sB, coff0)
-        # path.L(bezP1.x / dpi, bezP1.y / dpi).L(bezP2.x / dpi, bezP2.y / dpi).L( sB.x / dpi, sB.y / dpi)
-        path.C(bezP1.x / dpi, bezP1.y / dpi, bezP2.x / dpi, bezP2.y / dpi, sB.x / dpi, sB.y / dpi)
-        
-        return
-    def calkControlPointsVer2(lineA, lineB, place):
-        pointA0, pointA1 = CircuitSvg.convertToPoint(lineA)
-
-        pp0s, pp1s = CircuitSvg.scale(pointA0, pointA1, 30)
-        coordsB = lineB.coords
-        pp2s, pp3s = CircuitSvg.scale(Point(coordsB[0][0],coordsB[0][1]), Point(coordsB[1][0],coordsB[1][1]), 30)
-        l1 = LineString([pp0s, pp1s])
-        l2 = LineString([pp2s, pp3s])
-        # пересечение линий
-        result = l1.intersection(l2)
-        size = len(result.coords)
-        if size == 0:
-            return None, None
-
-        lineResult1 = CircuitSvg.createLineFromInterction(pointA0,pointA1,result)
-        # lineResult1 = lineResult1.centroid
-
-        lineResult2 = CircuitSvg.createLineFromInterction(coordsB[0],coordsB[1],result)
-        # return lineResult1.centroid, result
-        
-        bez0= CircuitSvg.divideLine(lineResult1, 0.101)
-        bez1= CircuitSvg.divideLine(lineResult2, 0.101)
-        return bez0, bez1
-    def get_angle(line: LineString) -> float:
-        'Returns the angle (in radians) of a given line in relation with the X axis.'
-        points = line.coords
-        # start, end = line.boundary
-        start, end = Point(points[0]),Point(points[1])
-        if end.y - start.y == 0:  # Avoids dividing by zero.
-            return math.acos(0)
-        return -math.atan((end.x - start.x) / (end.y - start.y))
-
-    def resize_line(line: LineString, length: float) -> LineString:
-        'Returns a new line with the same center and angle of a given line, but with different length.'
-        angle = CircuitSvg.get_angle(line)
-        ext_x = round(length / 2 * math.sin(angle), 6)
-        ext_y = round(length / 2 * math.cos(angle), 6)
-        return LineString(([line.centroid.x + ext_x, line.centroid.y - ext_y],
-                        [line.centroid.x - ext_x, line.centroid.y + ext_y]))
-            
     def createHalfCircle(lineA, lineB, path, dpi, isLeft):
         pointA = lineA[1]
         pointB = lineB[0]
@@ -386,8 +312,8 @@ class CircuitSvg:
         lineResult2 = CircuitSvg.createLineFromInterction(coordsB[0],coordsB[1],result)
         # return lineResult1.centroid, result
         
-        bez0= CircuitSvg.divideLine(lineResult1, 0.101)
-        bez1= CircuitSvg.divideLine(lineResult2, 0.101)
+        bez0= bezier.divideLine(lineResult1, 0.101)
+        bez1= bezier.divideLine(lineResult2, 0.101)
         return bez0, bez1
     def distancePoint(pointA, pointB):
         deltaX = pointA[0]-pointB[0]
@@ -413,10 +339,6 @@ class CircuitSvg:
         if l2length < l1length:
             return l2
         return l1
-    def divideLine(line, place):
-        splitter = MultiPoint([line.interpolate((place), normalized=True) for i in range(1, 2)])
-        split(line, splitter).wkt
-        return splitter.centroid
     # работа с контуром
     # создание зхакругления для контура
     # если Nont то паралельны

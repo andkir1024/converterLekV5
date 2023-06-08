@@ -214,7 +214,7 @@ def do_frame(imgOk, filesSrc, svgDir, param0):
     # param0 = frame2control.param0.get()
     imgGrey =cvDraw.createGray(imgOk, param0)
     imgTst = cvUtils.doContours(imgGrey, imgDraw, filesSrc, svgDir, dpiSvg)
-    return imgDraw
+    return imgDraw, imgTst
 def show_frame():
     global imgOk
     global updateImage
@@ -226,7 +226,7 @@ def show_frame():
     if updateImage == True or updateImageZoom == True:
         updateImage = False
         if imgOk is not None:
-            imgDraw = do_frame(imgOk, filesSrc, svgDir, slider1.get())
+            imgDraw,imgTst = do_frame(imgOk, filesSrc, svgDir, slider1.get())
 
             scale, dispX, dispY = calkViewParam(rmainImage, imgDraw)
             img = cv2.resize(imgDraw, (0, 0), interpolation=cv2.INTER_AREA, fx=scale, fy=scale)
@@ -253,6 +253,7 @@ def show_frame():
                 viewX = right-widthZoom
 
             # imgDraw = cv2.imdecode(np.fromfile("example.png", dtype=np.uint8), cv2.IMREAD_COLOR)
+            
             im_crop = imgDraw[viewY:viewY+heightZoom, viewX:right]
             # im_crop = imgTst[viewY:viewY+heightZoom, viewX:right]
 
