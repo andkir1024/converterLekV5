@@ -78,6 +78,8 @@ class CircuitSvg:
             pp1, pp2 = CircuitSvg.aligmentVert(pp1, pp2)
             pp0, pp3 = CircuitSvg.aligmentVert(pp0, pp3)
 
+            CircuitSvg.createHalfCircleByVer2(pp1, pp2, path, dpi, False)
+
             path.M(pp0.x / dpi, pp0.y / dpi).L(pp1.x / dpi, pp1.y / dpi) 
             CircuitSvg.createHalfCircle(lineA, lineB, path, dpi, False)
             # path.L(pp2.x / dpi, pp2.y / dpi).L(pp3.x / dpi, pp3.y / dpi) 
@@ -256,32 +258,34 @@ class CircuitSvg:
         # начальная и конечная точка кривой
         ab = LineString([startCur, finCur])
         cd_length = ab.length
-        dir = 'left'
+        dir = 'left' 
         if isLeft == False:
             dir = 'right'
         # сдвиг на половину длины
         shiftedLine  = ab.parallel_offset(cd_length / 2, dir)
-        s = scale(line, xfact=10.0, yfact=10.0, zfact=1.0)
-                                    
-        centroid = shiftedLine.centroid.coords
-        size = len(centroid)
-        if size == 0:
-            return
-        
-        xCenter = centroid[0][0]
-        yCenter = centroid[0][1]
-        # получение контрольных точек для кривой безье
-        
-        bezP1, bezP2 = CircuitSvg.calkControlPoints(lineA, shiftedLine, 0.101)
-        if bezP1 is None:
-            return
-        path.C(bezP1.x / dpi, bezP1.y / dpi, bezP2.x / dpi, bezP2.y / dpi, xCenter / dpi, yCenter / dpi)
-
-        bezP1, bezP2 = CircuitSvg.calkControlPoints(lineB, shiftedLine, 0.101)
-        if bezP1 is None:
-            return
-        path.C(bezP2.x / dpi, bezP2.y / dpi, bezP1.x / dpi, bezP1.y / dpi, lineB[0][0] / dpi,lineB[0][1] / dpi)
+        shiftedLineScaled  =CircuitSvg.resize_line(shiftedLine, cd_length * 2)
         return
+        # s = scale(line, xfact=10.0, yfact=10.0, zfact=1.0)
+                                    
+        # centroid = shiftedLine.centroid.coords
+        # size = len(centroid)
+        # if size == 0:
+        #     return
+        
+        # xCenter = centroid[0][0]
+        # yCenter = centroid[0][1]
+        # # получение контрольных точек для кривой безье
+        
+        # bezP1, bezP2 = CircuitSvg.calkControlPointsVer2(lineA, shiftedLine, 0.101)
+        # if bezP1 is None:
+        #     return
+        # path.C(bezP1.x / dpi, bezP1.y / dpi, bezP2.x / dpi, bezP2.y / dpi, xCenter / dpi, yCenter / dpi)
+
+        # bezP1, bezP2 = CircuitSvg.calkControlPointsVer2(lineB, shiftedLine, 0.101)
+        # if bezP1 is None:
+        #     return
+        # path.C(bezP2.x / dpi, bezP2.y / dpi, bezP1.x / dpi, bezP1.y / dpi, lineB[0][0] / dpi,lineB[0][1] / dpi)
+        # return
     def calkControlPointsVer2(lineA, lineB, place):
         pointA0, pointA1 = CircuitSvg.convertToPoint(lineA)
 
@@ -307,7 +311,9 @@ class CircuitSvg:
         return bez0, bez1
     def get_angle(line: LineString) -> float:
         'Returns the angle (in radians) of a given line in relation with the X axis.'
-        start, end = line.boundary
+        points = line.coords
+        # start, end = line.boundary
+        start, end = Point(points[0]),Point(points[1])
         if end.y - start.y == 0:  # Avoids dividing by zero.
             return math.acos(0)
         return -math.atan((end.x - start.x) / (end.y - start.y))
