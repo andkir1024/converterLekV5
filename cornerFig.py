@@ -78,11 +78,10 @@ class CircuitSvg:
             pp1, pp2 = CircuitSvg.aligmentVert(pp1, pp2)
             pp0, pp3 = CircuitSvg.aligmentVert(pp0, pp3)
 
-            CircuitSvg.createHalfCircleByVer2(pp1, pp2, path, dpi, False)
-
             path.M(pp0.x / dpi, pp0.y / dpi).L(pp1.x / dpi, pp1.y / dpi) 
-            CircuitSvg.createHalfCircle(lineA, lineB, path, dpi, False)
-            # path.L(pp2.x / dpi, pp2.y / dpi).L(pp3.x / dpi, pp3.y / dpi) 
+            CircuitSvg.createHalfCircleVer2(pp0, pp1, pp2, pp3, path, dpi, False)
+            # CircuitSvg.createHalfCircle(lineA, lineB, path, dpi, False)
+            path.L(pp2.x / dpi, pp2.y / dpi).L(pp3.x / dpi, pp3.y / dpi) 
             # CircuitSvg.createHalfCircle(lineB, lineA, path, dpi, False)
             path.Z()
             draw.append(path)
@@ -254,38 +253,39 @@ class CircuitSvg:
 
         return
     # работа с овалами
-    def createHalfCircleByVer2(startCur, finCur, path, dpi, isLeft):
+    # закруглени sA, fA, sB, fB
+    def createHalfCircleVer2(sA, fA, sB, fB, path, dpi, isLeft):
         # начальная и конечная точка кривой
-        ab = LineString([startCur, finCur])
+        ab = LineString([fA, sB])
         cd_length = ab.length
         dir = 'left' 
         if isLeft == False:
             dir = 'right'
         # сдвиг на половину длины
         shiftedLine  = ab.parallel_offset(cd_length / 2, dir)
-        shiftedLineScaled  =CircuitSvg.resize_line(shiftedLine, cd_length * 2)
+        shiftedLineScaled  = CircuitSvg.resize_line(shiftedLine, cd_length * 2)
+        centroid = shiftedLineScaled.centroid
+        #  part 0
+        la=  LineString([sA, fA])
+        coff0 = 0.5
+        coff1 = 0.5
+        laScaled  = CircuitSvg.resize_line(la, la.length * 2)
+        result = shiftedLineScaled.intersection(laScaled)
+        bezP1 = CircuitSvg.interpolatePoint(result, fA, coff0)
+        bezP2 = CircuitSvg.interpolatePoint(result, centroid, coff1)
+        # path.L(bezP1.x / dpi, bezP1.y / dpi).L(bezP2.x / dpi, bezP2.y / dpi).L( centroid.x / dpi, centroid.y / dpi)
+        path.C(bezP1.x / dpi, bezP1.y / dpi, bezP2.x / dpi, bezP2.y / dpi, centroid.x / dpi, centroid.y / dpi)
+        
+        #  part 1
+        lb=  LineString([sB, fB])
+        lbScaled  = CircuitSvg.resize_line(lb, lb.length * 2)
+        result = shiftedLineScaled.intersection(lbScaled)
+        bezP1 = CircuitSvg.interpolatePoint(result, centroid, coff1)
+        bezP2 = CircuitSvg.interpolatePoint(result, sB, coff0)
+        # path.L(bezP1.x / dpi, bezP1.y / dpi).L(bezP2.x / dpi, bezP2.y / dpi).L( sB.x / dpi, sB.y / dpi)
+        path.C(bezP1.x / dpi, bezP1.y / dpi, bezP2.x / dpi, bezP2.y / dpi, sB.x / dpi, sB.y / dpi)
+        
         return
-        # s = scale(line, xfact=10.0, yfact=10.0, zfact=1.0)
-                                    
-        # centroid = shiftedLine.centroid.coords
-        # size = len(centroid)
-        # if size == 0:
-        #     return
-        
-        # xCenter = centroid[0][0]
-        # yCenter = centroid[0][1]
-        # # получение контрольных точек для кривой безье
-        
-        # bezP1, bezP2 = CircuitSvg.calkControlPointsVer2(lineA, shiftedLine, 0.101)
-        # if bezP1 is None:
-        #     return
-        # path.C(bezP1.x / dpi, bezP1.y / dpi, bezP2.x / dpi, bezP2.y / dpi, xCenter / dpi, yCenter / dpi)
-
-        # bezP1, bezP2 = CircuitSvg.calkControlPointsVer2(lineB, shiftedLine, 0.101)
-        # if bezP1 is None:
-        #     return
-        # path.C(bezP2.x / dpi, bezP2.y / dpi, bezP1.x / dpi, bezP1.y / dpi, lineB[0][0] / dpi,lineB[0][1] / dpi)
-        # return
     def calkControlPointsVer2(lineA, lineB, place):
         pointA0, pointA1 = CircuitSvg.convertToPoint(lineA)
 
