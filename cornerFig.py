@@ -58,12 +58,6 @@ class Corner:
         self.linesFig = linesFig
 
 class CircuitSvg:
-    def aligmentHor(pp0, pp1):
-        y = pp0.y + ((pp1.y - pp0.y)/2)
-        return Point(pp0.x, y), Point(pp1.x, y)
-    def aligmentVert(pp0, pp1):
-        x = pp0.x + ((pp1.x - pp0.x)/2)
-        return Point(x, pp0.y), Point(x, pp1.y)
     def createContureSvg(lines, draw, path, dpi):
         indexMax = len(lines)-1
         # добавление горизонтального овала 
@@ -71,8 +65,8 @@ class CircuitSvg:
             lineA = lines[0]
             lineB = lines[1]
 
-            pp0, pp1 = CircuitSvg.convertToPoint(lineA)
-            pp2, pp3 = CircuitSvg.convertToPoint(lineB)
+            pp0, pp1 = bezier.convertToPoint(lineA)
+            pp2, pp3 = bezier.convertToPoint(lineB)
             
             pp0, pp1 = CircuitSvg.aligmentHor(pp0, pp1)
             pp2, pp3 = CircuitSvg.aligmentHor(pp2, pp3)
@@ -211,10 +205,6 @@ class CircuitSvg:
         draw.append(path)
         return
     
-    def convertToPoint(line):
-        p0 = Point(line[0][0],line[0][1])
-        p1 = Point(line[1][0],line[1][1])
-        return p0, p1
     def convertToLineString(line):
         pointA = line[0]
         pointB = line[1]
@@ -293,7 +283,7 @@ class CircuitSvg:
         return
     # вычисление контрольных точек для безье
     def calkControlPoints(lineA, lineB, place):
-        pointA0, pointA1 = CircuitSvg.convertToPoint(lineA)
+        pointA0, pointA1 = bezier.convertToPoint(lineA)
 
         pp0s, pp1s = CircuitSvg.scale(pointA0, pointA1, 30)
         coordsB = lineB.coords

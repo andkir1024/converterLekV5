@@ -11,7 +11,9 @@ from scipy import interpolate
 
 class bezier:
     # тестирование вертикальые линии последовательно
-    def testFig0(lineA, lineB, lineС):
+    def testFig0(lineA, lineB, lineC):
+        pp0, pp1 = bezier.convertToPoint(lineA)
+        pp2, pp3 = bezier.convertToPoint(lineB)
         return False
     def createHalfCircleVer2(sA, fA, sB, fB, path, dpi, isLeft):
         # начальная и конечная точка кривой
@@ -74,3 +76,52 @@ class bezier:
         splitter = MultiPoint([line.interpolate((place), normalized=True) for i in range(1, 2)])
         split(line, splitter).wkt
         return splitter.centroid
+    def convertToPoint(line):
+        p0 = Point(line[0][0],line[0][1])
+        p1 = Point(line[1][0],line[1][1])
+        return p0, p1
+    def aligmentHor(pp0, pp1):
+        y = pp0.y + ((pp1.y - pp0.y)/2)
+        return Point(pp0.x, y), Point(pp1.x, y)
+    def aligmentVert(pp0, pp1):
+        x = pp0.x + ((pp1.x - pp0.x)/2)
+        return Point(x, pp0.y), Point(x, pp1.y)
+    def is_eql(a_delta, b_delta, dist):
+        dist = 4
+        if b_delta < dist and a_delta < dist:
+            return True
+        return False
+    def is_parallel(line1, line2,minX,minY,maxX,maxY,linesFig ):
+        a_delta_x = abs(line1[1][0] - line1[0][0])
+        a_delta_y = abs(line1[1][1] - line1[0][1])
+        b_delta_x = abs(line2[1][0] - line2[0][0])
+        b_delta_y = abs(line2[1][1] - line2[0][1])
+        '''
+        # паралельность по вертикали
+        eqVert = bezier.is_eql(a_delta_x, b_delta_x, 4)
+        # паралельность по горизонтали
+        eqHor = bezier.is_eql(a_delta_y, b_delta_y, 4)
+        if eqHor == True:
+            deltaX = line2[0][0] - line1[1][0]
+            # начало второй правее конца первой (по горизонтали)
+            # if line2[0][0] > line1[1][0]:
+            #     # высота второй ниже высоты первой (по верикали)
+            #     if line2[0][1] > line1[1][1]:
+            #         return ParallStatus.hor_down
+            #     else:
+            #         return ParallStatus.hor_up
+            # return ParallStatus.hor
+
+        if eqVert == True:
+            # return ParallStatus.vert
+            # начало второй правее конца первой (по горизонтали)
+            # if line2[0][0] > line1[1][0]:
+            #     # высота второй ниже высоты первой (по верикали)
+            #     if line2[0][1] > line1[1][1]:
+            #         return ParallStatus.hor_down
+            #     else:
+            #         return ParallStatus.hor_up
+            # return ParallStatus.hor
+
+        # return ParallStatus.none
+        '''        
