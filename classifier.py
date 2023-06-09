@@ -8,7 +8,7 @@ from shapely import Point
 from shapely import *
 from shapely.geometry import Polygon
 from shapely.ops import split
-from scipy import interpolate
+# from scipy import interpolate
 
 class classifier:
     # вырезаем короткие линии

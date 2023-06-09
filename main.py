@@ -18,7 +18,7 @@ filesSrc = None
 svgDir = '../outSvg/'
 cmpDir = '../outSvg/'
 doConsole = True
-dpiSvg = 9.066
+dpiSvg = 9.977
 
 argumentList = sys.argv[1:]
 options = "hmo:"
@@ -77,7 +77,7 @@ if doConsole == False:
     root = Tk()
     root.bind('<Escape>', lambda e: root.quit())
     root.title("Лекала тестер")
-    root.geometry("1700x900+0+0")
+    root.geometry("1700x1000+0+0")
 
     frame1original = Frame(master=root, bg="red")
     frame1original.pack()
@@ -210,11 +210,14 @@ def convertScreenToImageCoord(rmainImage, imgOk, xZoom, yZoom):
     # viewY = 934
     return viewX, viewY
 def do_frame(imgOk, filesSrc, svgDir, param0):
-    imgDraw = imgOk.copy()
-    # param0 = frame2control.param0.get()
-    imgGrey =cvDraw.createGray(imgOk, param0)
-    imgTst = cvUtils.doContours(imgGrey, imgDraw, filesSrc, svgDir, dpiSvg)
-    return imgDraw, imgTst
+    try:
+        imgDraw = imgOk.copy()
+        # param0 = frame2control.param0.get()
+        imgGrey =cvDraw.createGray(imgOk, param0)
+        imgTst = cvUtils.doContours(imgGrey, imgDraw, filesSrc, svgDir, dpiSvg)
+    except:
+        return imgDraw, imgDraw, False
+    return imgDraw, imgTst, True
 def show_frame():
     global imgOk
     global updateImage
@@ -226,7 +229,7 @@ def show_frame():
     if updateImage == True or updateImageZoom == True:
         updateImage = False
         if imgOk is not None:
-            imgDraw,imgTst = do_frame(imgOk, filesSrc, svgDir, slider1.get())
+            imgDraw,imgTst, resImag = do_frame(imgOk, filesSrc, svgDir, slider1.get())
 
             scale, dispX, dispY = calkViewParam(rmainImage, imgDraw)
             img = cv2.resize(imgDraw, (0, 0), interpolation=cv2.INTER_AREA, fx=scale, fy=scale)
@@ -276,8 +279,11 @@ else:
         nowStart = datetime.datetime.now()
         for f in listFiles:
             imgOk = cv2.imdecode(np.fromfile(f, dtype=np.uint8), cv2.IMREAD_COLOR)
-            do_frame(imgOk, f, svgDir, 0)
-            print(f)
+            imd0, img1, ok = do_frame(imgOk, f, svgDir, 0)
+            if ok == True:
+                print(f)
+            else:
+                print('файл дефектный:'+f)
         now = datetime.datetime.now()
         tdelta = (now - nowStart).total_seconds()
         print(f"Завершена за: {tdelta} сек")

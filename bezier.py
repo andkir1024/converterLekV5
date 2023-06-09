@@ -7,14 +7,33 @@ from shapely import Point
 from shapely import *
 from shapely.geometry import Polygon
 from shapely.ops import split
-from scipy import interpolate
+# from scipy import interpolate
 
 class bezier:
+    def is_eql(a_delta, b_delta, dist):
+        if b_delta < dist and a_delta < dist:
+            return True
+        return False
+    def is_eqlVal(a_val, b_val, dist):
+        delta = (a_val - b_val)
+        if delta < dist:
+            return True
+        return False
     # тестирование вертикальые линии последовательно
-    def testFig0(lineA, lineB, lineC):
+    def testFig0(lineA, lineB, lineC, path, dpi):
         pp0, pp1 = bezier.convertToPoint(lineA)
         pp2, pp3 = bezier.convertToPoint(lineB)
-        return False
+        sY = pp1.y
+        fY = pp2.y
+        eqVert = bezier.is_eqlVal(sY, fY, 4)
+        deltaY1 = pp1.y-pp0.y
+        deltaY2 = pp3.y-pp2.y
+        sign = deltaY1 * deltaY2
+        if eqVert == True  and sign >= 0:
+        # if eqVert == True:
+            path.L(pp1.x / dpi, pp1.y / dpi).L(pp2.x / dpi, pp2.y / dpi) 
+            return True
+        return False    
     def createHalfCircleVer2(sA, fA, sB, fB, path, dpi, isLeft):
         # начальная и конечная точка кривой
         ab = LineString([fA, sB])
@@ -53,6 +72,7 @@ class bezier:
     def get_angle(line: LineString) -> float:
         'Returns the angle (in radians) of a given line in relation with the X axis.'
         points = line.coords
+            
         # start, end = line.boundary
         start, end = Point(points[0]),Point(points[1])
         if end.y - start.y == 0:  # Avoids dividing by zero.
@@ -61,6 +81,9 @@ class bezier:
 
     def resize_line(line: LineString, length: float) -> LineString:
         'Returns a new line with the same center and angle of a given line, but with different length.'
+        if len(line.coords) == 0:
+            return None
+
         angle = bezier.get_angle(line)
         ext_x = round(length / 2 * math.sin(angle), 6)
         ext_y = round(length / 2 * math.cos(angle), 6)
@@ -86,11 +109,6 @@ class bezier:
     def aligmentVert(pp0, pp1):
         x = pp0.x + ((pp1.x - pp0.x)/2)
         return Point(x, pp0.y), Point(x, pp1.y)
-    def is_eql(a_delta, b_delta, dist):
-        dist = 4
-        if b_delta < dist and a_delta < dist:
-            return True
-        return False
     def is_parallel(line1, line2,minX,minY,maxX,maxY,linesFig ):
         a_delta_x = abs(line1[1][0] - line1[0][0])
         a_delta_y = abs(line1[1][1] - line1[0][1])

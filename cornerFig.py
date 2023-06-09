@@ -68,11 +68,11 @@ class CircuitSvg:
             pp0, pp1 = bezier.convertToPoint(lineA)
             pp2, pp3 = bezier.convertToPoint(lineB)
             
-            pp0, pp1 = CircuitSvg.aligmentHor(pp0, pp1)
-            pp2, pp3 = CircuitSvg.aligmentHor(pp2, pp3)
+            pp0, pp1 = bezier.aligmentHor(pp0, pp1)
+            pp2, pp3 = bezier.aligmentHor(pp2, pp3)
             
-            pp1, pp2 = CircuitSvg.aligmentVert(pp1, pp2)
-            pp0, pp3 = CircuitSvg.aligmentVert(pp0, pp3)
+            pp1, pp2 = bezier.aligmentVert(pp1, pp2)
+            pp0, pp3 = bezier.aligmentVert(pp0, pp3)
 
             path.M(pp0.x / dpi, pp0.y / dpi).L(pp1.x / dpi, pp1.y / dpi) 
             bezier.createHalfCircleVer2(pp0, pp1, pp2, pp3, path, dpi, False)
@@ -145,7 +145,7 @@ class CircuitSvg:
                     # path.L(tL.x / dpi, tL.y / dpi) 
                     centroid1 = Point(xL,yS)
                     centroid2 = Point(xL,yS)
-                    centroid2 = CircuitSvg.interpolatePoint(centroid2, tL, 0.1)
+                    centroid2 = bezier.interpolatePoint(centroid2, tL, 0.1)
                     path.C(centroid1.x / dpi, centroid1.y / dpi, centroid2.x / dpi,centroid2.y / dpi, tL.x / dpi, tL.y / dpi)
                     
                     # сплине 1 (center l)
@@ -153,7 +153,7 @@ class CircuitSvg:
                     centroid1 = Point(xL,tMain.y)
                     centroid2 = Point(xL,tMain.y)
                     # centroid2 = CircuitSvg.interpolatePoint(centroid2, tMain, 0)
-                    centroid2 = CircuitSvg.interpolatePoint(centroid2, tMain, 0.4)
+                    centroid2 = bezier.interpolatePoint(centroid2, tMain, 0.4)
                     path.C(centroid1.x / dpi, centroid1.y / dpi, centroid2.x / dpi,centroid2.y / dpi, tMain.x / dpi, tMain.y / dpi)
                 
                 if doReversS:
@@ -161,34 +161,38 @@ class CircuitSvg:
                     # path.L(tR.x / dpi, tR.y / dpi) 
                     centroid1 = Point(xR,tMain.y)
                     centroid2 = Point(xR,tMain.y)
-                    centroid1 = CircuitSvg.interpolatePoint(centroid1, tMain, 0.4)
+                    centroid1 = bezier.interpolatePoint(centroid1, tMain, 0.4)
                     path.C(centroid1.x / dpi, centroid1.y / dpi, centroid2.x / dpi,centroid2.y / dpi, tR.x / dpi, tR.y / dpi)
 
                     # сплине 3
                     # path.L(pp3.x / dpi, pp3.y / dpi) 
                     centroid1 = Point(xR,yE)
                     centroid2 = Point(xR,yE)
-                    centroid1 = CircuitSvg.interpolatePoint(centroid1, tR, 0.1)
+                    centroid1 = bezier.interpolatePoint(centroid1, tR, 0.1)
                     path.C(centroid1.x / dpi, centroid1.y / dpi, centroid2.x / dpi,centroid2.y / dpi, pp3.x / dpi, pp3.y / dpi)
                 continue
             if corner.cross == ParallStatus.vert:
-                isFig0 = bezier.testFig0(lineA,lineB, lineC)
-                pp0 = Point(lineA[1][0],lineA[1][1])
-                # pp1 = Point(lineA[1][0],corner.minY)
-                # pp2 = Point(lineB[0][0],corner.minY)
+                isFig0 = bezier.testFig0(lineA,lineB, lineC, path, dpi)
+                if isFig0 == True:
+                    continue
+                else:
+                    pp0 = Point(lineA[1][0],lineA[1][1])
+                    # pp1 = Point(lineA[1][0],corner.minY)
+                    # pp2 = Point(lineB[0][0],corner.minY)
 
-                pp1 = Point(lineA[1][0],lineA[1][1])
-                pp2 = Point(lineB[0][0],lineA[1][1])
-                pp2 = Point(corner.minX + ((corner.maxX - corner.minX)/2),corner.minY)
-                pp3 = Point(lineB[0][0],lineB[0][1])
+                    pp1 = Point(lineA[1][0],lineA[1][1])
+                    pp2 = Point(lineB[0][0],lineA[1][1])
+                    pp2 = Point(corner.minX + ((corner.maxX - corner.minX)/2),corner.minY)
+                    pp3 = Point(lineB[0][0],lineB[0][1])
+                    
+                    path.L(pp0.x / dpi, pp0.y / dpi) 
+                    
+                    # path.L(pp1.x / dpi, pp1.y / dpi) 
+                    # path.L(pp2.x / dpi, pp2.y / dpi) 
+                    # path.L(pp3.x / dpi, pp3.y / dpi) 
+                    
+                    CircuitSvg.createHalfCircle(lineA, lineB, path, dpi, True)                
                 
-                path.L(pp0.x / dpi, pp0.y / dpi) 
-                
-                # path.L(pp1.x / dpi, pp1.y / dpi) 
-                # path.L(pp2.x / dpi, pp2.y / dpi) 
-                # path.L(pp3.x / dpi, pp3.y / dpi) 
-                
-                CircuitSvg.createHalfCircle(lineA, lineB, path, dpi, True)                
                 continue
             # if typeLine == LineStatus.sequest:
             #     path.L(lineB[1][0] / dpi,lineB[1][1] / dpi) 
