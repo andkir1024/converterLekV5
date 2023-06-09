@@ -104,7 +104,12 @@ class CircuitSvg:
             width = corner.maxX-corner.minX
             height = corner.maxY-corner.minY
             if corner.cross == ParallStatus.hor:
-                isFig1 = bezier.testFig1(lineA,lineB, corner, path, dpi)
+                deltaX = abs(lineB[0][0] - lineA[1][0])
+                deltaY = abs(lineB[0][1] - lineA[1][1])
+                if deltaY >10:
+                    isFig1 = bezier.testFig1(lineA,lineB, corner, path, dpi)
+                else:
+                    isFig1 = bezier.testFig2(lineA,lineB, corner, path, dpi)
                 '''
                 pp0 = Point(lineA[1][0],lineA[1][1])
                 # pp1 = Point(lineA[1][0],corner.maxY)

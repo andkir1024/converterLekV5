@@ -19,6 +19,70 @@ class bezier:
         if delta < dist:
             return True
         return False
+    def findVertInFig(figure):
+        xL=10000 
+        xR=0
+        posXL = None
+        posXR = None
+        for fig in figure:
+            len = fig[3]
+            dY = abs(fig[0][1]-fig[1][1])
+            if len > 10:
+                if dY < xL:
+                    xL=dY
+                    posXL = fig[0][0]
+                if dY > xR:
+                    xR=dY
+                    posXR = fig[0][0]
+        return posXL, posXR
+    def testFig2(lineA, lineB, corner, path, dpi):
+        pp0, pp1 = bezier.convertToPoint(lineA)
+        pp2, pp3 = bezier.convertToPoint(lineB)
+        
+        figure = corner.linesFig
+        if figure != None:
+            posXL, posXR = bezier.findVertInFig(figure)
+            if posXL is not None and posXR is not None:
+                corner.minX = posXL
+                corner.maxX = posXR
+                # corner.minX = 1267
+                # corner.maxX = 1374
+        xCenter = corner.minX + ((corner.maxX - corner.minX)/2)
+        yCenter = corner.minY + ((corner.maxY - corner.minY)/2)
+        dX = pp2.x - pp1.x
+        radius = dX / 2
+
+        coff0 = 0.5
+        coff1 = 0.2
+        # part1
+        pA = Point(corner.minX,corner.minY)
+        pB = Point(corner.minX,corner.maxY-radius)
+        pC = Point(corner.minX,corner.maxY)
+        pD = Point(xCenter,corner.maxY)
+        pE = Point(corner.maxX,corner.maxY)
+        pF = Point(corner.maxX,corner.maxY-radius)
+        pG = Point(corner.maxX,corner.minY)
+
+        path.L(pA.x / dpi, pA.y / dpi) 
+        path.L(pB.x / dpi, pB.y / dpi) 
+        
+        # path.L(pC.x / dpi, pC.y / dpi) 
+        # path.L(pD.x / dpi, pD.y / dpi) 
+        bezier.doCorner(pB, pC, pD, path, dpi, 0.7, 0.3)
+
+        # path.L(pE.x / dpi, pE.y / dpi) 
+        # path.L(pF.x / dpi, pF.y / dpi) 
+        bezier.doCorner(pD, pE, pF, path, dpi, 0.7, 0.3)
+
+        path.L(pG.x / dpi, pG.y / dpi) 
+
+        return True 
+    def doCorner(pA, pB, pC, path, dpi, coff0, coff1):
+        bezP1 = bezier.interpolatePoint(pA, pB, coff0)
+        bezP2 = bezier.interpolatePoint(pB, pC, coff1)
+        # path.L(bezP1.x / dpi, bezP1.y / dpi).L(bezP2.x / dpi, bezP2.y / dpi).L( pC.x / dpi, pC.y / dpi)
+        path.C(bezP1.x / dpi, bezP1.y / dpi, bezP2.x / dpi, bezP2.y / dpi, pC.x / dpi, pC.y / dpi)
+        return
     # тестирование горизонтальные линии последовательно
     def testFig1(lineA, lineB, corner, path, dpi):
         pp0, pp1 = bezier.convertToPoint(lineA)
@@ -70,66 +134,6 @@ class bezier:
             # path.L(bezP1.x / dpi, bezP1.y / dpi).L(bezP2.x / dpi, bezP2.y / dpi).L( pE.x / dpi, pE.y / dpi)
             path.C(bezP1.x / dpi, bezP1.y / dpi, bezP2.x / dpi, bezP2.y / dpi, pE.x / dpi, pE.y / dpi)
         return True 
-        '''
-        pp0 = Point(lineA[1][0],lineA[1][1])
-        pp3 = Point(lineB[0][0],lineB[0][1])
-
-        xS = lineA[1][0]
-        xCenter = corner.minX + ((corner.maxX - corner.minX)/2)
-        xL = corner.minX + ((xCenter - corner.minX)/2)
-        xR = xCenter + ((xCenter - corner.minX)/2)
-        xE = lineB[0][0]
-        
-        deltaY = lineA[1][1] - lineB[0][1]
-        doReversS = True
-        doS = True
-        if abs(deltaY) > 5:
-            if deltaY > 5:
-                doS = False
-            else:
-                doReversS = False
-
-        yS = lineA[1][1]
-        yCenter = corner.minY + ((corner.maxY - corner.minY)/2)
-        yE = lineB[0][1]
-
-        tL = Point(xL,yCenter)
-        tMain = Point(xCenter,corner.maxY)
-        tR = Point(xR,yCenter)
-
-        path.L(pp0.x / dpi, pp0.y / dpi) 
-        if doS:
-            # сплине 0
-            # path.L(tL.x / dpi, tL.y / dpi) 
-            centroid1 = Point(xL,yS)
-            centroid2 = Point(xL,yS)
-            centroid2 = bezier.interpolatePoint(centroid2, tL, 0.1)
-            path.C(centroid1.x / dpi, centroid1.y / dpi, centroid2.x / dpi,centroid2.y / dpi, tL.x / dpi, tL.y / dpi)
-            
-            # сплине 1 (center l)
-            # path.L(tMain.x / dpi, tMain.y / dpi) 
-            centroid1 = Point(xL,tMain.y)
-            centroid2 = Point(xL,tMain.y)
-            # centroid2 = CircuitSvg.interpolatePoint(centroid2, tMain, 0)
-            centroid2 = bezier.interpolatePoint(centroid2, tMain, 0.4)
-            path.C(centroid1.x / dpi, centroid1.y / dpi, centroid2.x / dpi,centroid2.y / dpi, tMain.x / dpi, tMain.y / dpi)
-        
-        if doReversS:
-            # сплине 2 (center r)
-            # path.L(tR.x / dpi, tR.y / dpi) 
-            centroid1 = Point(xR,tMain.y)
-            centroid2 = Point(xR,tMain.y)
-            centroid1 = bezier.interpolatePoint(centroid1, tMain, 0.4)
-            path.C(centroid1.x / dpi, centroid1.y / dpi, centroid2.x / dpi,centroid2.y / dpi, tR.x / dpi, tR.y / dpi)
-
-            # сплине 3
-            # path.L(pp3.x / dpi, pp3.y / dpi) 
-            centroid1 = Point(xR,yE)
-            centroid2 = Point(xR,yE)
-            centroid1 = bezier.interpolatePoint(centroid1, tR, 0.1)
-            path.C(centroid1.x / dpi, centroid1.y / dpi, centroid2.x / dpi,centroid2.y / dpi, pp3.x / dpi, pp3.y / dpi)
-        '''
-        return False    
     # тестирование вертикальые линии последовательно
     def testFig0(lineA, lineB, lineC, path, dpi):
         pp0, pp1 = bezier.convertToPoint(lineA)
