@@ -210,20 +210,20 @@ def convertScreenToImageCoord(rmainImage, imgOk, xZoom, yZoom):
     # viewY = 934
     return viewX, viewY
 def do_frame(imgOk, filesSrc, svgDir, param0):
-    imgDraw = imgOk.copy()
-    # param0 = frame2control.param0.get()
-    imgGrey =cvDraw.createGray(imgOk, param0)
-    imgTst = cvUtils.doContours(imgGrey, imgDraw, filesSrc, svgDir, dpiSvg)
-    return imgDraw, imgDraw, False
+    # imgDraw = imgOk.copy()
+    # # param0 = frame2control.param0.get()  
+    # imgGrey =cvDraw.createGray(imgOk, param0)
+    # imgTst = cvUtils.doContours(imgGrey, imgDraw, filesSrc, svgDir, dpiSvg)
+    # return imgDraw, imgDraw, False
     
-    # try:
-    #     imgDraw = imgOk.copy()
-    #     # param0 = frame2control.param0.get()
-    #     imgGrey =cvDraw.createGray(imgOk, param0)
-    #     imgTst = cvUtils.doContours(imgGrey, imgDraw, filesSrc, svgDir, dpiSvg)
-    # except:
-    #     return imgDraw, imgDraw, False
-    # return imgDraw, imgTst, True
+    try:
+        imgDraw = imgOk.copy()
+        # param0 = frame2control.param0.get()
+        imgGrey =cvDraw.createGray(imgOk, param0)
+        imgTst = cvUtils.doContours(imgGrey, imgDraw, filesSrc, svgDir, dpiSvg)
+    except:
+        return imgDraw, imgDraw, False
+    return imgDraw, imgTst, True
 def show_frame():
     global imgOk
     global updateImage
