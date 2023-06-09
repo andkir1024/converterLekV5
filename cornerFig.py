@@ -104,6 +104,8 @@ class CircuitSvg:
             width = corner.maxX-corner.minX
             height = corner.maxY-corner.minY
             if corner.cross == ParallStatus.hor:
+                isFig1 = bezier.testFig1(lineA,lineB, corner, path, dpi)
+                '''
                 pp0 = Point(lineA[1][0],lineA[1][1])
                 # pp1 = Point(lineA[1][0],corner.maxY)
                 # pp2 = Point(lineB[0][0],corner.maxY)
@@ -170,6 +172,7 @@ class CircuitSvg:
                     centroid2 = Point(xR,yE)
                     centroid1 = bezier.interpolatePoint(centroid1, tR, 0.1)
                     path.C(centroid1.x / dpi, centroid1.y / dpi, centroid2.x / dpi,centroid2.y / dpi, pp3.x / dpi, pp3.y / dpi)
+                '''
                 continue
             if corner.cross == ParallStatus.vert:
                 isFig0 = bezier.testFig0(lineA,lineB, lineC, path, dpi)
