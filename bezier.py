@@ -28,10 +28,15 @@ class bezier:
         eqVert = bezier.is_eqlVal(sY, fY, 4)
         deltaY1 = pp1.y-pp0.y
         deltaY2 = pp3.y-pp2.y
+        deltaX = pp1.x-pp2.x
         sign = deltaY1 * deltaY2
         if eqVert == True  and sign >= 0:
-        # if eqVert == True:
-            path.L(pp1.x / dpi, pp1.y / dpi).L(pp2.x / dpi, pp2.y / dpi) 
+            if deltaX > 0:
+                path.L(pp1.x / dpi, pp1.y / dpi).L(pp2.x / dpi, pp1.y / dpi) 
+            else:
+                path.L(pp1.x / dpi, pp2.y / dpi).L(pp2.x / dpi, pp2.y / dpi) 
+            # path.L(pp1.x / dpi, pp1.y / dpi).L(pp2.x / dpi, pp1.y / dpi) 
+            # path.L(pp1.x / dpi, pp1.y / dpi).L(pp2.x / dpi, pp2.y / dpi) 
             return True
         return False    
     def createHalfCircleVer2(sA, fA, sB, fB, path, dpi, isLeft):
