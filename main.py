@@ -221,9 +221,11 @@ def do_frame(imgOk, filesSrc, svgDir, param0):
         # param0 = frame2control.param0.get()
         imgGrey =cvDraw.createGray(imgOk, param0)
         imgTst = cvUtils.doContours(imgGrey, imgDraw, filesSrc, svgDir, dpiSvg)
-    except:
-        return imgDraw, imgDraw, False
-    return imgDraw, imgTst, True
+        # valu =0
+        # zz= valu /0
+    except Exception as e:
+        return imgDraw, imgDraw, e
+    return imgDraw, imgTst, None
 def show_frame():
     global imgOk
     global updateImage
@@ -286,9 +288,10 @@ else:
         for f in listFiles:
             imgOk = cv2.imdecode(np.fromfile(f, dtype=np.uint8), cv2.IMREAD_COLOR)
             imd0, img1, ok = do_frame(imgOk, f, svgDir, 0)
-            if ok == True:
+            if ok is None:
                 print(f)
             else:
+                print(ok)
                 print('файл дефектный:'+f)
         now = datetime.datetime.now()
         tdelta = (now - nowStart).total_seconds()
