@@ -93,7 +93,8 @@ class classifier:
             minX,minY,maxX,maxY,linesFig = classifier.calkFigRect(sel_countour, lines, line, lineNext)
             # определение точки пересечения для закругдегия угла
             cross = classifier.calkCrossLine(line, lineNext, minX,minY,maxX,maxY,linesFig )
-            corner = Corner(minX,minY,maxX,maxY,linesFig,cross)
+            points = classifier.calkFigPoints(sel_countour, lines, line, lineNext)
+            corner = Corner(minX,minY,maxX,maxY,linesFig,cross, points)
             line[6] = corner
         return
     # определение того как соеденить сегменты
@@ -117,8 +118,6 @@ class classifier:
                 for lineFig in corner.linesFig: 
                     cv2.line(img, lineFig[0], lineFig[1], color=(255,0,0), thickness=thickness)
         return
-    def getFigpoints(sel_countour, line):
-        return
     def calkFigRect(sel_countour, lines, line,lineNext):
         indexStart, indexFinish = line[4]
         if indexFinish < 0:
@@ -138,6 +137,27 @@ class classifier:
         if len(linesFig) == 0:
             linesFig = None
         return (minX,minY,maxX,maxY,linesFig)
+    def calkFigPoints(sel_countour, lines, line,lineNext):
+       
+        indexStart, indexFinish = line[4]
+        if indexFinish < 0:
+            return None
+        if indexStart < 0:
+            indexStart = 0
+        points = []
+        for index in range(indexStart, indexFinish):
+            point = sel_countour[index]
+            points.append(point[0])
+        if len(points) == 0:
+            return None
+        # contours = [np.array([[1,1],[10,50],[50,50]], dtype=np.int32) , np.array([[99,99],[99,60],[60,99]], dtype=np.int32)]
+        # drawing = np.zeros([100, 100],np.uint8)
+        # points = np.array([[25,25], [70,10], [150,50], [250,250], [100,350]])
+        # a = np.array([[1, 2, 3, 4, 5], [6, 7, 8, 9, 10], [11, 12, 13, 14, 15]])
+        array = np.asarray(points)
+        return array
+        
+        # return points
     def calkCrossLine(line, lineNext, minX,minY,maxX,maxY,linesFig ):
         test = classifier.is_parallel(line, lineNext, minX,minY,maxX,maxY,linesFig )
         if test != ParallStatus.none:

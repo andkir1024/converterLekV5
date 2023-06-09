@@ -49,13 +49,15 @@ class Corner:
     cross = ParallStatus.none
     minX = minY =maxX =maxY=0
     linesFig = None
-    def __init__(self, minX,minY,maxX,maxY,linesFig,cross):
+    pointsFig = None
+    def __init__(self, minX,minY,maxX,maxY,linesFig,cross, pointsFig):
         self.minX = minX
         self.maxX = maxX
         self.minY = minY
         self.maxY = maxY
         self.cross = cross
         self.linesFig = linesFig
+        self.pointsFig = pointsFig
 
 class CircuitSvg:
     def createContureSvg(lines, draw, path, dpi):
@@ -86,7 +88,8 @@ class CircuitSvg:
         pp0, pp1, centroid1, centroid2, pp2 = CircuitSvg.createAngle(lines[indexMax][0], lines[indexMax][1],lines[0][0], lines[0][1])
         if pp0 is not None:
             path.M(pp0.x / dpi, pp0.y / dpi).L(pp1.x / dpi, pp1.y / dpi) 
-            path.C(centroid1.x / dpi, centroid1.y / dpi, centroid2.x / dpi,centroid2.y / dpi, pp2.x / dpi, pp2.y / dpi)
+            ctartCorner = CircuitSvg.doLekaloCorner(lines[indexMax], lines[0], path, dpi, True)
+            # path.C(centroid1.x / dpi, centroid1.y / dpi, centroid2.x / dpi,centroid2.y / dpi, pp2.x / dpi, pp2.y / dpi)
         else:
             lineA = lines[0]
             lineB = lines[indexMax]
@@ -192,25 +195,45 @@ class CircuitSvg:
                     pp3 = Point(lineB[0][0],lineB[0][1])
                     
                     path.L(pp0.x / dpi, pp0.y / dpi) 
-                    
                     CircuitSvg.createHalfCircle(lineA, lineB, path, dpi, True)                
-                
                 continue
-            # if typeLine == LineStatus.sequest:
-            #     path.L(lineB[1][0] / dpi,lineB[1][1] / dpi) 
-            #     continue
-            # elif typeLine == LineStatus.parallel:
-            #     CircuitSvg.createHalfCircle(lineA, lineB, path, dpi, True)
-            #     continue
             else:
-                pp0, pp1, centroid1, centroid2, pp2 = CircuitSvg.createAngle(lineA[0], lineA[1],lineB[0], lineB[1])
-                if pp0 is not None:
-                    path.L(pp1.x / dpi, pp1.y / dpi) 
-                    path.C(centroid1.x / dpi, centroid1.y / dpi, centroid2.x / dpi,centroid2.y / dpi, pp2.x / dpi, pp2.y / dpi)
+                CircuitSvg.doLekaloCorner(lineA, lineB, path, dpi, False)
+                # idSmoth = CircuitSvg.createCornerLine(lineA[6].pointsFig, path, dpi)
+                # if idSmoth == True:
+                #     pp0, pp1, centroid1, centroid2, pp2 = CircuitSvg.createAngle(lineA[0], lineA[1],lineB[0], lineB[1])
+                #     if pp0 is not None:
+                #         path.L(pp1.x / dpi, pp1.y / dpi) 
+                #         path.C(centroid1.x / dpi, centroid1.y / dpi, centroid2.x / dpi,centroid2.y / dpi, pp2.x / dpi, pp2.y / dpi)
         path.Z()
         draw.append(path)
         return
-    
+    # создание углов главного контура лекала
+    def doLekaloCorner(lineA, lineB, path , dpi, start):
+        idSmoth = CircuitSvg.createCornerLine(lineA[6].pointsFig, path, dpi)
+        if idSmoth == True:
+            pp0, pp1, centroid1, centroid2, pp2 = CircuitSvg.createAngle(lineA[0], lineA[1],lineB[0], lineB[1])
+            if pp0 is not None:
+                path.L(pp1.x / dpi, pp1.y / dpi) 
+                path.C(centroid1.x / dpi, centroid1.y / dpi, centroid2.x / dpi,centroid2.y / dpi, pp2.x / dpi, pp2.y / dpi)
+                return True
+            else:
+                return False
+        return True
+
+    def createCornerLine(points, path , dpi):
+        peri = cv2.arcLength(points,True)
+        # approx = cv2.approxPolyDP(points, 0.02 * peri, False)
+        approx = cv2.approxPolyDP(points, 0.05 * peri, False)
+        if approx.size == 4: 
+            st = approx[0]
+            x1,y1 = st[:, 0][0],st[:, 1][0]
+            fin = approx[1]
+            x2,y2 = fin[:, 0][0],fin[:, 1][0]
+            path.L(x2/dpi,y2/dpi) 
+            path.L(x1/dpi,y1/dpi) 
+            return False
+        return True
     def convertToLineString(line):
         pointA = line[0]
         pointB = line[1]
