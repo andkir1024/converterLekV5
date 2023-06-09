@@ -89,50 +89,63 @@ class bezier:
         pp2, pp3 = bezier.convertToPoint(lineB)
         xCenter = corner.minX + ((corner.maxX - corner.minX)/2)
         yCenter = corner.minY + ((corner.maxY - corner.minY)/2)
-        # ab = LineString([Point(xCenter,corner.minY), Point(xCenter,corner.maxY)])
-        # aaScaled  = bezier.resize_line(ab, ab.length * 2)
-        # ab = LineString([Point(corner.minX,corner.minY), Point(xCenter,corner.minY)])
-        # bc = LineString([Point(xCenter,corner.minY), Point(xCenter,yCenter)])
-        # cd = LineString([Point(xCenter,yCenter), Point(xCenter,corner.maxY)])
-        # de = LineString([Point(xCenter,corner.maxY),Point(corner.maxX,corner.maxY)]),
-
+            
+        deltaX = pp0.x-pp1.x
         deltaY = pp1.y-pp2.y
         coff0 = 0.5
         coff1 = 0.2
-        if deltaY < 0:
-            pA = Point(corner.minX,corner.minY)
-            pB = Point(xCenter,corner.minY)
-            pC = Point(xCenter,yCenter)
-            pD = Point(xCenter,corner.maxY)
-            pE = Point(corner.maxX,corner.maxY)
-
-            path.L(pA.x / dpi, pA.y / dpi) 
-            bezP1 = bezier.interpolatePoint(pA, pB, coff0)
-            bezP2 = bezier.interpolatePoint(pB, pC, coff1)
-            # path.L(bezP1.x / dpi, bezP1.y / dpi).L(bezP2.x / dpi, bezP2.y / dpi).L( pC.x / dpi, pC.y / dpi)
-            path.C(bezP1.x / dpi, bezP1.y / dpi, bezP2.x / dpi, bezP2.y / dpi, pC.x / dpi, pC.y / dpi)
-            
-            bezP1 = bezier.interpolatePoint(pC, pD, 0.8)
-            bezP2 = bezier.interpolatePoint(pD, pE, 0.2)
-            # path.L(bezP1.x / dpi, bezP1.y / dpi).L(bezP2.x / dpi, bezP2.y / dpi).L( pE.x / dpi, pE.y / dpi)
-            path.C(bezP1.x / dpi, bezP1.y / dpi, bezP2.x / dpi, bezP2.y / dpi, pE.x / dpi, pE.y / dpi)
+        # слева направо
+        if deltaX > 0: 
+            path.L(pp0.x / dpi, pp0.y / dpi) 
+            path.L(pp1.x / dpi, pp1.y / dpi) 
+            path.L(pp2.x / dpi, pp2.y / dpi) 
+            path.L(pp3.x / dpi, pp3.y / dpi) 
+            # pA = Point(corner.maxX,corner.minY)
+            # pB = Point(xCenter,corner.minY)
+            # pC = Point(xCenter,yCenter)
+            # pD = Point(xCenter,corner.minY)
+            # pE = Point(corner.minX,corner.minY)
+            # path.L(pA.x / dpi, pA.y / dpi) 
+            # path.L(pB.x / dpi, pB.y / dpi) 
+            # path.L(pC.x / dpi, pC.y / dpi) 
+            # path.L(pD.x / dpi, pD.y / dpi) 
+            # path.L(pE.x / dpi, pE.y / dpi) 
+        # справа налево
         else:
-            pA = Point(corner.minX,corner.maxY)
-            pB = Point(xCenter,corner.maxY)
-            pC = Point(xCenter,yCenter)
-            pD = Point(xCenter,corner.minY)
-            pE = Point(corner.maxX,corner.minY)
+            if deltaY < 0:
+                pA = Point(corner.minX,corner.minY)
+                pB = Point(xCenter,corner.minY)
+                pC = Point(xCenter,yCenter)
+                pD = Point(xCenter,corner.maxY)
+                pE = Point(corner.maxX,corner.maxY)
 
-            path.L(pA.x / dpi, pA.y / dpi) 
-            bezP1 = bezier.interpolatePoint(pA, pB, coff0)
-            bezP2 = bezier.interpolatePoint(pB, pC, coff1)
-            # path.L(bezP1.x / dpi, bezP1.y / dpi).L(bezP2.x / dpi, bezP2.y / dpi).L( pC.x / dpi, pC.y / dpi)
-            path.C(bezP1.x / dpi, bezP1.y / dpi, bezP2.x / dpi, bezP2.y / dpi, pC.x / dpi, pC.y / dpi)
-            
-            bezP1 = bezier.interpolatePoint(pC, pD, 0.8)
-            bezP2 = bezier.interpolatePoint(pD, pE, 0.2)
-            # path.L(bezP1.x / dpi, bezP1.y / dpi).L(bezP2.x / dpi, bezP2.y / dpi).L( pE.x / dpi, pE.y / dpi)
-            path.C(bezP1.x / dpi, bezP1.y / dpi, bezP2.x / dpi, bezP2.y / dpi, pE.x / dpi, pE.y / dpi)
+                path.L(pA.x / dpi, pA.y / dpi) 
+                bezP1 = bezier.interpolatePoint(pA, pB, coff0)
+                bezP2 = bezier.interpolatePoint(pB, pC, coff1)
+                # path.L(bezP1.x / dpi, bezP1.y / dpi).L(bezP2.x / dpi, bezP2.y / dpi).L( pC.x / dpi, pC.y / dpi)
+                path.C(bezP1.x / dpi, bezP1.y / dpi, bezP2.x / dpi, bezP2.y / dpi, pC.x / dpi, pC.y / dpi)
+                
+                bezP1 = bezier.interpolatePoint(pC, pD, 0.8)
+                bezP2 = bezier.interpolatePoint(pD, pE, 0.2)
+                # path.L(bezP1.x / dpi, bezP1.y / dpi).L(bezP2.x / dpi, bezP2.y / dpi).L( pE.x / dpi, pE.y / dpi)
+                path.C(bezP1.x / dpi, bezP1.y / dpi, bezP2.x / dpi, bezP2.y / dpi, pE.x / dpi, pE.y / dpi)
+            else:
+                pA = Point(corner.minX,corner.maxY)
+                pB = Point(xCenter,corner.maxY)
+                pC = Point(xCenter,yCenter)
+                pD = Point(xCenter,corner.minY)
+                pE = Point(corner.maxX,corner.minY)
+
+                path.L(pA.x / dpi, pA.y / dpi) 
+                bezP1 = bezier.interpolatePoint(pA, pB, coff0)
+                bezP2 = bezier.interpolatePoint(pB, pC, coff1)
+                # path.L(bezP1.x / dpi, bezP1.y / dpi).L(bezP2.x / dpi, bezP2.y / dpi).L( pC.x / dpi, pC.y / dpi)
+                path.C(bezP1.x / dpi, bezP1.y / dpi, bezP2.x / dpi, bezP2.y / dpi, pC.x / dpi, pC.y / dpi)
+                
+                bezP1 = bezier.interpolatePoint(pC, pD, 0.8)
+                bezP2 = bezier.interpolatePoint(pD, pE, 0.2)
+                # path.L(bezP1.x / dpi, bezP1.y / dpi).L(bezP2.x / dpi, bezP2.y / dpi).L( pE.x / dpi, pE.y / dpi)
+                path.C(bezP1.x / dpi, bezP1.y / dpi, bezP2.x / dpi, bezP2.y / dpi, pE.x / dpi, pE.y / dpi)
         return True 
     # тестирование вертикальые линии последовательно
     def testFig0(lineA, lineB, lineC, path, dpi):

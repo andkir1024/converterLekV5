@@ -107,6 +107,7 @@ class CircuitSvg:
                 deltaX = abs(lineB[0][0] - lineA[1][0])
                 deltaY = abs(lineB[0][1] - lineA[1][1])
                 if deltaY >10:
+                    # гор - гор - гор
                     isFig1 = bezier.testFig1(lineA,lineB, corner, path, dpi)
                 else:
                     isFig1 = bezier.testFig2(lineA,lineB, corner, path, dpi)
@@ -185,19 +186,12 @@ class CircuitSvg:
                     continue
                 else:
                     pp0 = Point(lineA[1][0],lineA[1][1])
-                    # pp1 = Point(lineA[1][0],corner.minY)
-                    # pp2 = Point(lineB[0][0],corner.minY)
-
                     pp1 = Point(lineA[1][0],lineA[1][1])
                     pp2 = Point(lineB[0][0],lineA[1][1])
                     pp2 = Point(corner.minX + ((corner.maxX - corner.minX)/2),corner.minY)
                     pp3 = Point(lineB[0][0],lineB[0][1])
                     
                     path.L(pp0.x / dpi, pp0.y / dpi) 
-                    
-                    # path.L(pp1.x / dpi, pp1.y / dpi) 
-                    # path.L(pp2.x / dpi, pp2.y / dpi) 
-                    # path.L(pp3.x / dpi, pp3.y / dpi) 
                     
                     CircuitSvg.createHalfCircle(lineA, lineB, path, dpi, True)                
                 
