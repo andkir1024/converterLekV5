@@ -100,6 +100,7 @@ class CircuitSvg:
             lineA = lines[index]
             lineB = lines[index+1]
             lineC = None
+            contoureAnalizer.drawCountureFromLine(lineA)
             if index < indexMax - 2:
                 lineC = lines[index+2]
                 
@@ -211,7 +212,7 @@ class CircuitSvg:
         return
     # создание углов главного контура лекала
     def doLekaloCorner(lineA, lineB, path , dpi, start):
-        contoureAnalizer.drawCountureFromLine(lineA)
+        # contoureAnalizer.drawCountureFromLine(lineA)
         idSmoth = CircuitSvg.createCornerLine(lineA[6].pointsFig, path, dpi)
         if idSmoth == True:
             pp0, pp1, centroid1, centroid2, pp2 = CircuitSvg.createAngle(lineA[0], lineA[1],lineB[0], lineB[1])
