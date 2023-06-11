@@ -258,7 +258,7 @@ class contoureAnalizer:
             os.remove(os.path.join(contoureAnalizer.curveDir, f))        
         
     def drawCountureFromLine(line):
-        contours = line[6].pointsFig
+        contours = line[6].pointsFig.copy()
         if contours is not None:
             shape = contours.shape
             xMin = yMin = 10000000
@@ -275,11 +275,23 @@ class contoureAnalizer:
                 contour[1]=contour[1]-yMin
             w = xMax-xMin
             h = yMax-yMin
-            img = np.empty([w+20,h+20, 3], dtype=np.uint8) 
-            img.fill(128) # gray            
-            approx = cv2.approxPolyDP(contours, 0.05, False)
-            cv2.drawContours(img, approx, -1, (0, 255, 0), 3)
+            th = 3 if w<100 else 10
+            img = np.empty([h,w*3, 3], dtype=np.uint8) 
+            # img = np.empty([w*2,h*2, 3], dtype=np.uint8) 
+            img.fill(0) # gray            
+            peri = cv2.arcLength(contours,True)
+            
+            contoureAnalizer.drawSingleCounture(img, contours,  0.001 * peri, w*0, (255,255,255),th)
+            contoureAnalizer.drawSingleCounture(img, contours,  0.01 * peri, w*1, (255,255,0),th)
+            contoureAnalizer.drawSingleCounture(img, contours,  0.1 * peri, w*2, (255,255,0),th)
             name = contoureAnalizer.curveDir + str(contoureAnalizer.counterCorner) + ".png"
             contoureAnalizer.counterCorner+=1
             cv2.imwrite(name, img) 
+        return
+    def drawSingleCounture(img, contoursSrc, coff, xstart, color, th):
+        contours = contoursSrc.copy()
+        for contour in contours:
+            contour[0]=contour[0]+xstart
+        approx = cv2.approxPolyDP(contours, coff, False)
+        cv2.drawContours(img, approx, -1, color, th, cv2.LINE_AA)
         return

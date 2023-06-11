@@ -61,7 +61,6 @@ class Corner:
 
 class CircuitSvg:
     def createContureSvg(lines, draw, path, dpi):
-        contoureAnalizer.start()
         indexMax = len(lines)-1
         # добавление горизонтального овала 
         if indexMax == 1:
@@ -86,6 +85,7 @@ class CircuitSvg:
             return
 
         # добавление главного контура
+        contoureAnalizer.start()
         pp0, pp1, centroid1, centroid2, pp2 = CircuitSvg.createAngle(lines[indexMax][0], lines[indexMax][1],lines[0][0], lines[0][1])
         if pp0 is not None:
             path.M(pp0.x / dpi, pp0.y / dpi).L(pp1.x / dpi, pp1.y / dpi) 
@@ -96,6 +96,8 @@ class CircuitSvg:
             lineB = lines[indexMax]
             path.M(lineA[0][0] / dpi, lineA[0][1] / dpi)
 
+        # contoureAnalizer.drawCountureFromLine(lines[0])
+        contoureAnalizer.drawCountureFromLine(lines[indexMax])
         for index in range(indexMax):
             lineA = lines[index]
             lineB = lines[index+1]
