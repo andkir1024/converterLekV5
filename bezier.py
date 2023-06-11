@@ -1,4 +1,5 @@
 import enum
+import os
 import cv2
 import numpy as np
 import math
@@ -247,32 +248,38 @@ class bezier:
         a_delta_y = abs(line1[1][1] - line1[0][1])
         b_delta_x = abs(line2[1][0] - line2[0][0])
         b_delta_y = abs(line2[1][1] - line2[0][1])
-        '''
-        # паралельность по вертикали
-        eqVert = bezier.is_eql(a_delta_x, b_delta_x, 4)
-        # паралельность по горизонтали
-        eqHor = bezier.is_eql(a_delta_y, b_delta_y, 4)
-        if eqHor == True:
-            deltaX = line2[0][0] - line1[1][0]
-            # начало второй правее конца первой (по горизонтали)
-            # if line2[0][0] > line1[1][0]:
-            #     # высота второй ниже высоты первой (по верикали)
-            #     if line2[0][1] > line1[1][1]:
-            #         return ParallStatus.hor_down
-            #     else:
-            #         return ParallStatus.hor_up
-            # return ParallStatus.hor
-
-        if eqVert == True:
-            # return ParallStatus.vert
-            # начало второй правее конца первой (по горизонтали)
-            # if line2[0][0] > line1[1][0]:
-            #     # высота второй ниже высоты первой (по верикали)
-            #     if line2[0][1] > line1[1][1]:
-            #         return ParallStatus.hor_down
-            #     else:
-            #         return ParallStatus.hor_up
-            # return ParallStatus.hor
-
-        # return ParallStatus.none
-        '''        
+class contoureAnalizer:
+    counterCorner = 0 
+    curveDir = "./out/"
+    def start():
+        contoureAnalizer.counterCorner=0
+        
+        for f in os.listdir(contoureAnalizer.curveDir):
+            os.remove(os.path.join(contoureAnalizer.curveDir, f))        
+        
+    def drawCountureFromLine(line):
+        contours = line[6].pointsFig
+        if contours is not None:
+            shape = contours.shape
+            xMin = yMin = 10000000
+            xMax = yMax = 0
+            for contour in contours:
+                x = contour[0]
+                y = contour[1]
+                xMin = min(xMin,x)
+                yMin = min(yMin,y)
+                xMax = max(xMax,x)
+                yMax = max(yMax,y)
+            for contour in contours:
+                contour[0]=contour[0]-xMin
+                contour[1]=contour[1]-yMin
+            w = xMax-xMin
+            h = yMax-yMin
+            img = np.empty([w+20,h+20, 3], dtype=np.uint8) 
+            img.fill(128) # gray            
+            approx = cv2.approxPolyDP(contours, 0.05, False)
+            cv2.drawContours(img, approx, -1, (0, 255, 0), 3)
+            name = contoureAnalizer.curveDir + str(contoureAnalizer.counterCorner) + ".png"
+            contoureAnalizer.counterCorner+=1
+            cv2.imwrite(name, img) 
+        return

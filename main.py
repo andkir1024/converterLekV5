@@ -215,17 +215,21 @@ def do_frame(imgOk, filesSrc, svgDir, param0):
     # imgGrey =cvDraw.createGray(imgOk, param0)
     # imgTst = cvUtils.doContours(imgGrey, imgDraw, filesSrc, svgDir, dpiSvg)
     # return imgDraw, imgDraw, False
-    
-    try:
+    canExeption = False
+    if canExeption:    
+        try:
+            imgDraw = imgOk.copy()
+            # param0 = frame2control.param0.get()
+            imgGrey =cvDraw.createGray(imgOk, param0)
+            imgTst = cvUtils.doContours(imgGrey, imgDraw, filesSrc, svgDir, dpiSvg)
+        except Exception as e:
+            return imgDraw, imgDraw, e
+        return imgDraw, imgTst, None
+    else:
         imgDraw = imgOk.copy()
-        # param0 = frame2control.param0.get()
         imgGrey =cvDraw.createGray(imgOk, param0)
         imgTst = cvUtils.doContours(imgGrey, imgDraw, filesSrc, svgDir, dpiSvg)
-        # valu =0
-        # zz= valu /0
-    except Exception as e:
-        return imgDraw, imgDraw, e
-    return imgDraw, imgTst, None
+        return imgDraw, imgTst, None
 def show_frame():
     global imgOk
     global updateImage
@@ -285,14 +289,17 @@ else:
         print(filesDir + " - директория пуста или отсутсявует")
     else:
         nowStart = datetime.datetime.now()
+        index = 0
         for f in listFiles:
             imgOk = cv2.imdecode(np.fromfile(f, dtype=np.uint8), cv2.IMREAD_COLOR)
             imd0, img1, ok = do_frame(imgOk, f, svgDir, 0)
             if ok is None:
-                print(f)
+                msg = f"{index} "
+                print(msg + f)
             else:
                 print(ok)
                 print('файл дефектный:'+f)
+            index = index + 1
         now = datetime.datetime.now()
         tdelta = (now - nowStart).total_seconds()
         print(f"Завершена за: {tdelta} сек")

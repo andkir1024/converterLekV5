@@ -10,7 +10,7 @@ from shapely import *
 from shapely.geometry import Polygon
 from shapely.ops import split
 
-from bezier import bezier
+from bezier import bezier, contoureAnalizer
 
 # статус паралельных линий
 class ParallStatus(enum.Enum):
@@ -61,6 +61,7 @@ class Corner:
 
 class CircuitSvg:
     def createContureSvg(lines, draw, path, dpi):
+        contoureAnalizer.start()
         indexMax = len(lines)-1
         # добавление горизонтального овала 
         if indexMax == 1:
@@ -210,6 +211,7 @@ class CircuitSvg:
         return
     # создание углов главного контура лекала
     def doLekaloCorner(lineA, lineB, path , dpi, start):
+        contoureAnalizer.drawCountureFromLine(lineA)
         idSmoth = CircuitSvg.createCornerLine(lineA[6].pointsFig, path, dpi)
         if idSmoth == True:
             pp0, pp1, centroid1, centroid2, pp2 = CircuitSvg.createAngle(lineA[0], lineA[1],lineB[0], lineB[1])
@@ -230,6 +232,9 @@ class CircuitSvg:
             x1,y1 = st[:, 0][0],st[:, 1][0]
             fin = approx[1]
             x2,y2 = fin[:, 0][0],fin[:, 1][0]
+            # x1,y1 = points[0][0],points[0][1]
+            # x2,y2 = points[-1][0],points[-1][1]
+            
             path.L(x2/dpi,y2/dpi) 
             path.L(x1/dpi,y1/dpi) 
             return False
