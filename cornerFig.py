@@ -120,19 +120,20 @@ class CircuitSvg:
                 lineA = typeFigures[index][1]
                 lineB = typeFigures[index][2]
                 corner = lineA[6]
-                deltaX = lineA[0][0]-lineA[1][0]
-                xCenter,yCenter = bezier.prepareS(lineA, lineB, corner)
+                # deltaX = lineA[0][0]-lineA[1][0]
+                xCenter,yCenter,deltaX,prop = bezier.prepareS(lineA, lineB, corner)
                 if deltaX < 0:
-                    bezier.doSUpDown(xCenter,yCenter, corner, path, dpi, 0.5, 0.2, True)
+                    bezier.doSUpDown(xCenter,yCenter, corner, path, dpi, 0.6, 0.9, True,prop)
+                    # bezier.doSUpDown(xCenter,yCenter, corner, path, dpi, 0.5, 0.2, True,prop)
                 else:
-                    bezier.doSUpDown(xCenter,yCenter, corner, path, dpi, 0.5, 0.2,False)
+                    bezier.doSUpDown(xCenter,yCenter, corner, path, dpi, 0.5, 0.2,False,prop)
                 continue
             if typeFigures[index][0] == FigureStatus.sDownUp:
                 lineA = typeFigures[index][1]
                 lineB = typeFigures[index][2]
                 corner = lineA[6]
-                deltaX = lineA[0][0]-lineA[1][0]
-                xCenter,yCenter = bezier.prepareS(lineA, lineB, corner)
+                # deltaX = lineA[0][0]-lineA[1][0]
+                xCenter,yCenter,deltaX,prop = bezier.prepareS(lineA, lineB, corner)
                 if deltaX < 0:
                     bezier.doSDownUp(xCenter,yCenter, corner, path, dpi, 0.5, 0.2, True)
                 else:
