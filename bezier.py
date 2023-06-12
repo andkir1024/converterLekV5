@@ -212,7 +212,7 @@ class bezier:
         if end.y - start.y == 0:  # Avoids dividing by zero.
             return math.acos(0)
         return -math.atan((end.x - start.x) / (end.y - start.y))
-    def get_angle(pointS, pointE) -> float:
+    def get_angleP(pointS, pointE) -> float:
         'Returns the angle (in radians) of a given line in relation with the X axis.'
         # start, end = line.boundary
         start, end = Point(pointS),Point(pointE)
@@ -267,7 +267,7 @@ class contoureAnalizer:
         deltax = pointS[0] - pointF[0]
         deltay = pointS[1] - pointF[1]
         len = math.sqrt(deltax**2+deltay**2)
-        rad = bezier.get_angle(Point(pointS[0],pointS[1]),Point(pointF[0],pointF[1]))
+        rad = bezier.get_angleP(Point(pointS[0],pointS[1]),Point(pointF[0],pointF[1]))
         angle = math.degrees(rad)
         return  (int(len), int(angle))
     def drawCountureFromLine(line):
@@ -276,17 +276,10 @@ class contoureAnalizer:
             shape = contours.shape
             xMin = yMin = 10000000
             xMax = yMax = 0
-            diffs = []
             for index in range(len(contours)):
                 contour = contours[index]
                 x = contour[0]
                 y = contour[1]
-                
-                if index < len(contours)-1:
-                    contourNext = contours[index+1]
-                    deltax = contour[0] - contourNext[0]
-                    deltay = contour[1] - contourNext[1]
-                    diffs.append(contoureAnalizer.getParamVector(contour,contourNext))
                 
                 xMin = min(xMin,x)
                 yMin = min(yMin,y)
@@ -304,8 +297,10 @@ class contoureAnalizer:
             img.fill(0) # gray            
             peri = cv2.arcLength(contours,True)
             
+            contoureAnalizer.drawSingleCounture(img, contours,  0.005 * peri, w*1, (255,255,255),th)
+
             # contoureAnalizer.drawSingleCounture(img, contours,  0.001 * peri, w*0, (255,255,255),th)
-            contoureAnalizer.drawSingleCounture(img, contours,  0.01 * peri, w*1, (255,255,0),th)
+            # contoureAnalizer.drawSingleCounture(img, contours,  0.01 * peri, w*1, (255,255,0),th)
             # contoureAnalizer.drawSingleCounture(img, contours,  0.1 * peri, w*2, (255,255,0),th)
             name = contoureAnalizer.curveDir + str(contoureAnalizer.counterCorner) + ".png"
             contoureAnalizer.counterCorner+=1
@@ -315,7 +310,7 @@ class contoureAnalizer:
         contours = contoursSrc.copy()
         for contour in contours:
             contour[0]=contour[0]+xstart
-        approx = cv2.approxPolyDP(contours, coff, False)
+        approx = cv2.approxPolyDP(contours, coff, True)
         
         diffs = []
         for index in range(len(approx)-1):
