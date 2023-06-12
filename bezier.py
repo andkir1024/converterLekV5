@@ -104,54 +104,116 @@ class bezier:
         pC = Point(xCenter,yCenter)
         pD = Point(xCenter,corner.maxY)
         pE = Point(corner.maxX,corner.maxY)
+        bezier.doSUpDownSvg(pA,pB,pC,pD,pE,path, dpi, coff0, coff1, dir, prop)
+        return
+    def doSUpDownSvg(pA,pB,pC,pD,pE,path, dpi, coff0, coff1, dir, prop):
         mode = 0
         if prop > 0.9 and prop < 1.1:
             mode = 1
             coff0 = 0.4
             coff1 = 0.2
+        if prop == 0:
+            mode = 2
+            coff0 = 0.4
+            coff1 = 0.02
         if dir == False:
             pA, pE = pE, pA
             pB, pD = pD, pB
         path.L(pA.x / dpi, pA.y / dpi) 
         bezP1 = bezier.interpolatePoint(pA, pB, coff0)
         bezP2 = bezier.interpolatePoint(pB, pC, 1-coff1)
-        # bezP2 = bezier.interpolatePoint(pA, pC, 0.5)
         if mode == 1:
             bezP2 = bezP1
-        # bezP2 = Point(bezP1.x,bezP2.y)
+        if mode == 2:
+            bezP2 = bezP1
         # path.L(bezP1.x / dpi, bezP1.y / dpi).L(bezP2.x / dpi, bezP2.y / dpi).L( pC.x / dpi, pC.y / dpi)
         path.C(bezP1.x / dpi, bezP1.y / dpi, bezP2.x / dpi, bezP2.y / dpi, pC.x / dpi, pC.y / dpi)
         
         bezP1 = bezier.interpolatePoint(pC, pD, coff1)
-        # bezP1 = bezier.interpolatePoint(pC, pE, 0.5)
         bezP2 = bezier.interpolatePoint(pD, pE, 1-coff0)
         if mode == 1:
             bezP1 = bezP2
-        # bezP1.x = bezP2.x
-        # bezP1 = Point(bezP2.x,bezP1.y)
+        if mode == 2:
+            bezP1 = bezP2
+            bezP2 = bezier.interpolatePoint(pD, pE, 0.9)
         # path.L(bezP1.x / dpi, bezP1.y / dpi).L(bezP2.x / dpi, bezP2.y / dpi).L( pE.x / dpi, pE.y / dpi)
         path.C(bezP1.x / dpi, bezP1.y / dpi, bezP2.x / dpi, bezP2.y / dpi, pE.x / dpi, pE.y / dpi)
         return
+    # вырез как треугольник
+    def doCutoutTriangle(lineA,lineB, cornerBase, path, dpi):
+        pp0 = Point(lineA[1][0],lineA[1][1])
+        pp2 = Point(cornerBase.minX + ((cornerBase.maxX - cornerBase.minX)/2),cornerBase.maxY)
+        pp3 = Point(lineB[0][0],lineB[0][1])
+        
+        x0 = pp0.x
+        x4 = pp3.x
+        lenX = (x4-x0)/4
+        x1 = x0 + lenX
+        x2 = x1 + lenX
+        x3 = x2 + lenX
+
+        y0 = pp0.y
+        yCenter = cornerBase.minY + ((cornerBase.maxY - cornerBase.minY)/2)
+        y1 = cornerBase.maxY
+        
+        pA = Point(x0,y0)
+        pB = Point(x1,y0)
+        pC = Point(x1,yCenter)
+        pD = Point(x1,y1)
+        pE = Point(x2,y1)
+        bezier.doSUpDownSvg(pA,pB,pC,pD,pE,path, dpi, 0.5, 0.5, True, 0)
+
+        pA = Point(x2,y1)
+        pB = Point(x3,y1)
+        pC = Point(x3,yCenter)
+        pD = Point(x3,y0)
+        pE = Point(x4,y0)
+        bezier.doSDownUpSvg(pA,pB,pC,pD,pE,path, dpi, 0.5, 0.5, True, 0)
+        
+        
+        # path.L(pp0.x / dpi, pp0.y / dpi) 
+        # path.L(pp2.x / dpi, pp2.y / dpi) 
+        # path.L(pp3.x / dpi, pp3.y / dpi) 
+        return
     # S фигура снизу вверх
-    def doSDownUp(xCenter,yCenter, corner, path, dpi, coff0, coff1, dir):
+    def doSDownUp(xCenter,yCenter, corner, path, dpi, coff0, coff1, dir, prop):
         pA = Point(corner.minX,corner.maxY)
         pB = Point(xCenter,corner.maxY)
         pC = Point(xCenter,yCenter)
         pD = Point(xCenter,corner.minY)
         pE = Point(corner.maxX,corner.minY)
+        bezier.doSDownUpSvg(pA,pB,pC,pD,pE,path, dpi, coff0, coff1, dir, prop)
+        return
+    def doSDownUpSvg(pA,pB,pC,pD,pE,path, dpi, coff0, coff1, dir, prop):
+        mode = 0
+        if prop > 0.9 and prop < 1.1:
+            mode = 1
+            coff0 = 0.4
+            coff1 = 0.2
+        if prop == 0:
+            mode = 2
+            coff0 = 0.4
+            coff1 = 0.02
         if dir == False:
             pA, pE = pE, pA
             pB, pD = pD, pB
 
         path.L(pA.x / dpi, pA.y / dpi) 
         bezP1 = bezier.interpolatePoint(pA, pB, coff0)
-        bezP2 = bezier.interpolatePoint(pB, pC, coff1)
-        # path.L(bezP1.x / dpi, bezP1.y / dpi).L(bezP2.x / dpi, bezP2.y / dpi).L( pC.x / dpi, pC.y / dpi)
+        bezP2 = bezier.interpolatePoint(pB, pC, 1-coff1)
+        if mode == 1:
+            bezP2 = bezP1
+        if mode == 2:
+            bezP2 = bezP1
+            bezP1 = bezier.interpolatePoint(pA, pB, 0.1)
         path.C(bezP1.x / dpi, bezP1.y / dpi, bezP2.x / dpi, bezP2.y / dpi, pC.x / dpi, pC.y / dpi)
         
-        bezP1 = bezier.interpolatePoint(pC, pD, 0.8)
-        bezP2 = bezier.interpolatePoint(pD, pE, 0.2)
-        # path.L(bezP1.x / dpi, bezP1.y / dpi).L(bezP2.x / dpi, bezP2.y / dpi).L( pE.x / dpi, pE.y / dpi)
+        bezP1 = bezier.interpolatePoint(pC, pD, coff1)
+        bezP2 = bezier.interpolatePoint(pD, pE, 1- coff0)
+        if mode == 1:
+            bezP1 = bezP2
+        if mode == 2:
+            bezP1 = bezP2
         path.C(bezP1.x / dpi, bezP1.y / dpi, bezP2.x / dpi, bezP2.y / dpi, pE.x / dpi, pE.y / dpi)
         return
     # тестирование горизонтальные линии последовательно
@@ -322,6 +384,9 @@ class FigureStatus(enum.Enum):
     halfCircleDown = 4
     sUpDown = 5
     sDownUp = 6
+    cutoutTriangle = 7
+    cutoutRect = 8
+    cutoutCircle = 9
     
 class contoureAnalizer:
     counterCorner = 0 
@@ -364,10 +429,12 @@ class contoureAnalizer:
             img = np.empty([h,w*3, 3], dtype=np.uint8) 
             # img = np.empty([w*2,h*2, 3], dtype=np.uint8) 
             img.fill(0) # gray            
-            peri = cv2.arcLength(contours,True)
+            peri = cv2.arcLength(contours,False)
+            # peri1 = cv2.arcLength(contours,True)
             
-            # contoureAnalizer.drawSingleCounture(img, contours,  0.005 * peri, w*1, (255,255,255),th)
-            typeFigure = contoureAnalizer.drawSingleCounture(img, contours,  0.01 * peri, w*1, (255,255,255),th,w,h,lineA, lineB)
+            # typeFigure = contoureAnalizer.drawSingleCounture(img, contours,  0.01 * peri, w*1, (255,255,255),th,w,h,lineA, lineB)
+            typeFigure = contoureAnalizer.drawSingleCounture(img, contours,  0.02 * peri, w*1, (255,255,255),th,w,h,lineA, lineB)
+            # typeFigure = contoureAnalizer.drawSingleCounture(img, contours,  0.1 * peri, w*1, (255,255,255),th,w,h,lineA, lineB)
 
             # contoureAnalizer.drawSingleCounture(img, contours,  0.001 * peri, w*0, (255,255,255),th)
             # contoureAnalizer.drawSingleCounture(img, contours,  0.01 * peri, w*1, (255,255,0),th)
@@ -396,9 +463,12 @@ class contoureAnalizer:
         return typeFigure
     def clasificatorFigure(diffs, countor, w, h,lineA, lineB):
         someSign= contoureAnalizer.check_sort(diffs)
+        cutout = contoureAnalizer.checkCutout(countor)
         analized = mathSvg.testSequence(diffs)
-        if mathSvg.isHalfCircle(analized) == True:
-            return FigureStatus.halfCircleUp
+        if cutout is not None:
+            return cutout
+        # if mathSvg.isHalfCircle(analized) == True:
+            # return FigureStatus.halfCircleUp
         sFig = mathSvg.isSFigure(analized, diffs,countor)
         if sFig == 1:
             return FigureStatus.sDownUp
@@ -420,20 +490,23 @@ class contoureAnalizer:
         out = np.take(array, indices, axis=1)        
         plus = all([x > y for x, y in zip(out, out[1:])])
         return plus
-    
-    def isSorted(x,flag):
-        st = x[0][1]
-        delta = []
-        for index in range(1, len(x)):
-            test = x[index][1]
-            delta.append( test - st)
-            st = test 
-        return
-    def sign(a):
-        if a>0:
-            return 1;
-        elif a<0:
-            return -1;
-        else:
-            return 0    
+    def checkCutout(countor):
+        peri = cv2.arcLength(countor,False)
+        approx = cv2.approxPolyDP(countor, 0.1* peri, False)
+        all = len(approx)
+        if all == 3:
+            # в ряд
+            lenght = approx[0][0][0] - approx[2][0][0]
+            height = approx[1][0][1]
+            if approx[0][0][0] > approx[1][0][0] and approx[1][0][0] > approx[2][0][0]:
+                if approx[1][0][1] > approx[0][0][1] and approx[1][0][1] > approx[2][0][1]:
+                    return FigureStatus.cutoutTriangle
+                if approx[1][0][1] < approx[0][0][1] and approx[1][0][1] < approx[2][0][1]:
+                    return None
+            if approx[0][0][0] < approx[1][0][0] and approx[1][0][0] < approx[2][0][0]:
+                if approx[1][0][1] < approx[0][0][1] and approx[1][0][1] < approx[2][0][1]:
+                    return FigureStatus.halfCircleUp
+                if approx[1][0][1] > approx[0][0][1] and approx[1][0][1] > approx[2][0][1]:
+                    return None
+        return None
     
