@@ -88,6 +88,7 @@ class CircuitSvg:
         # добавление главного контура
         contoureAnalizer.start()
         
+        # '''
         typeFigures = []
         typeFigures.append(contoureAnalizer.drawCountureFromLine(lines[indexMax],lines[0]))
         for index in range(indexMax):
@@ -115,6 +116,28 @@ class CircuitSvg:
                 path.L(pp0.x / dpi, pp0.y / dpi) 
                 CircuitSvg.createHalfCircle(lineA, lineB, path, dpi, True)                
                 continue
+            if typeFigures[index][0] == FigureStatus.sUpDown:
+                lineA = typeFigures[index][1]
+                lineB = typeFigures[index][2]
+                corner = lineA[6]
+                deltaX = lineA[0][0]-lineA[1][0]
+                xCenter,yCenter = bezier.prepareS(lineA, lineB, corner)
+                if deltaX < 0:
+                    bezier.doSUpDown(xCenter,yCenter, corner, path, dpi, 0.5, 0.2, True)
+                else:
+                    bezier.doSUpDown(xCenter,yCenter, corner, path, dpi, 0.5, 0.2,False)
+                continue
+            if typeFigures[index][0] == FigureStatus.sDownUp:
+                lineA = typeFigures[index][1]
+                lineB = typeFigures[index][2]
+                corner = lineA[6]
+                deltaX = lineA[0][0]-lineA[1][0]
+                xCenter,yCenter = bezier.prepareS(lineA, lineB, corner)
+                if deltaX < 0:
+                    bezier.doSDownUp(xCenter,yCenter, corner, path, dpi, 0.5, 0.2, True)
+                else:
+                    bezier.doSDownUp(xCenter,yCenter, corner, path, dpi, 0.5, 0.2, False)
+                continue
             
         
         '''
@@ -141,13 +164,14 @@ class CircuitSvg:
             width = corner.maxX-corner.minX
             height = corner.maxY-corner.minY
             if corner.cross == ParallStatus.hor:
-                # deltaX = abs(lineB[0][0] - lineA[1][0])
-                # deltaY = abs(lineB[0][1] - lineA[1][1])
-                # if deltaY >10:
-                #     # гор - гор - гор
-                #     isFig1 = bezier.testFig1(lineA,lineB, corner, path, dpi)
-                # else:
-                #     isFig1 = bezier.testFig2(lineA,lineB, corner, path, dpi)
+                deltaX = abs(lineB[0][0] - lineA[1][0])
+                deltaY = abs(lineB[0][1] - lineA[1][1])
+                if deltaY >10:
+                    # гор - гор - гор
+                    # continue
+                    isFig1 = bezier.testFig1(lineA,lineB, corner, path, dpi)
+                else:
+                    isFig1 = bezier.testFig2(lineA,lineB, corner, path, dpi)
                 continue
             if corner.cross == ParallStatus.vert:
                 isFig0 = bezier.testFig0(lineA,lineB, lineC, path, dpi)
@@ -165,8 +189,8 @@ class CircuitSvg:
                 continue
             else:
                 CircuitSvg.doLekaloCorner(lineA, lineB, path, dpi, False)
-        '''                
-                
+            '''                
+
                 
         path.Z()
         draw.append(path)

@@ -8,6 +8,7 @@ from shapely import Point
 from shapely import *
 from shapely.geometry import Polygon
 from shapely.ops import split
+from mathUtils import *
 # from scipy import interpolate
 
 class bezier:
@@ -84,6 +85,74 @@ class bezier:
         # path.L(bezP1.x / dpi, bezP1.y / dpi).L(bezP2.x / dpi, bezP2.y / dpi).L( pC.x / dpi, pC.y / dpi)
         path.C(bezP1.x / dpi, bezP1.y / dpi, bezP2.x / dpi, bezP2.y / dpi, pC.x / dpi, pC.y / dpi)
         return
+    # S фигура подготовка
+    def prepareS(lineA, lineB, corner):
+        pp0, pp1 = bezier.convertToPoint(lineA)
+        pp2, pp3 = bezier.convertToPoint(lineB)
+        xCenter = corner.minX + ((corner.maxX - corner.minX)/2)
+        yCenter = corner.minY + ((corner.maxY - corner.minY)/2)
+        return xCenter,yCenter
+    # S фигура сверху вниз
+    def doSUpDown(xCenter,yCenter, corner, path, dpi, coff0, coff1, dir):
+        pA = Point(corner.minX,corner.minY)
+        pB = Point(xCenter,corner.minY)
+        pC = Point(xCenter,yCenter)
+        pD = Point(xCenter,corner.maxY)
+        pE = Point(corner.maxX,corner.maxY)
+        if dir == False:
+            pA, pE = pE, pA
+            pB, pD = pD, pB
+        path.L(pA.x / dpi, pA.y / dpi) 
+        bezP1 = bezier.interpolatePoint(pA, pB, coff0)
+        bezP2 = bezier.interpolatePoint(pB, pC, coff1)
+        # path.L(bezP1.x / dpi, bezP1.y / dpi).L(bezP2.x / dpi, bezP2.y / dpi).L( pC.x / dpi, pC.y / dpi)
+        path.C(bezP1.x / dpi, bezP1.y / dpi, bezP2.x / dpi, bezP2.y / dpi, pC.x / dpi, pC.y / dpi)
+        
+        bezP1 = bezier.interpolatePoint(pC, pD, 0.8)
+        bezP2 = bezier.interpolatePoint(pD, pE, 0.2)
+        # path.L(bezP1.x / dpi, bezP1.y / dpi).L(bezP2.x / dpi, bezP2.y / dpi).L( pE.x / dpi, pE.y / dpi)
+        path.C(bezP1.x / dpi, bezP1.y / dpi, bezP2.x / dpi, bezP2.y / dpi, pE.x / dpi, pE.y / dpi)
+        return
+    def doSUpDown1(xCenter,yCenter, corner, path, dpi, coff0, coff1):
+        pE = Point(corner.minX,corner.minY)
+        pD = Point(xCenter,corner.minY)
+        pC = Point(xCenter,yCenter)
+        pB = Point(xCenter,corner.maxY)
+        pA = Point(corner.maxX,corner.maxY)
+
+        path.L(pA.x / dpi, pA.y / dpi) 
+        bezP1 = bezier.interpolatePoint(pA, pB, coff0)
+        bezP2 = bezier.interpolatePoint(pB, pC, coff1)
+        # path.L(bezP1.x / dpi, bezP1.y / dpi).L(bezP2.x / dpi, bezP2.y / dpi).L( pC.x / dpi, pC.y / dpi)
+        path.C(bezP1.x / dpi, bezP1.y / dpi, bezP2.x / dpi, bezP2.y / dpi, pC.x / dpi, pC.y / dpi)
+        
+        bezP1 = bezier.interpolatePoint(pC, pD, 0.8)
+        bezP2 = bezier.interpolatePoint(pD, pE, 0.2)
+        # path.L(bezP1.x / dpi, bezP1.y / dpi).L(bezP2.x / dpi, bezP2.y / dpi).L( pE.x / dpi, pE.y / dpi)
+        path.C(bezP1.x / dpi, bezP1.y / dpi, bezP2.x / dpi, bezP2.y / dpi, pE.x / dpi, pE.y / dpi)
+        return
+    # S фигура снизу вверх
+    def doSDownUp(xCenter,yCenter, corner, path, dpi, coff0, coff1, dir):
+        pA = Point(corner.minX,corner.maxY)
+        pB = Point(xCenter,corner.maxY)
+        pC = Point(xCenter,yCenter)
+        pD = Point(xCenter,corner.minY)
+        pE = Point(corner.maxX,corner.minY)
+        if dir == False:
+            pA, pE = pE, pA
+            pB, pD = pD, pB
+
+        path.L(pA.x / dpi, pA.y / dpi) 
+        bezP1 = bezier.interpolatePoint(pA, pB, coff0)
+        bezP2 = bezier.interpolatePoint(pB, pC, coff1)
+        # path.L(bezP1.x / dpi, bezP1.y / dpi).L(bezP2.x / dpi, bezP2.y / dpi).L( pC.x / dpi, pC.y / dpi)
+        path.C(bezP1.x / dpi, bezP1.y / dpi, bezP2.x / dpi, bezP2.y / dpi, pC.x / dpi, pC.y / dpi)
+        
+        bezP1 = bezier.interpolatePoint(pC, pD, 0.8)
+        bezP2 = bezier.interpolatePoint(pD, pE, 0.2)
+        # path.L(bezP1.x / dpi, bezP1.y / dpi).L(bezP2.x / dpi, bezP2.y / dpi).L( pE.x / dpi, pE.y / dpi)
+        path.C(bezP1.x / dpi, bezP1.y / dpi, bezP2.x / dpi, bezP2.y / dpi, pE.x / dpi, pE.y / dpi)
+        return
     # тестирование горизонтальные линии последовательно
     def testFig1(lineA, lineB, corner, path, dpi):
         pp0, pp1 = bezier.convertToPoint(lineA)
@@ -101,16 +170,6 @@ class bezier:
             path.L(pp1.x / dpi, pp1.y / dpi) 
             path.L(pp2.x / dpi, pp2.y / dpi) 
             path.L(pp3.x / dpi, pp3.y / dpi) 
-            # pA = Point(corner.maxX,corner.minY)
-            # pB = Point(xCenter,corner.minY)
-            # pC = Point(xCenter,yCenter)
-            # pD = Point(xCenter,corner.minY)
-            # pE = Point(corner.minX,corner.minY)
-            # path.L(pA.x / dpi, pA.y / dpi) 
-            # path.L(pB.x / dpi, pB.y / dpi) 
-            # path.L(pC.x / dpi, pC.y / dpi) 
-            # path.L(pD.x / dpi, pD.y / dpi) 
-            # path.L(pE.x / dpi, pE.y / dpi) 
         # справа налево
         else:
             if deltaY < 0:
@@ -256,9 +315,12 @@ class bezier:
         b_delta_x = abs(line2[1][0] - line2[0][0])
         b_delta_y = abs(line2[1][1] - line2[0][1])
 class FigureStatus(enum.Enum):
-    smoothCorner = 2
-    undefined = 3
-    halfCircleUp = 1
+    smoothCorner = 1
+    undefined = 2
+    halfCircleUp = 3
+    halfCircleDown = 4
+    sUpDown = 5
+    sDownUp = 6
     
 class contoureAnalizer:
     counterCorner = 0 
@@ -333,10 +395,20 @@ class contoureAnalizer:
         return typeFigure
     def clasificatorFigure(diffs, countor, w, h,lineA, lineB):
         someSign= contoureAnalizer.check_sort(diffs)
+        analized = mathSvg.testSequence(diffs)
+        if mathSvg.isHalfCircle(analized) == True:
+            return FigureStatus.halfCircleUp
+        sFig = mathSvg.isSFigure(analized, diffs,countor)
+        if sFig == 1:
+            return FigureStatus.sDownUp
+        if sFig == -1:
+            return FigureStatus.sUpDown
+
+
         # val0= contoureAnalizer.isSorted(diffs, 1)
         # val1= contoureAnalizer.isSorted(diffs, -1)
-        if len(diffs) == 8:
-            return FigureStatus.halfCircleUp
+        # if len(diffs) == 8:
+            # return FigureStatus.halfCircleUp
         if someSign:
             return FigureStatus.smoothCorner
         return FigureStatus.undefined
