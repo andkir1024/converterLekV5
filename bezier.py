@@ -297,7 +297,8 @@ class contoureAnalizer:
             img.fill(0) # gray            
             peri = cv2.arcLength(contours,True)
             
-            contoureAnalizer.drawSingleCounture(img, contours,  0.005 * peri, w*1, (255,255,255),th)
+            # contoureAnalizer.drawSingleCounture(img, contours,  0.005 * peri, w*1, (255,255,255),th)
+            contoureAnalizer.drawSingleCounture(img, contours,  0.01 * peri, w*1, (255,255,255),th)
 
             # contoureAnalizer.drawSingleCounture(img, contours,  0.001 * peri, w*0, (255,255,255),th)
             # contoureAnalizer.drawSingleCounture(img, contours,  0.01 * peri, w*1, (255,255,0),th)
