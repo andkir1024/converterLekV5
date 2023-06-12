@@ -212,6 +212,13 @@ class bezier:
         if end.y - start.y == 0:  # Avoids dividing by zero.
             return math.acos(0)
         return -math.atan((end.x - start.x) / (end.y - start.y))
+    def get_angle(pointS, pointE) -> float:
+        'Returns the angle (in radians) of a given line in relation with the X axis.'
+        # start, end = line.boundary
+        start, end = Point(pointS),Point(pointE)
+        if end.y - start.y == 0:  # Avoids dividing by zero.
+            return math.acos(0)
+        return -math.atan((end.x - start.x) / (end.y - start.y))
 
     def resize_line(line: LineString, length: float) -> LineString:
         'Returns a new line with the same center and angle of a given line, but with different length.'
@@ -256,20 +263,36 @@ class contoureAnalizer:
         
         for f in os.listdir(contoureAnalizer.curveDir):
             os.remove(os.path.join(contoureAnalizer.curveDir, f))        
-        
+    def getParamVector(pointS, pointF):
+        deltax = pointS[0] - pointF[0]
+        deltay = pointS[1] - pointF[1]
+        len = math.sqrt(deltax**2+deltay**2)
+        rad = bezier.get_angle(Point(pointS[0],pointS[1]),Point(pointF[0],pointF[1]))
+        angle = math.degrees(rad)
+        return  (int(len), int(angle))
     def drawCountureFromLine(line):
         contours = line[6].pointsFig.copy()
         if contours is not None:
             shape = contours.shape
             xMin = yMin = 10000000
             xMax = yMax = 0
-            for contour in contours:
+            diffs = []
+            for index in range(len(contours)):
+                contour = contours[index]
                 x = contour[0]
                 y = contour[1]
+                
+                if index < len(contours)-1:
+                    contourNext = contours[index+1]
+                    deltax = contour[0] - contourNext[0]
+                    deltay = contour[1] - contourNext[1]
+                    diffs.append(contoureAnalizer.getParamVector(contour,contourNext))
+                
                 xMin = min(xMin,x)
                 yMin = min(yMin,y)
                 xMax = max(xMax,x)
                 yMax = max(yMax,y)
+                
             for contour in contours:
                 contour[0]=contour[0]-xMin
                 contour[1]=contour[1]-yMin
@@ -281,9 +304,9 @@ class contoureAnalizer:
             img.fill(0) # gray            
             peri = cv2.arcLength(contours,True)
             
-            contoureAnalizer.drawSingleCounture(img, contours,  0.001 * peri, w*0, (255,255,255),th)
+            # contoureAnalizer.drawSingleCounture(img, contours,  0.001 * peri, w*0, (255,255,255),th)
             contoureAnalizer.drawSingleCounture(img, contours,  0.01 * peri, w*1, (255,255,0),th)
-            contoureAnalizer.drawSingleCounture(img, contours,  0.1 * peri, w*2, (255,255,0),th)
+            # contoureAnalizer.drawSingleCounture(img, contours,  0.1 * peri, w*2, (255,255,0),th)
             name = contoureAnalizer.curveDir + str(contoureAnalizer.counterCorner) + ".png"
             contoureAnalizer.counterCorner+=1
             cv2.imwrite(name, img) 
@@ -293,5 +316,12 @@ class contoureAnalizer:
         for contour in contours:
             contour[0]=contour[0]+xstart
         approx = cv2.approxPolyDP(contours, coff, False)
+        
+        diffs = []
+        for index in range(len(approx)-1):
+            contour = approx[index]
+            contourNext = approx[index+1]
+            diffs.append(contoureAnalizer.getParamVector(contour[0],contourNext[0]))
+        
         cv2.drawContours(img, approx, -1, color, th, cv2.LINE_AA)
         return
