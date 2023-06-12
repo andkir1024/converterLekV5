@@ -10,7 +10,7 @@ from shapely import *
 from shapely.geometry import Polygon
 from shapely.ops import split
 
-from bezier import bezier, contoureAnalizer
+from bezier import bezier, contoureAnalizer, FigureStatus
 
 # статус паралельных линий
 class ParallStatus(enum.Enum):
@@ -33,11 +33,11 @@ class ParallStatus(enum.Enum):
             return False
         return True
 
-class CornerStatus(enum.Enum):
-    # закругленный угол
-    round = 0
-    # последовательность линий
-    lineStrip = 1
+# class CornerStatus(enum.Enum):
+#     # закругленный угол
+#     round = 0
+#     # последовательность линий
+#     lineStrip = 1
 
 class LineStatus(enum.Enum):
     round = 0
@@ -60,6 +60,7 @@ class Corner:
         self.pointsFig = pointsFig
 
 class CircuitSvg:
+    
     def createContureSvg(lines, draw, path, dpi):
         indexMax = len(lines)-1
         # добавление горизонтального овала 
@@ -86,6 +87,37 @@ class CircuitSvg:
 
         # добавление главного контура
         contoureAnalizer.start()
+        
+        typeFigures = []
+        typeFigures.append(contoureAnalizer.drawCountureFromLine(lines[indexMax],lines[0]))
+        for index in range(indexMax):
+            typeFigures.append(contoureAnalizer.drawCountureFromLine(lines[index],lines[index+1]))
+
+        pp0, pp1 = CircuitSvg.getStartPoint(lines[indexMax][0], lines[indexMax][1],lines[0][0], lines[0][1])
+        path.M(pp0.x / dpi, pp0.y / dpi).L(pp1.x / dpi, pp1.y / dpi) 
+        for index in range(len(typeFigures)):
+            if typeFigures[index][0] == FigureStatus.smoothCorner:
+                lineA = typeFigures[index][1]
+                lineB = typeFigures[index][2]
+                CircuitSvg.doLekaloCorner(lineA, lineB, path, dpi, False)
+                continue
+            if typeFigures[index][0] == FigureStatus.halfCircleUp:
+                lineA = typeFigures[index][1]
+                lineB = typeFigures[index][2]
+
+                corner = lineA[6]
+                pp0 = Point(lineA[1][0],lineA[1][1])
+                pp1 = Point(lineA[1][0],lineA[1][1])
+                pp2 = Point(lineB[0][0],lineA[1][1])
+                pp2 = Point(corner.minX + ((corner.maxX - corner.minX)/2),corner.minY)
+                pp3 = Point(lineB[0][0],lineB[0][1])
+                
+                path.L(pp0.x / dpi, pp0.y / dpi) 
+                CircuitSvg.createHalfCircle(lineA, lineB, path, dpi, True)                
+                continue
+            
+        
+        '''
         pp0, pp1, centroid1, centroid2, pp2 = CircuitSvg.createAngle(lines[indexMax][0], lines[indexMax][1],lines[0][0], lines[0][1])
         if pp0 is not None:
             path.M(pp0.x / dpi, pp0.y / dpi).L(pp1.x / dpi, pp1.y / dpi) 
@@ -96,13 +128,11 @@ class CircuitSvg:
             lineB = lines[indexMax]
             path.M(lineA[0][0] / dpi, lineA[0][1] / dpi)
 
-        # contoureAnalizer.drawCountureFromLine(lines[0])
-        contoureAnalizer.drawCountureFromLine(lines[indexMax])
+        
         for index in range(indexMax):
             lineA = lines[index]
             lineB = lines[index+1]
             lineC = None
-            contoureAnalizer.drawCountureFromLine(lineA)
             if index < indexMax - 2:
                 lineC = lines[index+2]
                 
@@ -111,81 +141,13 @@ class CircuitSvg:
             width = corner.maxX-corner.minX
             height = corner.maxY-corner.minY
             if corner.cross == ParallStatus.hor:
-                deltaX = abs(lineB[0][0] - lineA[1][0])
-                deltaY = abs(lineB[0][1] - lineA[1][1])
-                if deltaY >10:
-                    # гор - гор - гор
-                    isFig1 = bezier.testFig1(lineA,lineB, corner, path, dpi)
-                else:
-                    isFig1 = bezier.testFig2(lineA,lineB, corner, path, dpi)
-                '''
-                pp0 = Point(lineA[1][0],lineA[1][1])
-                # pp1 = Point(lineA[1][0],corner.maxY)
-                # pp2 = Point(lineB[0][0],corner.maxY)
-                pp3 = Point(lineB[0][0],lineB[0][1])
-                # path.L(pp0.x / dpi, pp0.y / dpi) 
-                # path.L(pp1.x / dpi, pp1.y / dpi) 
-                # path.L(pp2.x / dpi, pp2.y / dpi) 
-                # path.L(pp3.x / dpi, pp3.y / dpi) 
-
-                xS = lineA[1][0]
-                xCenter = corner.minX + ((corner.maxX - corner.minX)/2)
-                xL = corner.minX + ((xCenter - corner.minX)/2)
-                xR = xCenter + ((xCenter - corner.minX)/2)
-                xE = lineB[0][0]
-                
-                deltaY = lineA[1][1] - lineB[0][1]
-                doReversS = True
-                doS = True
-                if abs(deltaY) > 5:
-                    if deltaY > 5:
-                        doS = False
-                    else:
-                        doReversS = False
-
-                yS = lineA[1][1]
-                yCenter = corner.minY + ((corner.maxY - corner.minY)/2)
-                yE = lineB[0][1]
-
-                tL = Point(xL,yCenter)
-                tMain = Point(xCenter,corner.maxY)
-                tR = Point(xR,yCenter)
-
-                # pp1 = Point(lineA[1][0],corner.maxY)
-                # pp2 = Point(lineB[0][0],corner.maxY)
-                # pp3 = Point(lineB[0][0],lineB[0][1])
-                path.L(pp0.x / dpi, pp0.y / dpi) 
-                if doS:
-                    # сплине 0
-                    # path.L(tL.x / dpi, tL.y / dpi) 
-                    centroid1 = Point(xL,yS)
-                    centroid2 = Point(xL,yS)
-                    centroid2 = bezier.interpolatePoint(centroid2, tL, 0.1)
-                    path.C(centroid1.x / dpi, centroid1.y / dpi, centroid2.x / dpi,centroid2.y / dpi, tL.x / dpi, tL.y / dpi)
-                    
-                    # сплине 1 (center l)
-                    # path.L(tMain.x / dpi, tMain.y / dpi) 
-                    centroid1 = Point(xL,tMain.y)
-                    centroid2 = Point(xL,tMain.y)
-                    # centroid2 = CircuitSvg.interpolatePoint(centroid2, tMain, 0)
-                    centroid2 = bezier.interpolatePoint(centroid2, tMain, 0.4)
-                    path.C(centroid1.x / dpi, centroid1.y / dpi, centroid2.x / dpi,centroid2.y / dpi, tMain.x / dpi, tMain.y / dpi)
-                
-                if doReversS:
-                    # сплине 2 (center r)
-                    # path.L(tR.x / dpi, tR.y / dpi) 
-                    centroid1 = Point(xR,tMain.y)
-                    centroid2 = Point(xR,tMain.y)
-                    centroid1 = bezier.interpolatePoint(centroid1, tMain, 0.4)
-                    path.C(centroid1.x / dpi, centroid1.y / dpi, centroid2.x / dpi,centroid2.y / dpi, tR.x / dpi, tR.y / dpi)
-
-                    # сплине 3
-                    # path.L(pp3.x / dpi, pp3.y / dpi) 
-                    centroid1 = Point(xR,yE)
-                    centroid2 = Point(xR,yE)
-                    centroid1 = bezier.interpolatePoint(centroid1, tR, 0.1)
-                    path.C(centroid1.x / dpi, centroid1.y / dpi, centroid2.x / dpi,centroid2.y / dpi, pp3.x / dpi, pp3.y / dpi)
-                '''
+                # deltaX = abs(lineB[0][0] - lineA[1][0])
+                # deltaY = abs(lineB[0][1] - lineA[1][1])
+                # if deltaY >10:
+                #     # гор - гор - гор
+                #     isFig1 = bezier.testFig1(lineA,lineB, corner, path, dpi)
+                # else:
+                #     isFig1 = bezier.testFig2(lineA,lineB, corner, path, dpi)
                 continue
             if corner.cross == ParallStatus.vert:
                 isFig0 = bezier.testFig0(lineA,lineB, lineC, path, dpi)
@@ -203,12 +165,9 @@ class CircuitSvg:
                 continue
             else:
                 CircuitSvg.doLekaloCorner(lineA, lineB, path, dpi, False)
-                # idSmoth = CircuitSvg.createCornerLine(lineA[6].pointsFig, path, dpi)
-                # if idSmoth == True:
-                #     pp0, pp1, centroid1, centroid2, pp2 = CircuitSvg.createAngle(lineA[0], lineA[1],lineB[0], lineB[1])
-                #     if pp0 is not None:
-                #         path.L(pp1.x / dpi, pp1.y / dpi) 
-                #         path.C(centroid1.x / dpi, centroid1.y / dpi, centroid2.x / dpi,centroid2.y / dpi, pp2.x / dpi, pp2.y / dpi)
+        '''                
+                
+                
         path.Z()
         draw.append(path)
         return
@@ -426,4 +385,30 @@ class CircuitSvg:
         centroid1 = l3.centroid
         centroid2 = l4.centroid
         return pp0, pp1, centroid1, centroid2, pp2
+    
+    def getStartPoint(pointA, pointB,pointC, pointD):
+        distAC = CircuitSvg.distancePoint(pointA, pointC) 
+        distAD = CircuitSvg.distancePoint(pointA, pointD)
+        distBC = CircuitSvg.distancePoint(pointB, pointC)
+        distBD = CircuitSvg.distancePoint(pointB, pointD)
+        
+        a = np.array([distAC,distAD,distBC,distBD])
+        index = np.where(a == a.min())[0][0]
+        point0 = None
+        point1 = None
+        if index == 1:
+            point0 = pointB
+            point1 = pointA
+        elif index == 2:
+            point0 = pointA
+            point1 = pointB
+        elif index == 0:
+            point0 = pointA
+            point1 = pointB
+        else:
+            zz=0
+            
+        pp0 = Point(point0[0],point0[1])
+        pp1 = Point(point1[0],point1[1])
+        return pp0, pp1
     

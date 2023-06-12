@@ -255,6 +255,11 @@ class bezier:
         a_delta_y = abs(line1[1][1] - line1[0][1])
         b_delta_x = abs(line2[1][0] - line2[0][0])
         b_delta_y = abs(line2[1][1] - line2[0][1])
+class FigureStatus(enum.Enum):
+    smoothCorner = 2
+    undefined = 3
+    halfCircleUp = 1
+    
 class contoureAnalizer:
     counterCorner = 0 
     curveDir = "./out/"
@@ -270,8 +275,9 @@ class contoureAnalizer:
         rad = bezier.get_angleP(Point(pointS[0],pointS[1]),Point(pointF[0],pointF[1]))
         angle = math.degrees(rad)
         return  (int(len), int(angle))
-    def drawCountureFromLine(line):
-        contours = line[6].pointsFig.copy()
+    def drawCountureFromLine(lineA, lineB):
+        contours = lineA[6].pointsFig.copy()
+        type = FigureStatus.undefined
         if contours is not None:
             shape = contours.shape
             xMin = yMin = 10000000
@@ -298,7 +304,7 @@ class contoureAnalizer:
             peri = cv2.arcLength(contours,True)
             
             # contoureAnalizer.drawSingleCounture(img, contours,  0.005 * peri, w*1, (255,255,255),th)
-            contoureAnalizer.drawSingleCounture(img, contours,  0.01 * peri, w*1, (255,255,255),th)
+            typeFigure = contoureAnalizer.drawSingleCounture(img, contours,  0.01 * peri, w*1, (255,255,255),th,w,h,lineA, lineB)
 
             # contoureAnalizer.drawSingleCounture(img, contours,  0.001 * peri, w*0, (255,255,255),th)
             # contoureAnalizer.drawSingleCounture(img, contours,  0.01 * peri, w*1, (255,255,0),th)
@@ -306,12 +312,12 @@ class contoureAnalizer:
             name = contoureAnalizer.curveDir + str(contoureAnalizer.counterCorner) + ".png"
             contoureAnalizer.counterCorner+=1
             cv2.imwrite(name, img) 
-        return
-    def drawSingleCounture(img, contoursSrc, coff, xstart, color, th):
+        return (typeFigure,lineA, lineB)
+    def drawSingleCounture(img, contoursSrc, coff, xstart, color, th,w,h,lineA, lineB):
         contours = contoursSrc.copy()
         for contour in contours:
             contour[0]=contour[0]+xstart
-        approx = cv2.approxPolyDP(contours, coff, True)
+        approx = cv2.approxPolyDP(contours, coff, False)
         
         diffs = []
         for index in range(len(approx)-1):
@@ -320,4 +326,41 @@ class contoureAnalizer:
             diffs.append(contoureAnalizer.getParamVector(contour[0],contourNext[0]))
         
         cv2.drawContours(img, approx, -1, color, th, cv2.LINE_AA)
+        cv2.polylines(img, [approx], False, (0, 255, 0), 3)
+        typeFigure = contoureAnalizer.clasificatorFigure(diffs, approx, w, h,lineA, lineB)
+        if w < 32 and h < 32:
+            return FigureStatus.smoothCorner
+        return typeFigure
+    def clasificatorFigure(diffs, countor, w, h,lineA, lineB):
+        someSign= contoureAnalizer.check_sort(diffs)
+        # val0= contoureAnalizer.isSorted(diffs, 1)
+        # val1= contoureAnalizer.isSorted(diffs, -1)
+        if len(diffs) == 8:
+            return FigureStatus.halfCircleUp
+        if someSign:
+            return FigureStatus.smoothCorner
+        return FigureStatus.undefined
+    
+    def check_sort(array):
+        # plus = all([x > y for x, y in zip(array, array[1:])])
+        indices = [1]
+        out = np.take(array, indices, axis=1)        
+        plus = all([x > y for x, y in zip(out, out[1:])])
+        return plus
+    
+    def isSorted(x,flag):
+        st = x[0][1]
+        delta = []
+        for index in range(1, len(x)):
+            test = x[index][1]
+            delta.append( test - st)
+            st = test 
         return
+    def sign(a):
+        if a>0:
+            return 1;
+        elif a<0:
+            return -1;
+        else:
+            return 0    
+    
