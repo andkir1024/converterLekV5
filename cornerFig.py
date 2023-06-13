@@ -137,16 +137,33 @@ class CircuitSvg:
                 else:
                     bezier.doSDownUp(xCenter,yCenter, corner, path, dpi, 0.5, 0.2, False,prop)
                 continue
+            if typeFigures[index][0] == FigureStatus.cutoutRect:
+                lineA = typeFigures[index][1]
+                lineB = typeFigures[index][2]
+                corner = lineA[6]
+                
+                bezier.doCutoutTriangle(lineA,lineB, corner, path, dpi, True)
+                continue
             if typeFigures[index][0] == FigureStatus.cutoutTriangle:
                 lineA = typeFigures[index][1]
                 lineB = typeFigures[index][2]
-
                 corner = lineA[6]
-                # pp0 = Point(lineA[1][0],lineA[1][1])
-                # pp2 = Point(corner.minX + ((corner.maxX - corner.minX)/2),corner.maxY)
-                # pp3 = Point(lineB[0][0],lineB[0][1])
                 
-                bezier.doCutoutTriangle(lineA,lineB, corner, path, dpi)
+                bezier.doCutoutTriangle(lineA,lineB, corner, path, dpi, False)
+                continue
+            if typeFigures[index][0] == FigureStatus.camelA:
+                lineA = typeFigures[index][1]
+                lineB = typeFigures[index][2]
+                corner = lineA[6]
+                
+                bezier.doCamel(lineA,lineB, corner, path, dpi, FigureStatus.camelA)
+                continue
+            if typeFigures[index][0] == FigureStatus.camelB:
+                lineA = typeFigures[index][1]
+                lineB = typeFigures[index][2]
+                corner = lineA[6]
+                
+                bezier.doCamelB(lineA,lineB, corner, path, dpi)
                 continue
             
         

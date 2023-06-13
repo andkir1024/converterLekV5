@@ -251,7 +251,9 @@ class cvUtils:
         # поиск главного контура
         # contours,hiearchy = cv2.findContours(imgCanny,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_NONE)
         # contours,hiearchy = cv2.findContours(imgTst,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
-        contours,hiearchy = cv2.findContours(imgTst,cv2.RETR_LIST ,cv2.CHAIN_APPROX_SIMPLE)
+
+        # contours,hiearchy = cv2.findContours(imgTst,cv2.RETR_LIST ,cv2.CHAIN_APPROX_SIMPLE)
+        contours,hiearchy = cv2.findContours(imgTst,cv2.RETR_CCOMP  ,cv2.CHAIN_APPROX_SIMPLE)
         # сортировка котуров по площади (максимальный первый)
         minArea=1000  
         # sel_countour=None
@@ -264,6 +266,9 @@ class cvUtils:
                 bbox = cv2.boundingRect(approx)
                 finalCountours.append([0, area, approx, bbox, iCon, None])
         finalCountours = sorted(finalCountours,key = lambda x:x[1] ,reverse= True)                
+        # finalCountoursA = []
+        # finalCountoursA.append(finalCountours[1])
+        # finalCountours = finalCountoursA
         finalCountours = cvUtils.extractContours(finalCountours, circles)
         
         # генерация параметров контуров

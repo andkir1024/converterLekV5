@@ -116,6 +116,10 @@ class bezier:
             mode = 2
             coff0 = 0.4
             coff1 = 0.02
+        if prop == -1:
+            mode = 3
+            coff0 = 0.4
+            coff1 = 0.02
         if dir == False:
             pA, pE = pE, pA
             pB, pD = pD, pB
@@ -126,6 +130,9 @@ class bezier:
             bezP2 = bezP1
         if mode == 2:
             bezP2 = bezP1
+        if mode == 3:
+            bezP1 = bezier.interpolatePoint(pA, pB, 0.6)
+            bezP2 = bezier.interpolatePoint(pB, pC, 0.2)
         # path.L(bezP1.x / dpi, bezP1.y / dpi).L(bezP2.x / dpi, bezP2.y / dpi).L( pC.x / dpi, pC.y / dpi)
         path.C(bezP1.x / dpi, bezP1.y / dpi, bezP2.x / dpi, bezP2.y / dpi, pC.x / dpi, pC.y / dpi)
         
@@ -136,21 +143,117 @@ class bezier:
         if mode == 2:
             bezP1 = bezP2
             bezP2 = bezier.interpolatePoint(pD, pE, 0.9)
+        if mode == 3:
+            bezP1 = bezier.interpolatePoint(pC, pD, 0.7)
+            bezP2 = bezier.interpolatePoint(pD, pE, 0.2)
         # path.L(bezP1.x / dpi, bezP1.y / dpi).L(bezP2.x / dpi, bezP2.y / dpi).L( pE.x / dpi, pE.y / dpi)
         path.C(bezP1.x / dpi, bezP1.y / dpi, bezP2.x / dpi, bezP2.y / dpi, pE.x / dpi, pE.y / dpi)
         return
-    # вырез как треугольник
-    def doCutoutTriangle(lineA,lineB, cornerBase, path, dpi):
+    def doCamelB(lineA,lineB, cornerBase, path, dpi):
         pp0 = Point(lineA[1][0],lineA[1][1])
         pp2 = Point(cornerBase.minX + ((cornerBase.maxX - cornerBase.minX)/2),cornerBase.maxY)
         pp3 = Point(lineB[0][0],lineB[0][1])
         
         x0 = pp0.x
         x4 = pp3.x
-        lenX = (x4-x0)/4
-        x1 = x0 + lenX
-        x2 = x1 + lenX
-        x3 = x2 + lenX
+        lenX = (x4-x0)/9
+        x1 = x0 + (lenX*1)
+        x2 = x1 + (lenX*2)
+        x3 = x2 + (lenX*2)
+        x4 = x3 + (lenX*1)
+        x5 = x4 + (lenX*1)
+        x6 = x5 + (lenX*1)
+        x7 = x6 + (lenX*1)
+        prop =-1 
+
+        y0 = pp0.y
+        yCenter = cornerBase.minY + ((cornerBase.maxY - cornerBase.minY)/2)
+        y1 = pp3.y
+        
+        pA = Point(x0,y0)
+        pB = Point(x1,y0)
+        pC = Point(x1,yCenter)
+        pD = Point(x1,y1)
+        pE = Point(x2,y1)
+        bezier.doSDownUpSvg(pA,pB,pC,pD,pE,path, dpi, 0.5, 0.5, True, prop)
+
+        pA = Point(x2,y1)
+        pB = Point(x3,y1)
+        pC = Point(x3,yCenter)
+        pD = Point(x3,y0)
+        pE = Point(x4,y0)
+        bezier.doSUpDownSvg(pA,pB,pC,pD,pE,path, dpi, 0.5, 0.5, True, prop)
+
+        pA = Point(x5,y0)
+        pB = Point(x6,y0)
+        pC = Point(x6,yCenter)
+        pD = Point(x6,y1)
+        pE = Point(x7,y1)
+        bezier.doSDownUpSvg(pA,pB,pC,pD,pE,path, dpi, 0.5, 0.5, True, prop)
+        return
+    def doCamel(lineA,lineB, cornerBase, path, dpi, typeCamel):
+        pp0 = Point(lineA[1][0],lineA[1][1])
+        pp2 = Point(cornerBase.minX + ((cornerBase.maxX - cornerBase.minX)/2),cornerBase.maxY)
+        pp3 = Point(lineB[0][0],lineB[0][1])
+        
+        x0 = pp0.x
+        x4 = pp3.x
+        lenX = (x4-x0)/9
+        x1 = x0 + (lenX*1)
+        x2 = x1 + (lenX*1)
+        x3 = x2 + (lenX*1)
+        x4 = x3 + (lenX*1)
+        x5 = x4 + (lenX*1)
+        x6 = x5 + (lenX*2)
+        x7 = x6 + (lenX*2)
+        prop =-1 
+
+        y0 = pp3.y
+        yCenter = cornerBase.minY + ((cornerBase.maxY - cornerBase.minY)/2)
+        y1 = cornerBase.maxY
+        
+        pA = Point(x0,y1)
+        pB = Point(x1,y1)
+        pC = Point(x2,yCenter)
+        pD = Point(x2,y0)
+        pE = Point(x3,y0)
+        bezier.doSDownUpSvg(pA,pB,pC,pD,pE,path, dpi, 0.5, 0.5, True, prop)
+
+        pA = Point(x3,y0)
+        pB = Point(x4,y0)
+        pC = Point(x4,yCenter)
+        pD = Point(x4,y1)
+        pE = Point(x5,y1)
+        bezier.doSUpDownSvg(pA,pB,pC,pD,pE,path, dpi, 0.5, 0.5, True, prop)
+
+        pA = Point(x5,y1)
+        pB = Point(x6,y1)
+        pC = Point(x6,yCenter)
+        pD = Point(x6,y0)
+        pE = Point(x7,y0)
+        bezier.doSDownUpSvg(pA,pB,pC,pD,pE,path, dpi, 0.5, 0.5, True, prop)
+        return
+    # вырез как треугольник
+    def doCutoutTriangle(lineA,lineB, cornerBase, path, dpi, isRect):
+        pp0 = Point(lineA[1][0],lineA[1][1])
+        pp2 = Point(cornerBase.minX + ((cornerBase.maxX - cornerBase.minX)/2),cornerBase.maxY)
+        pp3 = Point(lineB[0][0],lineB[0][1])
+        
+        x0 = pp0.x
+        x4 = pp3.x
+        prop = 1
+        if isRect:
+            lenX = (x4-x0)/8
+            x1 = x0 + (lenX*1)
+            x2 = x1 + (lenX*3)
+            x3 = x2 + (lenX*3)
+            prop =-1 
+        else:
+            lenX = (x4-x0)/4
+            x1 = x0 + lenX
+            x2 = x1 + lenX
+            x3 = x2 + lenX
+            
 
         y0 = pp0.y
         yCenter = cornerBase.minY + ((cornerBase.maxY - cornerBase.minY)/2)
@@ -161,14 +264,14 @@ class bezier:
         pC = Point(x1,yCenter)
         pD = Point(x1,y1)
         pE = Point(x2,y1)
-        bezier.doSUpDownSvg(pA,pB,pC,pD,pE,path, dpi, 0.5, 0.5, True, 0)
+        bezier.doSUpDownSvg(pA,pB,pC,pD,pE,path, dpi, 0.5, 0.5, True, prop)
 
         pA = Point(x2,y1)
         pB = Point(x3,y1)
         pC = Point(x3,yCenter)
         pD = Point(x3,y0)
         pE = Point(x4,y0)
-        bezier.doSDownUpSvg(pA,pB,pC,pD,pE,path, dpi, 0.5, 0.5, True, 0)
+        bezier.doSDownUpSvg(pA,pB,pC,pD,pE,path, dpi, 0.5, 0.5, True, prop)
         
         
         # path.L(pp0.x / dpi, pp0.y / dpi) 
@@ -194,6 +297,10 @@ class bezier:
             mode = 2
             coff0 = 0.4
             coff1 = 0.02
+        if prop == -1:
+            mode = 3
+            coff0 = 0.4
+            coff1 = 0.02
         if dir == False:
             pA, pE = pE, pA
             pB, pD = pD, pB
@@ -206,6 +313,9 @@ class bezier:
         if mode == 2:
             bezP2 = bezP1
             bezP1 = bezier.interpolatePoint(pA, pB, 0.1)
+        if mode == 3:
+            bezP1 = bezier.interpolatePoint(pA, pB, 0.7)
+            bezP2 = bezier.interpolatePoint(pB, pC, 0.2)
         path.C(bezP1.x / dpi, bezP1.y / dpi, bezP2.x / dpi, bezP2.y / dpi, pC.x / dpi, pC.y / dpi)
         
         bezP1 = bezier.interpolatePoint(pC, pD, coff1)
@@ -214,6 +324,9 @@ class bezier:
             bezP1 = bezP2
         if mode == 2:
             bezP1 = bezP2
+        if mode == 3:
+            bezP1 = bezier.interpolatePoint(pC, pD, 0.6)
+            bezP2 = bezier.interpolatePoint(pD, pE, 0.2)
         path.C(bezP1.x / dpi, bezP1.y / dpi, bezP2.x / dpi, bezP2.y / dpi, pE.x / dpi, pE.y / dpi)
         return
     # тестирование горизонтальные линии последовательно
@@ -387,6 +500,9 @@ class FigureStatus(enum.Enum):
     cutoutTriangle = 7
     cutoutRect = 8
     cutoutCircle = 9
+
+    camelA = 10
+    camelB = 11
     
 class contoureAnalizer:
     counterCorner = 0 
@@ -469,6 +585,12 @@ class contoureAnalizer:
             return cutout
         # if mathSvg.isHalfCircle(analized) == True:
             # return FigureStatus.halfCircleUp
+        sCamel = mathSvg.isCamelFigure(analized, diffs,countor)
+        if sCamel == 0:
+            return FigureStatus.camelA
+        if sCamel == 1:
+            return FigureStatus.camelB
+
         sFig = mathSvg.isSFigure(analized, diffs,countor)
         if sFig == 1:
             return FigureStatus.sDownUp
@@ -500,6 +622,9 @@ class contoureAnalizer:
             height = approx[1][0][1]
             if approx[0][0][0] > approx[1][0][0] and approx[1][0][0] > approx[2][0][0]:
                 if approx[1][0][1] > approx[0][0][1] and approx[1][0][1] > approx[2][0][1]:
+                    prop = lenght / height
+                    if prop < 1.5 and prop > 0.75:
+                        return FigureStatus.cutoutRect
                     return FigureStatus.cutoutTriangle
                 if approx[1][0][1] < approx[0][0][1] and approx[1][0][1] < approx[2][0][1]:
                     return None

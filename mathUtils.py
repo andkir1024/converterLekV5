@@ -45,6 +45,22 @@ class mathSvg:
                 if seq[index] == seq[index+1] or seq[index]-1 == seq[index+1] or seq[index] == seq[index+1]-1:
                     return True
         return False
+    def doSignSeq(diffs):
+        result = []
+        for index in range(1, len(diffs)):
+            if abs(diffs[index-1][1]) > abs(diffs[index][1]):
+                result.append(True) 
+            else:
+                result.append(False) 
+        return result
+    def isCamelFigure(seq, diffs,countor):
+        seq = mathSvg.doSignSeq(diffs)
+        all= len(seq)
+        if all == 7 and seq[0]==False and seq[1]==False and seq[2]==True and seq[3]==True and seq[4]==False and seq[5]==True and seq[6]==False:
+            return 0
+        if all == 9 and seq[0]==True and seq[1]==False and seq[2]==True and seq[3]==True and seq[4]==False and seq[5]==False and seq[6]==True and seq[7]==True:
+            return 1
+        return -1
     def isSFigure(seq, diffs,countor):
         # if seq is None:
         #     return 0

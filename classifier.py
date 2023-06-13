@@ -31,10 +31,21 @@ class classifier:
     # выделение линий длиной не менее border из точек контура
     def extractLinesFromCircuit(sel_countour, border, startPoint, finPoint, closed):
         lines = []
+        peri = cv2.arcLength(sel_countour,True)
+        # sel_countour = cv2.approxPolyDP(sel_countour, 0.0001 * peri, True)
         all_points = len(sel_countour)
         if finPoint < 0:
             finPoint = all_points
+
+        # a = 2 % len(sel_countour)
+        # sel_countour1 = sel_countour[-a:] + sel_countour[:-a]
+        # sel_countour = np.delete(sel_countour, 0)
+        # sel_countour.remove(0)
+        # del sel_countour[0]
+        
         indexPrev=-1
+        # border =10
+        startP = None
         for index in range(startPoint+1, finPoint):
             curr_point=sel_countour[index][0]
             last_point = sel_countour[index-1][0]
@@ -43,8 +54,12 @@ class classifier:
             if line is not None:
                 lines.append(line)
                 indexPrev = index
+                if startP is  None:
+                    startP = startPoint
         if closed == True:
-            line =classifier.packLine(last_point,sel_countour[startPoint][0], border, (indexPrev,finPoint))
+            line =classifier.packLine(last_point,sel_countour[startP][0], border, (indexPrev,finPoint))
+            # line =classifier.packLine(last_point,sel_countour[startPoint][0], border, (indexPrev,finPoint))
+            # line =classifier.packLine(last_point,sel_countour[startPoint][0], 10, (indexPrev,finPoint))
             if line is not None:
                 lines.append(line)
         lines = lines[::-1]
@@ -108,7 +123,7 @@ class classifier:
             corner = line[6]
             img = cv2.rectangle(img, (corner.minX,corner.minY), (corner.maxX, corner.maxY), (0, 255, 0), thickness)
             msg = f"{line[4][0]},{line[4][1]},{index}"
-            cv2.putText(img, msg, (corner.minX, corner.minY), cv2.FONT_HERSHEY_SIMPLEX, 2, (255,0,0), 4)
+            cv2.putText(img, msg, (corner.minX, corner.minY), cv2.FONT_HERSHEY_SIMPLEX, 3, (255,0,0),4)
             cv2.line(img, line[0], line[1], color=(0,0,255), thickness=thickness)
             if ParallStatus.isCoord(corner.cross) == True:
                 cv2.circle(img, corner.cross, radius=0, color=(255, 0, 0), thickness=50)
