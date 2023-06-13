@@ -275,7 +275,7 @@ class cvUtils:
         objects_contours.sort(key=custom_key, reverse=True)
         return objects_contours
 
-    def doContours(imgGray, img, filesSrc, svgDir, dpiSvg):
+    def doContours(imgGray, img, filesSrc, svgDir, dpiSvg,pngDir):
         # -------------------------------------
         # нахождение круговых вырезов
         circles = cvUtils.findCircles(imgGray, img, True)
@@ -335,7 +335,7 @@ class cvUtils:
                     classifier.drawFigRect(img, countour, lines)
 
         cvUtils.createMainContoursSvg(
-            finalCountours, circles, imgGray, filesSrc, svgDir, dpiSvg
+            finalCountours, circles, imgGray, filesSrc, svgDir, dpiSvg,pngDir
         )
         return imgTst
 
@@ -477,7 +477,7 @@ class cvUtils:
                 return True
         return False
 
-    def createMainContoursSvg(finalCountours, circles, img, filesSrc, svgDir, dpiSvg):
+    def createMainContoursSvg(finalCountours, circles, img, filesSrc, svgDir, dpiSvg,pngDir):
         # return
         width = 4000
         height = 8000
@@ -485,16 +485,16 @@ class cvUtils:
             width = img.shape[1]
             height = img.shape[0]
         # создам svg для
-        dPrn = cvUtils.createSvg(finalCountours, circles, width, height, True, dpiSvg)
+        dPrn = cvUtils.createSvg(finalCountours, circles, width, height, True, dpiSvg,pngDir)
         svgTestName = "example.svg"
         dPrn.save_svg(svgTestName)
         pngTestName = "example.png"
-        d = cvUtils.createSvg(finalCountours, circles, width, height, False, dpiSvg)
+        d = cvUtils.createSvg(finalCountours, circles, width, height, False, dpiSvg,pngDir)
         d.save_png(pngTestName)
-        cvUtils.saveResult(img, filesSrc, svgDir, svgTestName, pngTestName)
+        cvUtils.saveResult(img, filesSrc, svgDir, svgTestName, pngTestName,pngDir)
         return
 
-    def createSvg(finalCountours, circles, width, height, printSvg, dpiSvg):
+    def createSvg(finalCountours, circles, width, height, printSvg, dpiSvg,pngDir):
         dpi = 1
         stroke_width = 10
         colorCircle = "blue"
@@ -541,7 +541,7 @@ class cvUtils:
         return d
 
     # сохранение результатов
-    def saveResult(img, filesSrc, svgDir, svgTestName, pngTestName):
+    def saveResult(img, filesSrc, svgDir, svgTestName, pngTestName,pngDir):
         if not os.path.isdir(svgDir):
             os.mkdir(svgDir)
         name = pathlib.Path(filesSrc).stem
@@ -570,8 +570,9 @@ class cvUtils:
         sought = [0, 0, 0]
         result = np.count_nonzero(np.all(out_img == sought, axis=2))
 
-        nameDiff = svgDir + "/" + name + "." + str(result) + ".png"
-        is_success, im_buf_arr = cv2.imencode(".png", out_img)
-        im_buf_arr.tofile(nameDiff)
+        if pngDir is not None:
+            nameDiff = pngDir + "/" + name + "." + str(result) + ".png"
+            is_success, im_buf_arr = cv2.imencode(".png", out_img)
+            im_buf_arr.tofile(nameDiff)
 
         return

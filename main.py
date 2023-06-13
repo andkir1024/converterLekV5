@@ -18,18 +18,21 @@ filesDir = '../popular1/'
 filesSrc = None
 svgDir = '../outSvg/'
 cmpDir = '../outSvg/'
+pngDir = None
 doConsole = True
 dpiSvg = 9.977
 
 argumentList = sys.argv[1:]
 options = "hmo:"
-long_options = ["Help", "wnd", "dirSrc=","dirDst=", "svg=", "cmp="]
+long_options = ["Help", "wnd", "dirSrc=","pngDir=","dirDst=", "svg=", "cmp="]
 arguments, values = getopt.getopt(argumentList, options, long_options)
 for currentArgument, currentValue in arguments:
         if currentArgument in ("-o", "--dirDst"):
             svgDir = currentValue
         if currentArgument in ("-d", "--dirSrc"):
             filesDir = currentValue
+        if currentArgument in ("-p", "--pngDir"):
+            pngDir = currentValue
         elif currentArgument in ("-w","--wnd"):
             doConsole = False
         if currentArgument in ("-s", "--svg"):
@@ -110,18 +113,20 @@ def slider_changed2(event):
     update_image()
     return
 def export_svg():
-    global filesSrc
-    if imgOk is None:
-        return
-    # data = [('svg', '*.svg')]
-    # file_path = filedialog.asksaveasfilename(filetypes=data, defaultextension=data)
-    # file_path = 'f:/out.svg'
-    fileDst = os.path.splitext(filesSrc)
-    if not os.path.exists(svgDir):
-        os.mkdir(svgDir)
-    filename = fileDst[0].split('/')
-    fileDst = svgDir + filename[-1] + ".svg"
-    lekaloSvg.saveToSvg(imgOk,fileDst)
+    return
+    # global filesSrc
+    # if imgOk is None:
+    #     return
+    # # data = [('svg', '*.svg')]
+    # # file_path = filedialog.asksaveasfilename(filetypes=data, defaultextension=data)
+    # # file_path = 'f:/out.svg'
+    # fileDst = os.path.splitext(filesSrc)
+    # if not os.path.exists(svgDir):
+    #     os.mkdir(svgDir)
+    # filename = fileDst[0].split('/')
+    # fileDst = svgDir + filename[-1] + ".svg"
+    # lekaloSvg.saveToSvg(imgOk,fileDst)
+    
 def update_image():
     global updateImage
     updateImage = True
@@ -210,7 +215,7 @@ def convertScreenToImageCoord(rmainImage, imgOk, xZoom, yZoom):
     # viewX = 440
     # viewY = 934
     return viewX, viewY
-def do_frame(imgOk, filesSrc, svgDir, param0):
+def do_frame(imgOk, filesSrc, svgDir, param0,pngDir):
     # imgDraw = imgOk.copy()
     # # param0 = frame2control.param0.get()  
     # imgGrey =cvDraw.createGray(imgOk, param0)
@@ -222,14 +227,14 @@ def do_frame(imgOk, filesSrc, svgDir, param0):
             imgDraw = imgOk.copy()
             # param0 = frame2control.param0.get()
             imgGrey =cvDraw.createGray(imgOk, param0)
-            imgTst = cvUtils.doContours(imgGrey, imgDraw, filesSrc, svgDir, dpiSvg)
+            imgTst = cvUtils.doContours(imgGrey, imgDraw, filesSrc, svgDir, dpiSvg,pngDir)
         except Exception as e:
             return imgDraw, imgDraw, e
         return imgDraw, imgTst, None
     else:
         imgDraw = imgOk.copy()
         imgGrey =cvDraw.createGray(imgOk, param0)
-        imgTst = cvUtils.doContours(imgGrey, imgDraw, filesSrc, svgDir, dpiSvg)
+        imgTst = cvUtils.doContours(imgGrey, imgDraw, filesSrc, svgDir, dpiSvg,pngDir)
         return imgDraw, imgTst, None
 def show_frame():
     global imgOk
@@ -237,12 +242,12 @@ def show_frame():
     global testName
     global updateImageZoom
     global xZoom,yZoom
-    global filesSrc, svgDir
+    global filesSrc, svgDir, pngDir
 
     if updateImage == True or updateImageZoom == True:
         updateImage = False
         if imgOk is not None:
-            imgDraw,imgTst, resImag = do_frame(imgOk, filesSrc, svgDir, slider1.get())
+            imgDraw,imgTst, resImag = do_frame(imgOk, filesSrc, svgDir, slider1.get(),pngDir)
 
             scale, dispX, dispY = calkViewParam(rmainImage, imgDraw)
             img = cv2.resize(imgDraw, (0, 0), interpolation=cv2.INTER_AREA, fx=scale, fy=scale)
@@ -293,7 +298,7 @@ else:
         index = 0
         for f in listFiles:
             imgOk = cv2.imdecode(np.fromfile(f, dtype=np.uint8), cv2.IMREAD_COLOR)
-            imd0, img1, ok = do_frame(imgOk, f, svgDir, 0)
+            imd0, img1, ok = do_frame(imgOk, f, svgDir, 0, pngDir)
             if ok is None:
                 msg = f"{index} "
                 print(msg + f)

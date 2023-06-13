@@ -21,7 +21,7 @@
             "request": "launch",
             "program": "main.py",
             "console": "externalTerminal",
-            "args": ["--dirSrc=../lekalo/popular/","--svg=9.07","--dirDst=../lekalo/srcDemoResult/"],
+            "args": ["--dirSrc=../lekalo/popular/","--svg=9.07","--dirDst=../lekalo/srcDemoResult/", "--pngDir=../lekalo/srcDemoResult/"],
             // "args": ["--dirSrc=../lekalo/src/","--svg=9.07","--dirDst=../lekalo/srcDemoResult/"],
             //"args": ["--dirSrc=../lekalo/srcDemo/","--svg=9.07","--dirDst=../lekalo/srcDemoResult/"],
             // "args": ["--dirSrc=../popularBad/","--svg=9.07","--dirDst=./out"],
