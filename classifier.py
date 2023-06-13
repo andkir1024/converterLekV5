@@ -57,8 +57,8 @@ class classifier:
                 if startP is  None:
                     startP = startPoint
         if closed == True:
-            line =classifier.packLine(last_point,sel_countour[startP][0], border, (indexPrev,finPoint))
-            # line =classifier.packLine(last_point,sel_countour[startPoint][0], border, (indexPrev,finPoint))
+            # line =classifier.packLine(last_point,sel_countour[startP][0], border, (indexPrev,finPoint))
+            line =classifier.packLine(last_point,sel_countour[startPoint][0], border, (indexPrev,finPoint))
             # line =classifier.packLine(last_point,sel_countour[startPoint][0], 10, (indexPrev,finPoint))
             if line is not None:
                 lines.append(line)

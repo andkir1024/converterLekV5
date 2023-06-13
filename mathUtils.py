@@ -60,6 +60,8 @@ class mathSvg:
             return 0
         if all == 9 and seq[0]==True and seq[1]==False and seq[2]==True and seq[3]==True and seq[4]==False and seq[5]==False and seq[6]==True and seq[7]==True:
             return 1
+        if all == 8 and seq[0]==False and seq[1]==False and seq[2]==True and seq[3]==False and seq[4]==True and seq[5]==False and seq[6]==False and seq[7]==True:
+            return 2
         return -1
     def isSFigure(seq, diffs,countor):
         # if seq is None:

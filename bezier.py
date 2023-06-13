@@ -149,6 +149,57 @@ class bezier:
         # path.L(bezP1.x / dpi, bezP1.y / dpi).L(bezP2.x / dpi, bezP2.y / dpi).L( pE.x / dpi, pE.y / dpi)
         path.C(bezP1.x / dpi, bezP1.y / dpi, bezP2.x / dpi, bezP2.y / dpi, pE.x / dpi, pE.y / dpi)
         return
+    def doCamelC(lineA,lineB, cornerBase, path, dpi):
+        pp0 = Point(lineA[1][0],lineA[1][1])
+        pp2 = Point(cornerBase.minX + ((cornerBase.maxX - cornerBase.minX)/2),cornerBase.maxY)
+        pp3 = Point(lineB[0][0],lineB[0][1])
+        
+        x0 = pp0.x
+        x4 = pp3.x
+        lenX = (x4-x0)/11
+        x1 = x0 + (lenX*1)
+        x2 = x1 + (lenX*1)
+        x3 = x2 + (lenX*2)
+        x4 = x3 + (lenX*1)
+        x5 = x4 + (lenX*1)
+        x6 = x5 + (lenX*1)
+        x7 = x6 + (lenX*1)
+        x8 = x7 + (lenX*2)
+        x9 = x8 + (lenX*1)
+        prop =-1 
+
+        y0 = pp0.y
+        yCenter = cornerBase.minY + ((cornerBase.maxY - cornerBase.minY)/2)
+        y1 = cornerBase.maxY
+        
+        pA = Point(x0,y0)
+        pB = Point(x1,y0)
+        pC = Point(x1,yCenter)
+        pD = Point(x1,y1)
+        pE = Point(x2,y1)
+        bezier.doSDownUpSvg(pA,pB,pC,pD,pE,path, dpi, 0.5, 0.5, True, prop)
+
+        pA = Point(x2,y1)
+        pB = Point(x3,y1)
+        pC = Point(x3,yCenter)
+        pD = Point(x3,y0)
+        pE = Point(x4,y0)
+        bezier.doSUpDownSvg(pA,pB,pC,pD,pE,path, dpi, 0.5, 0.5, True, prop)
+
+        pA = Point(x5,y0)
+        pB = Point(x6,y0)
+        pC = Point(x6,yCenter)
+        pD = Point(x6,y1)
+        pE = Point(x7,y1)
+        bezier.doSDownUpSvg(pA,pB,pC,pD,pE,path, dpi, 0.5, 0.5, True, prop)
+
+        pA = Point(x7,y1)
+        pB = Point(x8,y1)
+        pC = Point(x8,yCenter)
+        pD = Point(x8,y0)
+        pE = Point(x9,y0)
+        bezier.doSDownUpSvg(pA,pB,pC,pD,pE,path, dpi, 0.5, 0.5, True, prop)        
+        return
     def doCamelB(lineA,lineB, cornerBase, path, dpi):
         pp0 = Point(lineA[1][0],lineA[1][1])
         pp2 = Point(cornerBase.minX + ((cornerBase.maxX - cornerBase.minX)/2),cornerBase.maxY)
@@ -503,6 +554,7 @@ class FigureStatus(enum.Enum):
 
     camelA = 10
     camelB = 11
+    camelC = 12
     
 class contoureAnalizer:
     counterCorner = 0 
@@ -590,6 +642,8 @@ class contoureAnalizer:
             return FigureStatus.camelA
         if sCamel == 1:
             return FigureStatus.camelB
+        if sCamel == 2:
+            return FigureStatus.camelC
 
         sFig = mathSvg.isSFigure(analized, diffs,countor)
         if sFig == 1:

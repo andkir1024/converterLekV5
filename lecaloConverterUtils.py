@@ -252,8 +252,8 @@ class cvUtils:
         # contours,hiearchy = cv2.findContours(imgCanny,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_NONE)
         # contours,hiearchy = cv2.findContours(imgTst,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
 
-        # contours,hiearchy = cv2.findContours(imgTst,cv2.RETR_LIST ,cv2.CHAIN_APPROX_SIMPLE)
-        contours,hiearchy = cv2.findContours(imgTst,cv2.RETR_CCOMP  ,cv2.CHAIN_APPROX_SIMPLE)
+        contours,hiearchy = cv2.findContours(imgTst,cv2.RETR_LIST ,cv2.CHAIN_APPROX_SIMPLE)
+        # contours,hiearchy = cv2.findContours(imgTst,cv2.RETR_CCOMP  ,cv2.CHAIN_APPROX_SIMPLE)
         # сортировка котуров по площади (максимальный первый)
         minArea=1000  
         # sel_countour=None
