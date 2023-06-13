@@ -10,6 +10,7 @@ import os
 from lecaloConverterUtils import cvUtils
 from drawUtils import cvDraw
 import datetime
+from bezier import bezier, contoureAnalizer, FigureStatus
 
 ################################### разборка аргументов
 testName = None
@@ -215,8 +216,8 @@ def do_frame(imgOk, filesSrc, svgDir, param0):
     # imgGrey =cvDraw.createGray(imgOk, param0)
     # imgTst = cvUtils.doContours(imgGrey, imgDraw, filesSrc, svgDir, dpiSvg)
     # return imgDraw, imgDraw, False
-    canExeption = False
-    if canExeption:    
+    # canExeption = False
+    if bezier.DEBUG_MODE == False:    
         try:
             imgDraw = imgOk.copy()
             # param0 = frame2control.param0.get()

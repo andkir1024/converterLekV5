@@ -12,6 +12,7 @@ from mathUtils import *
 # from scipy import interpolate
 
 class bezier:
+    DEBUG_MODE = False
     def is_eql(a_delta, b_delta, dist):
         if b_delta < dist and a_delta < dist:
             return True
@@ -242,6 +243,50 @@ class bezier:
         pE = Point(x7,y1)
         bezier.doSDownUpSvg(pA,pB,pC,pD,pE,path, dpi, 0.5, 0.5, True, prop)
         return
+    def doCamelD(lineA,lineB, cornerBase, path, dpi):
+        pp0 = Point(lineA[1][0],lineA[1][1])
+        pp2 = Point(cornerBase.minX + ((cornerBase.maxX - cornerBase.minX)/2),cornerBase.maxY)
+        pp3 = Point(lineB[0][0],lineB[0][1])
+        
+        x0 = pp0.x
+        x4 = pp3.x
+        lenX = (x4-x0)/9
+        x1 = x0 + (lenX*1)
+        x2 = x1 + (lenX*1)
+        x3 = x2 + (lenX*1)
+        x4 = x3 + (lenX*1)
+        x5 = x4 + (lenX*1)
+        x6 = x5 + (lenX*2)
+        x7 = x6 + (lenX*3)
+        prop =-1 
+
+        y0s = pp0.y
+        y0 = pp3.y
+        yCenter = cornerBase.minY + ((cornerBase.maxY - cornerBase.minY)/2)
+        y1 = cornerBase.maxY
+        
+        pA = Point(x0,y0s)
+        pB = Point(x1,y0s)
+        pC = Point(x2,y0)
+        pD = Point(x2,y0)
+        pE = Point(x3,y0)
+        bezier.doSDownUpSvg(pA,pB,pC,pD,pE,path, dpi, 0.5, 0.5, True, prop)
+
+        pA = Point(x3,y0)
+        pB = Point(x4,y0)
+        pC = Point(x4,yCenter)
+        pD = Point(x4,y1)
+        pE = Point(x5,y1)
+        bezier.doSUpDownSvg(pA,pB,pC,pD,pE,path, dpi, 0.5, 0.5, True, prop)
+
+        pA = Point(x5,y1)
+        pB = Point(x6,y1)
+        pC = Point(x6,yCenter)
+        pD = Point(x6,y0)
+        pE = Point(x7,y0)
+        bezier.doSDownUpSvg(pA,pB,pC,pD,pE,path, dpi, 0.5, 0.5, True, prop)
+        return
+    
     def doCamel(lineA,lineB, cornerBase, path, dpi, typeCamel):
         pp0 = Point(lineA[1][0],lineA[1][1])
         pp2 = Point(cornerBase.minX + ((cornerBase.maxX - cornerBase.minX)/2),cornerBase.maxY)
@@ -555,15 +600,17 @@ class FigureStatus(enum.Enum):
     camelA = 10
     camelB = 11
     camelC = 12
+    camelD = 13
     
 class contoureAnalizer:
     counterCorner = 0 
     curveDir = "./out/"
     def start():
-        contoureAnalizer.counterCorner=0
-        
-        for f in os.listdir(contoureAnalizer.curveDir):
-            os.remove(os.path.join(contoureAnalizer.curveDir, f))        
+        if bezier.DEBUG_MODE == True:
+            contoureAnalizer.counterCorner=0
+            
+            for f in os.listdir(contoureAnalizer.curveDir):
+                os.remove(os.path.join(contoureAnalizer.curveDir, f))        
     def getParamVector(pointS, pointF):
         deltax = pointS[0] - pointF[0]
         deltay = pointS[1] - pointF[1]
@@ -609,7 +656,8 @@ class contoureAnalizer:
             # contoureAnalizer.drawSingleCounture(img, contours,  0.1 * peri, w*2, (255,255,0),th)
             name = contoureAnalizer.curveDir + str(contoureAnalizer.counterCorner) + ".png"
             contoureAnalizer.counterCorner+=1
-            cv2.imwrite(name, img) 
+            if bezier.DEBUG_MODE == True:
+                cv2.imwrite(name, img) 
         return (typeFigure,lineA, lineB)
     def drawSingleCounture(img, contoursSrc, coff, xstart, color, th,w,h,lineA, lineB):
         contours = contoursSrc.copy()
@@ -644,6 +692,8 @@ class contoureAnalizer:
             return FigureStatus.camelB
         if sCamel == 2:
             return FigureStatus.camelC
+        if sCamel == 3:
+            return FigureStatus.camelD
 
         sFig = mathSvg.isSFigure(analized, diffs,countor)
         if sFig == 1:

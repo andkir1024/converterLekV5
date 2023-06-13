@@ -172,6 +172,13 @@ class CircuitSvg:
                 
                 bezier.doCamelC(lineA,lineB, corner, path, dpi)
                 continue
+            if typeFigures[index][0] == FigureStatus.camelD:
+                lineA = typeFigures[index][1]
+                lineB = typeFigures[index][2]
+                corner = lineA[6]
+                
+                bezier.doCamelD(lineA,lineB, corner, path, dpi)
+                continue
             
         
         '''
