@@ -79,7 +79,8 @@ class CircuitSvg:
 
             path.M(pp0.x / dpi, pp0.y / dpi).L(pp1.x / dpi, pp1.y / dpi) 
             bezier.createHalfCircleVer2(pp0, pp1, pp2, pp3, path, dpi, False)
-            path.L(pp2.x / dpi, pp2.y / dpi).L(pp3.x / dpi, pp3.y / dpi) 
+            path.L(pp3.x / dpi, pp3.y / dpi) 
+            # path.L(pp2.x / dpi, pp2.y / dpi).L(pp3.x / dpi, pp3.y / dpi) 
             bezier.createHalfCircleVer2(pp2, pp3, pp0, pp1, path, dpi, False)
             path.Z()
             draw.append(path)
