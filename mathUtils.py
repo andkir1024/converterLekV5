@@ -105,3 +105,11 @@ class mathSvg:
         if falsePresent:
             return True
         return False
+    def isAngleCorner(countor,w,h,lineA,lineB):
+        if w > 2 * h:
+            if lineA[1][0] > lineB[0][0]:
+                return 1
+            else:
+                return 0
+        return -1
+    

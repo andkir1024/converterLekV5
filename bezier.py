@@ -9,6 +9,7 @@ from shapely import *
 from shapely.geometry import Polygon
 from shapely.ops import split
 from mathUtils import *
+from directionCountoure import directionStatus
 # from scipy import interpolate
 
 class bezier:
@@ -588,19 +589,21 @@ class bezier:
         b_delta_y = abs(line2[1][1] - line2[0][1])
 class FigureStatus(enum.Enum):
     smoothCorner = 1
-    undefined = 2
-    halfCircleUp = 3
-    halfCircleDown = 4
-    sUpDown = 5
-    sDownUp = 6
-    cutoutTriangle = 7
-    cutoutRect = 8
-    cutoutCircle = 9
+    angleCorner = 2
+    
+    undefined = 3
+    halfCircleUp = 4
+    halfCircleDown = 5
+    sUpDown = 6
+    sDownUp = 7
+    cutoutTriangle = 8
+    cutoutRect = 9
+    cutoutCircle = 10
 
-    camelA = 10
-    camelB = 11
-    camelC = 12
-    camelD = 13
+    camelA = 11
+    camelB = 12
+    camelC = 13
+    camelD = 14
     
 class contoureAnalizer:
     counterCorner = 0 
@@ -672,7 +675,7 @@ class contoureAnalizer:
             diffs.append(contoureAnalizer.getParamVector(contour[0],contourNext[0]))
         
         cv2.drawContours(img, approx, -1, color, th, cv2.LINE_AA)
-        cv2.polylines(img, [approx], False, (0, 255, 0), 3)
+        cv2.polylines(img, [approx], False, (0, 255, 0), 1)
         typeFigure = contoureAnalizer.clasificatorFigure(diffs, approx, w, h,lineA, lineB)
         if w < 32 and h < 32:
             return FigureStatus.smoothCorner
@@ -681,8 +684,18 @@ class contoureAnalizer:
         someSign= contoureAnalizer.check_sort(diffs)
         cutout = contoureAnalizer.checkCutout(countor)
         analized = mathSvg.testSequence(diffs)
+        cornerFig = lineA[6]
+        if cornerFig is not None:
+            direction = directionStatus.calcDirection(lineA, lineB)
+            cornerFig.dirFig = direction
         if cutout is not None:
             return cutout
+        # sAngle = mathSvg.isAngleCorner(countor,w,h,lineA,lineB)
+        # if sAngle == 0:
+        #     return FigureStatus.sDownUp
+        # if sAngle == 1:
+        #     return FigureStatus.sUpDown
+        
         # if mathSvg.isHalfCircle(analized) == True:
             # return FigureStatus.halfCircleUp
         sCamel = mathSvg.isCamelFigure(analized, diffs,countor)

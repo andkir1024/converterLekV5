@@ -50,6 +50,8 @@ class Corner:
     minX = minY =maxX =maxY=0
     linesFig = None
     pointsFig = None
+    cornerFig = None
+    dirFig = None
     def __init__(self, minX,minY,maxX,maxY,linesFig,cross, pointsFig):
         self.minX = minX
         self.maxX = maxX

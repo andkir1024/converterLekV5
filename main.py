@@ -284,6 +284,7 @@ else:
     else:
         nowStart = datetime.datetime.now()
         index = 0
+        listErr = []
         for f in listFiles:
             imgOk = cv2.imdecode(np.fromfile(f, dtype=np.uint8), cv2.IMREAD_COLOR)
             imd0, img1, ok = do_frame(imgOk, f, svgDir, 0, pngDir)
@@ -292,8 +293,15 @@ else:
                 print(msg + f)
             else:
                 print(ok)
-                print('файл дефектный:'+f)
+                listErr.append(ok)
+                msg = 'файл дефектный:'+f
+                print(msg)
+                listErr.append(msg)
             index = index + 1
         now = datetime.datetime.now()
         tdelta = (now - nowStart).total_seconds()
         print(f"Завершена за: {tdelta} сек")
+        if len(listErr) > 0:
+            print(f"Произошли ошибки:")
+        for err in listErr:
+            print(err)
