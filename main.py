@@ -114,18 +114,6 @@ def slider_changed2(event):
     return
 def export_svg():
     return
-    # global filesSrc
-    # if imgOk is None:
-    #     return
-    # # data = [('svg', '*.svg')]
-    # # file_path = filedialog.asksaveasfilename(filetypes=data, defaultextension=data)
-    # # file_path = 'f:/out.svg'
-    # fileDst = os.path.splitext(filesSrc)
-    # if not os.path.exists(svgDir):
-    #     os.mkdir(svgDir)
-    # filename = fileDst[0].split('/')
-    # fileDst = svgDir + filename[-1] + ".svg"
-    # lekaloSvg.saveToSvg(imgOk,fileDst)
     
 def update_image():
     global updateImage

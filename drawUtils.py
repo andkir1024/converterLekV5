@@ -16,6 +16,7 @@ class cvDraw:
     def createGray(imgOk, param0):
         imgGray = cv2.cvtColor(imgOk,cv2.COLOR_BGR2GRAY)
 
+        # imgGray  = cv2.medianBlur(imgGray,1)
         imgGray  = cv2.medianBlur(imgGray,7)
 
         # 1 повышение резкости

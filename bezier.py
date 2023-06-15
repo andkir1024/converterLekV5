@@ -12,7 +12,7 @@ from mathUtils import *
 # from scipy import interpolate
 
 class bezier:
-    DEBUG_MODE = False
+    DEBUG_MODE = True
     def is_eql(a_delta, b_delta, dist):
         if b_delta < dist and a_delta < dist:
             return True
