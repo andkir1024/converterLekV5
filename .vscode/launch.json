@@ -22,7 +22,9 @@
             "program": "main.py",
             "console": "externalTerminal",
             //"args": ["--dirSrc=../lekalo/srcDemo/","--svg=9.07","--dirDst=../lekalo/outSvgDemo/", "--pngDir=../lekalo/outSvgDemo/"],
-            "args": ["--dirSrc=../lekalo/src/","--svg=9.07","--dirDst=../lekalo/outSvgFed/", "--pngDir=../lekalo/outSvgFed/"],
+            //"args": ["--dirSrc=../lekalo/src/","--svg=9.07","--dirDst=../lekalo/outSvgFed/", "--pngDir=../lekalo/outSvgFed/"],
+            //отладка на популярном массиве
+            "args": ["--dirSrc=../popular/","--svg=9.07","--dirDst=../lekalo/popular/", "--pngDir=../lekalo/popular/"],
 
             // "args": ["--dirSrc=../popular/","--svg=9.07","--dirDst=../lekalo/srcDemoResult/", "--pngDir=../lekalo/srcDemoResult/"],
 
