@@ -533,6 +533,32 @@ class bezier:
         path.C(bezP1.x / dpi, bezP1.y / dpi, bezP2.x / dpi, bezP2.y / dpi, sB.x / dpi, sB.y / dpi)
         
         return
+    def createHalfCircle(sA, fA, sB, fB):
+        # начальная и конечная точка кривой
+        ab = LineString([fA, sB])
+        cd_length = ab.length
+        dir = 'right'
+        # сдвиг на половину длины
+        shiftedLine  = ab.parallel_offset(cd_length / 2, dir)
+        shiftedLineScaled  = bezier.resize_line(shiftedLine, cd_length * 2)
+        centroid = shiftedLineScaled.centroid
+        #  part 0
+        la=  LineString([sA, fA])
+        coff0 = 0.5
+        coff1 = 0.5
+        laScaled  = bezier.resize_line(la, la.length * 2)
+        result = shiftedLineScaled.intersection(laScaled)
+        bezP1 = bezier.interpolatePoint(result, fA, coff0)
+        bezP2 = bezier.interpolatePoint(result, centroid, coff1)
+        
+        #  part 1
+        lb=  LineString([sB, fB])
+        lbScaled  = bezier.resize_line(lb, lb.length * 2)
+        result = shiftedLineScaled.intersection(lbScaled)
+        bezP3 = bezier.interpolatePoint(result, centroid, coff1)
+        bezP4 = bezier.interpolatePoint(result, sB, coff0)
+        
+        return bezP1, bezP2, centroid, bezP3, bezP4, sB
 
     # работа с овалами
     # закруглени sA, fA, sB, fB

@@ -11,6 +11,7 @@ from shapely.geometry import Polygon
 from shapely.ops import split
 
 from bezier import bezier, contoureAnalizer, FigureStatus
+from countoureMain import svgPath
 
 # статус паралельных линий
 class ParallStatus(enum.Enum):
@@ -65,6 +66,7 @@ class CircuitSvg:
     
     def createContureSvg(lines, draw, path, dpi):
         indexMax = len(lines)-1
+        svgMain = svgPath()
         # добавление горизонтального овала 
         if indexMax == 1:
             lineA = lines[0]
@@ -79,13 +81,16 @@ class CircuitSvg:
             pp1, pp2 = bezier.aligmentVert(pp1, pp2)
             pp0, pp3 = bezier.aligmentVert(pp0, pp3)
 
-            path.M(pp0.x / dpi, pp0.y / dpi).L(pp1.x / dpi, pp1.y / dpi) 
-            bezier.createHalfCircleVer2(pp0, pp1, pp2, pp3, path, dpi, False)
-            path.L(pp3.x / dpi, pp3.y / dpi) 
-            # path.L(pp2.x / dpi, pp2.y / dpi).L(pp3.x / dpi, pp3.y / dpi) 
-            bezier.createHalfCircleVer2(pp2, pp3, pp0, pp1, path, dpi, False)
-            path.Z()
+
+            svgMain.addM(pp0)
+            svgMain.addL(pp1)
+            svgMain.addC(pp0, pp1, pp2, pp3)
+            svgMain.addL(pp3)
+            svgMain.addC(pp2, pp3, pp0, pp1)
+            svgMain.addZ()
+            svgMain.doPath(path, dpi)
             draw.append(path)
+
             return
 
         # добавление главного контура
