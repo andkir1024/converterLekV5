@@ -390,14 +390,14 @@ class cvUtils:
                 p = drawSvg.Path(stroke="red", stroke_width=stroke_width, fill="none")
                 lines = countour[5]
                 if lines is not None:
-                    CircuitSvg.createContureSvg(lines, d, p, dpi)
+                    circles = CircuitSvg.createContureSvg(lines, d, p, dpi, circles)
                 continue
             else:
                 # отверстия в лекале
                 p = drawSvg.Path(stroke="red", stroke_width=stroke_width, fill="none")
                 lines = countour[5]
                 if lines is not None:
-                    CircuitSvg.createContureSvg(lines, d, p, dpi)
+                    circles = CircuitSvg.createContureSvg(lines, d, p, dpi, circles)
                 continue
 
         # добавление кругов
@@ -406,15 +406,16 @@ class cvUtils:
             for i in circles[0, :]:
                 center = Point(i[0], i[1])
                 radius = i[2]
-                cvDraw.createCircle(
-                    d,
-                    int(radius),
-                    int(center.x),
-                    int(center.y),
-                    dpi,
-                    stroke_width,
-                    colorCircle,
-                )
+                if radius != 0:
+                    cvDraw.createCircle(
+                        d,
+                        int(radius),
+                        int(center.x),
+                        int(center.y),
+                        dpi,
+                        stroke_width,
+                        colorCircle,
+                    )
         return d
 
     # сохранение результатов

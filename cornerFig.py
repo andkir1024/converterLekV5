@@ -64,7 +64,7 @@ class Corner:
 
 class CircuitSvg:
     
-    def createContureSvg(lines, draw, path, dpi):
+    def createContureSvg(lines, draw, path, dpi, circles):
         indexMax = len(lines)-1
         svgMain = svgPath()
         # добавление горизонтального овала 
@@ -91,12 +91,20 @@ class CircuitSvg:
             svgMain.doPath(path, dpi)
             draw.append(path)
 
-            return
+            return circles
+
+        svgMain.createFlatCouture(lines)
+        svgMain.doPath(path, dpi)
+        draw.append(path)
+
+        svgMain.testPointInCounture(lines, circles)
+        # circles = np.delete(circles[0], 0)
+        
+        return circles
 
         # добавление главного контура
         contoureAnalizer.start()
         
-        # '''
         typeFigures = []
         typeFigures.append(contoureAnalizer.drawCountureFromLine(lines[indexMax],lines[0]))
         for index in range(indexMax):
@@ -188,63 +196,10 @@ class CircuitSvg:
                 
                 bezier.doCamelD(lineA,lineB, corner, path, dpi)
                 continue
-            
-        
-        '''
-        pp0, pp1, centroid1, centroid2, pp2 = CircuitSvg.createAngle(lines[indexMax][0], lines[indexMax][1],lines[0][0], lines[0][1])
-        if pp0 is not None:
-            path.M(pp0.x / dpi, pp0.y / dpi).L(pp1.x / dpi, pp1.y / dpi) 
-            ctartCorner = CircuitSvg.doLekaloCorner(lines[indexMax], lines[0], path, dpi, True)
-            # path.C(centroid1.x / dpi, centroid1.y / dpi, centroid2.x / dpi,centroid2.y / dpi, pp2.x / dpi, pp2.y / dpi)
-        else:
-            lineA = lines[0]
-            lineB = lines[indexMax]
-            path.M(lineA[0][0] / dpi, lineA[0][1] / dpi)
-
-        
-        for index in range(indexMax):
-            lineA = lines[index]
-            lineB = lines[index+1]
-            lineC = None
-            if index < indexMax - 2:
-                lineC = lines[index+2]
-                
-            typeLine = lineA[2]
-            corner = lineA[6]
-            width = corner.maxX-corner.minX
-            height = corner.maxY-corner.minY
-            if corner.cross == ParallStatus.hor:
-                deltaX = abs(lineB[0][0] - lineA[1][0])
-                deltaY = abs(lineB[0][1] - lineA[1][1])
-                if deltaY >10:
-                    # гор - гор - гор
-                    # continue
-                    isFig1 = bezier.testFig1(lineA,lineB, corner, path, dpi)
-                else:
-                    isFig1 = bezier.testFig2(lineA,lineB, corner, path, dpi)
-                continue
-            if corner.cross == ParallStatus.vert:
-                isFig0 = bezier.testFig0(lineA,lineB, lineC, path, dpi)
-                if isFig0 == True:
-                    continue
-                else:
-                    pp0 = Point(lineA[1][0],lineA[1][1])
-                    pp1 = Point(lineA[1][0],lineA[1][1])
-                    pp2 = Point(lineB[0][0],lineA[1][1])
-                    pp2 = Point(corner.minX + ((corner.maxX - corner.minX)/2),corner.minY)
-                    pp3 = Point(lineB[0][0],lineB[0][1])
-                    
-                    path.L(pp0.x / dpi, pp0.y / dpi) 
-                    CircuitSvg.createHalfCircle(lineA, lineB, path, dpi, True)                
-                continue
-            else:
-                CircuitSvg.doLekaloCorner(lineA, lineB, path, dpi, False)
-            '''                
-
                 
         path.Z()
         draw.append(path)
-        return
+        return circles
     # создание углов главного контура лекала
     def doLekaloCorner(lineA, lineB, path , dpi, start):
         # contoureAnalizer.drawCountureFromLine(lineA)
