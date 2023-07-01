@@ -29,3 +29,4 @@ pyinstaller --onefile main.py
 пример запуска
 main.exe --dirSrc=./src --svg=9.07 --dirDst=./outSvg
 ./main --dirSrc=./srcDemo --svg=9.977 --dirDst=./outSvg
+./AJPMax_validator -f outSvgDemo

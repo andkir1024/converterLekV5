@@ -422,6 +422,7 @@ class cvUtils:
         if not os.path.isdir(svgDir):
             os.mkdir(svgDir)
         name = pathlib.Path(filesSrc).stem
+        name =name.removesuffix('.prn')
         nameSvg = svgDir + "/" + name + ".svg"
         # nameSvg = "result.svg"
         with open(svgTestName, "r") as f1, open(nameSvg, "w") as f2:

@@ -9,10 +9,11 @@ from shapely import *
 from shapely.geometry import Polygon
 from shapely.ops import split
 from mathUtils import *
-from directionCountoure import directionStatus
+from directionCountoure import directionCountoure
 # from scipy import interpolate
 
 class bezier:
+    # DEBUG_MODE = False
     DEBUG_MODE = True
     def is_eql(a_delta, b_delta, dist):
         if b_delta < dist and a_delta < dist:
@@ -125,7 +126,7 @@ class bezier:
         if dir == False:
             pA, pE = pE, pA
             pB, pD = pD, pB
-        path.L(pA.x / dpi, pA.y / dpi) 
+        # path.L(pA.x / dpi, pA.y / dpi) 
         bezP1 = bezier.interpolatePoint(pA, pB, coff0)
         bezP2 = bezier.interpolatePoint(pB, pC, 1-coff1)
         if mode == 1:
@@ -402,7 +403,7 @@ class bezier:
             pA, pE = pE, pA
             pB, pD = pD, pB
 
-        path.L(pA.x / dpi, pA.y / dpi) 
+        # path.L(pA.x / dpi, pA.y / dpi) 
         bezP1 = bezier.interpolatePoint(pA, pB, coff0)
         bezP2 = bezier.interpolatePoint(pB, pC, 1-coff1)
         if mode == 1:
@@ -686,7 +687,7 @@ class contoureAnalizer:
         analized = mathSvg.testSequence(diffs)
         cornerFig = lineA[6]
         if cornerFig is not None:
-            direction = directionStatus.calcDirection(lineA, lineB)
+            direction = directionCountoure.calcDirection(lineA, lineB)
             cornerFig.dirFig = direction
         if cutout is not None:
             return cutout
