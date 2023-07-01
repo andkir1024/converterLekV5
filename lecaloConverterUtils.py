@@ -3,12 +3,13 @@ import cv2
 import numpy as np
 import math
 from classifier import classifier
-from cornerFig import LineStatus, CircuitSvg
+from cornerFig import CircuitSvg
 from drawUtils import cvDraw
 import drawsvg as drawSvg
 from shapely import Point
 import pathlib
 import os
+from commonData import LineStatus, ParallStatus, Corner
 
 
 class cvUtils:

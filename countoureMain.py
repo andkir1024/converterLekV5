@@ -9,6 +9,7 @@ from shapely.geometry import Polygon
 from shapely.ops import split
 from shapely import geometry
 from geomUtils import *
+from commonData import LineStatus, ParallStatus, Corner
 
 
 class svgCountoure(enum.Enum):
@@ -80,20 +81,26 @@ class svgPath:
     def createFlatCouture(self, lines):
         for index in range(len(lines)):
             line = lines[index]
+            lineType = line[6].cross
             # debug
             if index == 1:
+            # if lineType == ParallStatus.hor:
                 lineP = lines[index-1]
                 lineN = lines[index+1]
                 
                 contours = line[6].pointsFig.copy()
                 peri = cv2.arcLength(contours,False)
-                approx = cv2.approxPolyDP(contours, 0.005* peri, False)
+                approx = cv2.approxPolyDP(contours, 0.001* peri, False)
+                maxVal, pp0Max, pp1Max = geometryUtils.lenghtContoureLine(approx)
+                if maxVal > 0:
+                    coff = peri / maxVal
+                    self.cornerBetweenToLines( Point(lineP[0][0],lineP[0][1]), Point(lineP[1][0],lineP[1][1]), pp0Max, pp1Max)
                 
                 # def calkPointIntersection(lineP, lineB)
-                pp0 = geometryUtils.calkPointIntersection(Point(lineP[0][0], lineP[0][1]), 
-                                                          Point(lineP[1][0], lineP[1][1]),
-                                                          Point(line[0][0], lineP[0][1]),
-                                                          Point(line[0][0], line[0][1]))
+                # pp0 = geometryUtils.calkPointIntersection(Point(lineP[0][0], lineP[0][1]), 
+                #                                           Point(lineP[1][0], lineP[1][1]),
+                #                                           Point(line[0][0], lineP[0][1]),
+                #                                           Point(line[0][0], line[0][1]))
 
                 pointS = Point(lineP[1][0], lineP[1][1])
                 ppStart = geometry.Point(pointS.x, pointS.y)
@@ -107,7 +114,7 @@ class svgPath:
                 
                 ppDown = geometryUtils.centerLine(line)
                 
-                self.UneckSvg(pp0, 40, ppLeft, 60, ppDown, 60, ppRight, 40, ppEnd)
+                # self.UneckSvg(pp0, 40, ppLeft, 60, ppDown, 60, ppRight, 40, ppEnd)
                 # self.UneckSvg(ppStart, 40, ppLeft, 60, ppDown, 60, ppRight, 40, ppEnd)
                 continue
             pp0, pp1 = bezier.convertToPoint(line)
@@ -117,6 +124,12 @@ class svgPath:
                 self.addL(pp0)
             self.addL(pp1)
         self.addZ()
+        
+    def cornerBetweenToLines(self, pp0S, pp0E, pp1S, pp1E):
+        ppIntersected = geometryUtils.calkPointIntersection(pp0S, pp0E, pp1S, pp1E)
+        
+        # geometryUtils.cornerBetweenToLines(pp0S, pp0E, pp1S, pp1E)
+        return
     def UneckSvg(self, ppStart, cornSize0, ppLeft, cornSize1, ppDown, cornSize2, ppRight, cornSize3, ppEnd):
         self.addL(ppStart)
         self.addL(ppLeft)

@@ -3,12 +3,12 @@ import cv2
 import numpy as np
 import math
 import drawsvg as drawSvg
-from cornerFig import LineStatus, ParallStatus, CircuitSvg, Corner
+from cornerFig import CircuitSvg
 from shapely import Point
 from shapely import *
 from shapely.geometry import Polygon
 from shapely.ops import split
-# from scipy import interpolate
+from commonData import LineStatus, ParallStatus, Corner
 
 class classifier:
     # вырезаем короткие линии
