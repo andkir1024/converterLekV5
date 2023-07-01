@@ -1,5 +1,6 @@
 import enum
 
+import cv2
 import numpy as np
 from bezier import bezier
 from shapely import Point
@@ -7,6 +8,8 @@ from shapely import *
 from shapely.geometry import Polygon
 from shapely.ops import split
 from shapely import geometry
+from geomUtils import *
+
 
 class svgCountoure(enum.Enum):
     svgM = 0
@@ -73,29 +76,39 @@ class svgPath:
                 index = index+1
         
         return
-    def centerLine(self, line):
-        pointS = Point(line[0][0], line[0][1])
-        pointE = Point(line[1][0], line[1][1])
-        xCenter = pointS.x + ((pointS.x - pointE.x)/2)
-        yCenter = pointS.y + ((pointS.y - pointE.y)/2)
-        return Point(xCenter, yCenter)
         
     def createFlatCouture(self, lines):
         for index in range(len(lines)):
             line = lines[index]
+            # debug
             if index == 1:
                 lineP = lines[index-1]
                 lineN = lines[index+1]
+                
+                contours = line[6].pointsFig.copy()
+                peri = cv2.arcLength(contours,False)
+                approx = cv2.approxPolyDP(contours, 0.005* peri, False)
+                
+                # def calkPointIntersection(lineP, lineB)
+                pp0 = geometryUtils.calkPointIntersection(Point(lineP[0][0], lineP[0][1]), 
+                                                          Point(lineP[1][0], lineP[1][1]),
+                                                          Point(line[0][0], lineP[0][1]),
+                                                          Point(line[0][0], line[0][1]))
 
                 pointS = Point(lineP[1][0], lineP[1][1])
                 ppStart = geometry.Point(pointS.x, pointS.y)
 
+                
+                ppLeft = geometryUtils.centerConnectionLines(lineP, line)
+                ppRight = geometryUtils.centerConnectionLines(line, lineN)
+
                 pointE = Point(lineN[0][0], lineN[0][1])
                 ppEnd = geometry.Point(pointE.x, pointE.y)
                 
-                ppDown = self.centerLine(line)
+                ppDown = geometryUtils.centerLine(line)
                 
-                self.UneckSvg(ppStart, 40, 60, ppDown, 60,40, ppEnd)
+                self.UneckSvg(pp0, 40, ppLeft, 60, ppDown, 60, ppRight, 40, ppEnd)
+                # self.UneckSvg(ppStart, 40, ppLeft, 60, ppDown, 60, ppRight, 40, ppEnd)
                 continue
             pp0, pp1 = bezier.convertToPoint(line)
             if index == 0:
@@ -104,5 +117,9 @@ class svgPath:
                 self.addL(pp0)
             self.addL(pp1)
         self.addZ()
-    def UneckSvg(self, ppStart, cornSize0, cornSize1, ppDown, cornSize2,cornSize3, ppEnd):
+    def UneckSvg(self, ppStart, cornSize0, ppLeft, cornSize1, ppDown, cornSize2, ppRight, cornSize3, ppEnd):
+        self.addL(ppStart)
+        self.addL(ppLeft)
+        self.addL(ppDown)
+        self.addL(ppRight)
         return

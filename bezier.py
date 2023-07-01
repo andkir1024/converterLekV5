@@ -678,7 +678,8 @@ class contoureAnalizer:
             # peri1 = cv2.arcLength(contours,True)
             
             # typeFigure = contoureAnalizer.drawSingleCounture(img, contours,  0.01 * peri, w*1, (255,255,255),th,w,h,lineA, lineB)
-            typeFigure = contoureAnalizer.drawSingleCounture(img, contours,  0.02 * peri, w*1, (255,255,255),th,w,h,lineA, lineB)
+            # правильно 0ю02
+            typeFigure = contoureAnalizer.drawSingleCounture(img, contours,  0.005 * peri, w*1, (255,255,255),th,w,h,lineA, lineB)
             # typeFigure = contoureAnalizer.drawSingleCounture(img, contours,  0.1 * peri, w*1, (255,255,255),th,w,h,lineA, lineB)
 
             # contoureAnalizer.drawSingleCounture(img, contours,  0.001 * peri, w*0, (255,255,255),th)

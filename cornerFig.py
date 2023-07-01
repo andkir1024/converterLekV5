@@ -100,7 +100,6 @@ class CircuitSvg:
         svgMain.testPointInCounture(lines, circles)
         # circles = np.delete(circles[0], 0)
         
-        return circles
 
         # добавление главного контура
         contoureAnalizer.start()
@@ -109,6 +108,7 @@ class CircuitSvg:
         typeFigures.append(contoureAnalizer.drawCountureFromLine(lines[indexMax],lines[0]))
         for index in range(indexMax):
             typeFigures.append(contoureAnalizer.drawCountureFromLine(lines[index],lines[index+1]))
+        return circles
 
         pp0, pp1 = CircuitSvg.getStartPoint(lines[indexMax][0], lines[indexMax][1],lines[0][0], lines[0][1])
         # path.M(pp0.x / dpi, pp0.y / dpi).L(pp1.x / dpi, pp1.y / dpi) 
