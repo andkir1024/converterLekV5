@@ -17,6 +17,7 @@ class svgPath:
     svg = []
     def __init__(self):
         self.data = []
+        self.svg.clear()
     def addM(self, pp):
         param= (svgCountoure.svgM, pp)
         self.svg.append(param)
