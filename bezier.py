@@ -540,22 +540,24 @@ class bezier:
         dir = 'left' 
         if isLeft == False:
             dir = 'right'
+        else:
+            dir = 'left' 
         # сдвиг на половину длины
         shiftedLine  = ab.parallel_offset(cd_length / 2, dir)
-        shiftedLineScaled  = bezier.resize_line(shiftedLine, cd_length * 2)
+        shiftedLineScaled  = bezier.resize_line(shiftedLine, cd_length * 20)
         centroid = shiftedLineScaled.centroid
         #  part 0
         la=  LineString([sA, fA])
         coff0 = 0.5
         coff1 = 0.5
-        laScaled  = bezier.resize_line(la, la.length * 2)
+        laScaled  = bezier.resize_line(la, la.length * 20)
         result = shiftedLineScaled.intersection(laScaled)
         bezP1 = bezier.interpolatePoint(result, fA, coff0)
         bezP2 = bezier.interpolatePoint(result, centroid, coff1)
         
         #  part 1
         lb=  LineString([sB, fB])
-        lbScaled  = bezier.resize_line(lb, lb.length * 2)
+        lbScaled  = bezier.resize_line(lb, lb.length * 20)
         result = shiftedLineScaled.intersection(lbScaled)
         bezP3 = bezier.interpolatePoint(result, centroid, coff1)
         bezP4 = bezier.interpolatePoint(result, sB, coff0)

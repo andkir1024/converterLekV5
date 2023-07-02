@@ -33,11 +33,18 @@ class CircuitSvg:
             pp0, pp3 = bezier.aligmentVert(pp0, pp3)
 
 
-            svgMain.addM(pp0)
-            svgMain.addL(pp1)
-            svgMain.addChalfCircle(pp0, pp1, pp2, pp3)
-            svgMain.addL(pp3)
-            svgMain.addChalfCircle(pp2, pp3, pp0, pp1)
+            # svgMain.addM(pp0)
+            # svgMain.addL(pp1)
+            # svgMain.addChalfCircle(pp0, pp1, pp2, pp3)
+            # svgMain.addL(pp3)
+            # svgMain.addChalfCircle(pp2, pp3, pp0, pp1)
+            
+            svgMain.addM(pp1)
+            svgMain.addL(pp0)
+            svgMain.addChalfCircle(pp1, pp0, pp3, pp2, True)
+            svgMain.addL(pp2)
+            svgMain.addChalfCircle(pp3, pp2, pp1, pp0, True)
+            
             svgMain.addZ()
             svgMain.doPath(path, dpi)
             draw.append(path)

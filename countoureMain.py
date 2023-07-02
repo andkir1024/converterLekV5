@@ -96,10 +96,10 @@ class svgPath:
         isCorner = geometryUtils.checkCorner(line, lineN)
         isDownU = geometryUtils.checkDownU(line, lineN)
 
+        contours = line[6].pointsFig.copy()
+        peri = cv2.arcLength(contours,False)
         # параллельные последовательные линии
         if lineType == ParallStatus.hor:
-            contours = line[6].pointsFig.copy()
-            peri = cv2.arcLength(contours,False)
             approx = cv2.approxPolyDP(contours, 0.001* peri, False)
             maxVal, pp0Max, pp1Max = geometryUtils.lenghtContoureLine(approx)
             if maxVal > 0:
@@ -108,10 +108,18 @@ class svgPath:
                     self.cornerBetweenToParallelLinesTwoSpline( line, lineN, pp0Max, pp1Max)
                 else:
                     self.cornerBetweenToParallelLinesOneSplne( line, lineN)
+        elif lineType == ParallStatus.vert:
+            approx = cv2.approxPolyDP(contours, 0.001* peri, False)
+            maxVal, pp0Max, pp1Max = geometryUtils.lenghtContoureLine(approx)
+            if maxVal > 0:
+                coff = peri / maxVal
+                if coff < 5:
+                    self.cornerBetweenToParallelLinesTwoSpline( line, lineN, pp0Max, pp1Max)
+                else:
+                    self.cornerBetweenToParallelLinesOneSplne( line, lineN)
+            pass
         else:
             if isCorner == True:
-                contours = line[6].pointsFig.copy()
-                peri = cv2.arcLength(contours,False)
                 approx = cv2.approxPolyDP(contours, 0.01* peri, False)
                 maxVal, pp0Max, pp1Max = geometryUtils.lenghtContoureLine(approx)
                 if maxVal > 0:
@@ -133,7 +141,8 @@ class svgPath:
 
         pp2 = Point(lineN[0][0],lineN[0][1])
         pp3 = Point(lineN[1][0],lineN[1][1])
-        self.addChalfCircle(pp0, pp1, pp2, pp3, False)
+        # pp1, pp2 = bezier.aligmentHor(pp1, pp2)
+        self.addChalfCircle(pp0, pp1, pp2, pp3, True)
         return
     # соединение нижний вырез
     def cornerBetweenToParallelLinesOneSplne(self, line, lineN):

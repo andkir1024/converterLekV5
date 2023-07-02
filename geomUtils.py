@@ -34,6 +34,14 @@ class geometryUtils:
         secondPoint = Point(x2, y2)
         return firstPoint, secondPoint
 
+    def converterLineToPoints( lineA, lineB):
+        pp0 = Point(lineA[0][0],lineA[0][1])
+        pp1 = Point(lineA[1][0],lineA[1][1])
+
+        pp2 = Point(lineB[0][0],lineB[0][1])
+        pp3 = Point(lineB[1][0],lineB[1][1])
+        return pp0,pp1,pp2,pp3
+    
     def lenghtLine( pp0, pp1):
         lenLine = math.sqrt( ((pp0[0]-pp1[0])**2)+((pp0[1]-pp1[1])**2))
         return lenLine
