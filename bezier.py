@@ -533,11 +533,13 @@ class bezier:
         path.C(bezP1.x / dpi, bezP1.y / dpi, bezP2.x / dpi, bezP2.y / dpi, sB.x / dpi, sB.y / dpi)
         
         return
-    def createHalfCircle(sA, fA, sB, fB):
+    def createHalfCircle(sA, fA, sB, fB, isLeft):
         # начальная и конечная точка кривой
         ab = LineString([fA, sB])
         cd_length = ab.length
-        dir = 'right'
+        dir = 'left' 
+        if isLeft == False:
+            dir = 'right'
         # сдвиг на половину длины
         shiftedLine  = ab.parallel_offset(cd_length / 2, dir)
         shiftedLineScaled  = bezier.resize_line(shiftedLine, cd_length * 2)

@@ -89,3 +89,24 @@ class geometryUtils:
         if dxA < border and dyB < border:
             return True
         return False
+
+    # прверка является ли соединение нижним вырезом
+    def checkDownU(lineA, lineB):
+        dxA = abs(lineA[0][0]-lineA[1][0])
+        dyA = abs(lineA[0][1]-lineA[1][1])
+        lenA = geometryUtils.lenghtLineConture(lineA)
+
+        dxB = abs(lineB[0][0]-lineB[1][0])
+        dyB = abs(lineB[0][1]-lineB[1][1])
+        lenB = geometryUtils.lenghtLineConture(lineB)
+        if lenA < 100 or lenB < 100:
+            return False
+
+        dyAB0 = abs(lineA[0][1]-lineB[1][1])
+        dyAB1 = abs(lineB[0][1]-lineA[1][1])
+
+        border = 30
+        if dxA < border and dxB < border:
+            if dyAB0 < border and dyAB1 < border:
+                return True
+        return False

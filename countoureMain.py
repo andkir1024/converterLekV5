@@ -29,8 +29,8 @@ class svgPath:
         param= (svgCountoure.svgZ, None)
         self.svg.append(param)
         return
-    def addChalfCircle(self, pp0, pp1, pp2, pp3):
-        bezP1, bezP2, centroid, bezP3, bezP4, sB = bezier.createHalfCircle(pp0, pp1, pp2, pp3)
+    def addChalfCircle(self, pp0, pp1, pp2, pp3, isLeft = False):
+        bezP1, bezP2, centroid, bezP3, bezP4, sB = bezier.createHalfCircle(pp0, pp1, pp2, pp3, isLeft)
         
         param= (svgCountoure.svgCHalfCircle, bezP1, bezP2, centroid, bezP3, bezP4, sB)
         self.svg.append(param)
@@ -94,6 +94,7 @@ class svgPath:
         self.addL(pp1)
         lineType = line[6].cross
         isCorner = geometryUtils.checkCorner(line, lineN)
+        isDownU = geometryUtils.checkDownU(line, lineN)
 
         # параллельные последовательные линии
         if lineType == ParallStatus.hor:
@@ -123,6 +124,27 @@ class svgPath:
                         # угол скругленный
                         self.cornerRightSmooth(line, lineN)
                         pass
+            if isDownU == True:
+                self.cornerUDown(line, lineN)
+        return
+    def cornerUDown(self, line, lineN):
+        pp0 = Point(line[0][0],line[0][1])
+        pp1 = Point(line[1][0],line[1][1])
+
+        pp2 = Point(lineN[0][0],lineN[0][1])
+        pp3 = Point(lineN[1][0],lineN[1][1])
+        self.addChalfCircle(pp0, pp1, pp2, pp3, False)
+        return
+    # соединение нижний вырез
+    def cornerBetweenToParallelLinesOneSplne(self, line, lineN):
+        pp0 = Point(line[0][0],line[0][1])
+        pp1 = Point(line[1][0],line[1][1])
+
+        pp2 = Point(lineN[0][0],lineN[0][1])
+        pp3 = Point(lineN[1][0],lineN[1][1])
+
+        self.cornerBy2Point(pp1, pp2)
+        return
     # соединение пареллельных линий (линии внутри нет)
     def cornerBetweenToParallelLinesOneSplne(self, line, lineN):
         pp0 = Point(line[0][0],line[0][1])
@@ -183,12 +205,17 @@ class svgPath:
         ppIntersected1 = geometryUtils.calkPointIntersection(pp2, pp3, pp0Max, pp1Max)
         
         coff1 = 0.8
+
+        # self.addL(pp0Max)
+        # self.addL(pp1Max)
+        
+        # self.addL(ppIntersected0)
+        # self.addL(ppIntersected1)
+        
         self.cornerBy3Point(pp1, ppIntersected0, pp1Max,coff1)
         self.addL(pp0Max)
         self.cornerBy3Point(pp0Max, ppIntersected1, pp2,coff1)
        
-        # self.addL(pp1Max)
-        # self.addL(pp0Max)
         return
     # прямой сглаженный угол
     def cornerRightSmooth(self, lineA, lineB):
