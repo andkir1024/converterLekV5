@@ -421,24 +421,29 @@ class cvUtils:
 
     # сохранение результатов
     def saveResult(img, filesSrc, svgDir, svgTestName, pngTestName,pngDir):
-        if not os.path.isdir(svgDir):
-            os.mkdir(svgDir)
+        if svgDir is not None:
+            if not os.path.isdir(svgDir):
+                os.mkdir(svgDir)
+        if pngDir is not None:
+            if not os.path.isdir(pngDir):
+                os.mkdir(pngDir)
         name = pathlib.Path(filesSrc).stem
         name =name.removesuffix('.prn')
-        nameSvg = svgDir + "/" + name + ".svg"
-        # nameSvg = "result.svg"
-        with open(svgTestName, "r") as f1, open(nameSvg, "w") as f2:
-            lines = f1.readlines()
+        if svgDir is not None:
+            nameSvg = svgDir + "/" + name + ".svg"
+            # nameSvg = "result.svg"
+            with open(svgTestName, "r") as f1, open(nameSvg, "w") as f2:
+                lines = f1.readlines()
 
-            for line in lines:
-                line = line.strip() + "\n"
-                key = line.find("viewBox")
-                if key >= 0:
-                    f2.write(
-                        'width="8.2677in" height="11.6929in" viewBox="0 0 595.2756 841.8898">\n'
-                    )
-                else:
-                    f2.write(line)
+                for line in lines:
+                    line = line.strip() + "\n"
+                    key = line.find("viewBox")
+                    if key >= 0:
+                        f2.write(
+                            'width="8.2677in" height="11.6929in" viewBox="0 0 595.2756 841.8898">\n'
+                        )
+                    else:
+                        f2.write(line)
 
         imgSvg = cv2.imread(pngTestName)
         imgSrc = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)

@@ -23,8 +23,10 @@
             "console": "externalTerminal",
             //"args": ["--dirSrc=../lekalo/srcDemo/","--svg=9.07","--dirDst=../lekalo/outSvgDemo/", "--pngDir=../lekalo/outSvgDemo/"],
             //"args": ["--dirSrc=../lekalo/src/","--svg=9.07","--dirDst=../lekalo/outSvgFed/", "--pngDir=../lekalo/outSvgFed/"],
+            //тестовый прогон на весь массив
+            "args": ["--dirSrc=../lekalo/src/","--svg=9.07","--pngDir=../lekalo/outSvgFed1/"],
             //отладка на популярном массиве
-            "args": ["--dirSrc=../popular/","--svg=9.07","--dirDst=../lekalo/popular/", "--pngDir=../lekalo/popular/"],
+            //"args": ["--dirSrc=../popular/","--svg=9.07","--dirDst=../lekalo/popular/", "--pngDir=../lekalo/popular/"],
 
             // "args": ["--dirSrc=../popular/","--svg=9.07","--dirDst=../lekalo/srcDemoResult/", "--pngDir=../lekalo/srcDemoResult/"],
 

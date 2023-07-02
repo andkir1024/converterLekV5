@@ -16,7 +16,8 @@ from bezier import bezier, contoureAnalizer, FigureStatus
 testName = None
 filesDir = '../popular1/'
 filesSrc = None
-svgDir = '../outSvg/'
+svgDir = None
+# '../outSvg/'
 cmpDir = '../outSvg/'
 pngDir = None
 doConsole = True
@@ -276,8 +277,10 @@ def show_frame():
 
 if doConsole == False:
     show_frame()
+    bezier.DEBUG_MODE = True
     root.mainloop()
 else:
+    bezier.DEBUG_MODE = False
     listFiles = getFiles()
     if listFiles is None:
         print(filesDir + " - директория пуста или отсутсявует")

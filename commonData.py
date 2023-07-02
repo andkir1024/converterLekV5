@@ -3,11 +3,17 @@
 # статус паралельных линий
 import enum
 
+class svgCountoure(enum.Enum):
+    svgM = 0
+    svgL = 1
+    svgCHalfCircle = 2
+    svgZ = 3
+    svgC = 4
 
 class ParallStatus(enum.Enum):
     # не паралельны
     none = 0
-    # закругленный угол
+    # закругленный угол  
     vert = 1
     vert_left = 2
     vert_right = 3

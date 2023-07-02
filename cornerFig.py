@@ -35,9 +35,9 @@ class CircuitSvg:
 
             svgMain.addM(pp0)
             svgMain.addL(pp1)
-            svgMain.addC(pp0, pp1, pp2, pp3)
+            svgMain.addChalfCircle(pp0, pp1, pp2, pp3)
             svgMain.addL(pp3)
-            svgMain.addC(pp2, pp3, pp0, pp1)
+            svgMain.addChalfCircle(pp2, pp3, pp0, pp1)
             svgMain.addZ()
             svgMain.doPath(path, dpi)
             draw.append(path)
