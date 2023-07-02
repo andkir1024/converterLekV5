@@ -102,8 +102,10 @@ class svgPath:
         # параллельные последовательные линии
         if lineType == ParallStatus.hor:
             # approx = cv2.approxPolyDP(contours, 0.001* peri, False)
-            approx = cv2.approxPolyDP(contours, 0.001 * peri, False)
+            approx = cv2.approxPolyDP(contours, 0.01 * peri, False)
             path = sequencer.checkPath(approx)
+            typeСutout = sequencer.classifyPath(path, approx)
+
             maxVal, pp0Max, pp1Max = geometryUtils.lenghtContoureLine(approx)
             if maxVal > 0:
                 coff = peri / maxVal

@@ -7,9 +7,46 @@ from shapely.geometry import Polygon
 from shapely.ops import split
 from shapely import geometry
 
-from commonData import DirectionStatus
+from commonData import DirectionStatus, TypeСutout
 
 class sequencer:
+    def classifyPath(direction, approx):
+        seq = []
+        # выделение последовательностей
+        prev = direction[0]
+        param = (prev, 0)
+        seq.append(param)
+        all = len(direction)
+        for index in range(1, len(direction)):
+            dir = direction[index]
+            if dir != prev:
+                prev = dir
+                param = (prev, index)
+                seq.append(param)
+            pass
+        allSeq = len(seq)
+        if allSeq <= 1:
+            return TypeСutout.undifined
+        if allSeq == 2:
+            if seq[0][0]== DirectionStatus.dir90 and seq[1][0] == DirectionStatus.dir180:
+                pp0, pp1, pp2= sequencer.calk3PointRect(approx)
+                return TypeСutout.UType0, pp0, pp1, pp2
+            
+        return TypeСutout.undifined
+
+    # крание и центральная нижняя точка
+    def calk3PointRect(approx):
+        pp0 = Point(approx[0][0][0],approx[0][0][1])
+        pp2 = Point(approx[-1][0][0],approx[-1][0][1])
+        pp1 = approx[0]
+        x = pp0.x + ((pp2.x - pp0.x)/2)
+        y = 0
+        for pp in approx:
+            y = max(y, pp[0][1])
+            pass
+        pp1 = Point(x,y)
+        return pp0, pp1, pp2
+    
     def checkPath(approx):
         directions = []
         for index in range(len(approx)-1):

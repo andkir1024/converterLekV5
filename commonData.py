@@ -3,6 +3,10 @@
 # статус паралельных линий
 import enum
 
+class TypeСutout(enum.Enum):
+    undifined = 0
+    UType0 = 1
+
 class DirectionStatus(enum.Enum):
     dir0 = 0
     dir90 = 1
