@@ -6,6 +6,8 @@ import enum
 class TypeСutout(enum.Enum):
     undifined = 0
     UType0 = 1
+    UType1 = 2
+    UType2 = 3
 
 class DirectionStatus(enum.Enum):
     dir0 = 0

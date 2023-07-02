@@ -104,7 +104,7 @@ class svgPath:
             # approx = cv2.approxPolyDP(contours, 0.001* peri, False)
             approx = cv2.approxPolyDP(contours, 0.01 * peri, False)
             path = sequencer.checkPath(approx)
-            typeСutout, pp0, pp1, pp2 = sequencer.classifyPath(path, approx)
+            typeСutout, ppAll = sequencer.classifyPath(path, approx, lineN)
             if typeСutout == TypeСutout.undifined:
                 maxVal, pp0Max, pp1Max = geometryUtils.lenghtContoureLine(approx)
                 if maxVal > 0:
@@ -113,8 +113,10 @@ class svgPath:
                         self.cornerBetweenToParallelLinesTwoSpline( line, lineN, pp0Max, pp1Max)
                     else:
                         self.cornerBetweenToParallelLinesOneSplne( line, lineN)
-            else:
-                self.cutoutUType0(pp0, pp1, pp2)
+            elif typeСutout == TypeСutout.UType0:
+                self.cutoutUType0(ppAll)
+            elif typeСutout == TypeСutout.UType1:
+                self.cutoutUType1(ppAll)
                 pass
         elif lineType == ParallStatus.vert and isDownU == False:
             approx = cv2.approxPolyDP(contours, 0.001* peri, False)
@@ -247,9 +249,19 @@ class svgPath:
         self.cornerBy3Point(pp1, ppIntersected, pp2, coff1)
         return
     # вырезы --------------------------------------------------------------
-    def cutoutUType0(self, pp0,pp1, pp2):
+    def cutoutUType0(self, ppAll):
+        pp0 = ppAll[0]
+        pp1 = ppAll[1]
+        pp2 = ppAll[2]
         self.cornerBy2Point(pp2, pp1, 0.3, 0.3)
         self.cornerBy2Point(pp1, pp0, 0.3, 0.3)
+        return
+    def cutoutUType1(self, ppAll):
+        pp0 = ppAll[0]
+        pp1 = ppAll[1]
+        pp2 = ppAll[2]
+        self.cornerBy2Point(pp2, pp1, 0.1, 0.1)
+        self.cornerBy2Point(pp1, pp0, 0.1, 0.1)
         return
     
     def UneckSvg(self, ppStart, cornSize0, ppLeft, cornSize1, ppDown, cornSize2, ppRight, cornSize3, ppEnd):
