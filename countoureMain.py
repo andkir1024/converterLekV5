@@ -10,6 +10,7 @@ from shapely.ops import split
 from shapely import geometry
 from geomUtils import *
 from commonData import LineStatus, ParallStatus, Corner,svgCountoure
+from sequencer import sequencer
 
 
 class svgPath:
@@ -100,7 +101,9 @@ class svgPath:
         peri = cv2.arcLength(contours,False)
         # параллельные последовательные линии
         if lineType == ParallStatus.hor:
-            approx = cv2.approxPolyDP(contours, 0.001* peri, False)
+            # approx = cv2.approxPolyDP(contours, 0.001* peri, False)
+            approx = cv2.approxPolyDP(contours, 0.001 * peri, False)
+            path = sequencer.checkPath(approx)
             maxVal, pp0Max, pp1Max = geometryUtils.lenghtContoureLine(approx)
             if maxVal > 0:
                 coff = peri / maxVal

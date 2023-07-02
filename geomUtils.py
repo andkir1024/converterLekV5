@@ -7,6 +7,8 @@ from shapely.geometry import Polygon
 from shapely.ops import split
 from shapely import geometry
 
+from commonData import DirectionStatus
+
 class geometryUtils:
     def centerLine(line):
         pointS = Point(line[0][0], line[0][1])

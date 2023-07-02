@@ -3,6 +3,29 @@
 # статус паралельных линий
 import enum
 
+class DirectionStatus(enum.Enum):
+    dir0 = 0
+    dir90 = 1
+    dir180 = 2
+    dir270 = 3
+
+    dir0_90 = 4
+    dir90_180 = 5
+    dir180_270 = 6
+    dir270_360 = 7
+    undifined = 10
+
+    # dir00 = 0
+    # dir45 = 1
+    # dir90 = 2
+    # dir135 = 3
+    # dir180 = 4
+    # dir225 = 5
+    # dir270 = 6
+    # dir315 = 7
+    # dir360 = 8
+    # undifined = 10
+
 class svgCountoure(enum.Enum):
     svgM = 0
     svgL = 1
