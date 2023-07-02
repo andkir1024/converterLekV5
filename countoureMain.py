@@ -86,44 +86,8 @@ class svgPath:
             line = lines[index]
             lineN = lines[index+1]
             self.createStepCouture(line, lineN)
-            # pp0, pp1 = bezier.convertToPoint(line)
-            # self.addM(pp0)
-            # self.addL(pp1)
-            # lineType = line[6].cross
-
-            
-            # isCorner = geometryUtils.checkCorner(line, lineN)
-
-            # # параллельные последовательные линии
-            # if lineType == ParallStatus.hor:
-            #     contours = line[6].pointsFig.copy()
-            #     peri = cv2.arcLength(contours,False)
-            #     approx = cv2.approxPolyDP(contours, 0.001* peri, False)
-            #     maxVal, pp0Max, pp1Max = geometryUtils.lenghtContoureLine(approx)
-            #     if maxVal > 0:
-            #         coff = peri / maxVal
-            #         if coff < 5:
-            #             self.cornerBetweenToParallelLinesTwoSpline( line, lineN, pp0Max, pp1Max)
-            #         else:
-            #             self.cornerBetweenToParallelLinesOneSplne( line, lineN)
-            # else:
-            #     if isCorner == True:
-            #         contours = line[6].pointsFig.copy()
-            #         peri = cv2.arcLength(contours,False)
-            #         approx = cv2.approxPolyDP(contours, 0.01* peri, False)
-            #         maxVal, pp0Max, pp1Max = geometryUtils.lenghtContoureLine(approx)
-            #         if maxVal > 0:
-            #             coff = peri / maxVal
-            #             if coff < 2:
-            #                 # угол с линией
-            #                 pass
-            #             else:
-            #                 # угол скругленный
-            #                 # self.cornerRightSmooth(line, lineN)
-            #                 pass
-        # self.createStepCouture(lines[0], lines[len(lines)-1])
         self.createStepCouture(lines[len(lines)-1], lines[0])
-        # self.addZ()
+        self.addZ()
     def createStepCouture(self, line, lineN):
         pp0, pp1 = bezier.convertToPoint(line)
         # self.addM(pp0)
@@ -153,6 +117,7 @@ class svgPath:
                     coff = peri / maxVal
                     if coff < 2:
                         # угол с линией
+                        self.cornerRight(line, lineN,pp0Max, pp1Max)
                         pass
                     else:
                         # угол скругленный
@@ -205,6 +170,25 @@ class svgPath:
         bezP0 = bezier.interpolatePoint(pp0, pp1, coff1)
         bezP1 = bezier.interpolatePoint(pp2, pp1, coff1)
         self.addC(bezP0, bezP1, pp2)
+        return
+    # прямой не сглаженный угол
+    def cornerRight(self, lineA, lineB,pp0Max, pp1Max):
+        pp0 = Point(lineA[0][0],lineA[0][1])
+        pp1 = Point(lineA[1][0],lineA[1][1])
+
+        pp2 = Point(lineB[0][0],lineB[0][1])
+        pp3 = Point(lineB[1][0],lineB[1][1])
+        
+        ppIntersected0 = geometryUtils.calkPointIntersection(pp0, pp1, pp0Max, pp1Max)
+        ppIntersected1 = geometryUtils.calkPointIntersection(pp2, pp3, pp0Max, pp1Max)
+        
+        coff1 = 0.8
+        self.cornerBy3Point(pp1, ppIntersected0, pp1Max,coff1)
+        self.addL(pp0Max)
+        self.cornerBy3Point(pp0Max, ppIntersected1, pp2,coff1)
+       
+        # self.addL(pp1Max)
+        # self.addL(pp0Max)
         return
     # прямой сглаженный угол
     def cornerRightSmooth(self, lineA, lineB):
