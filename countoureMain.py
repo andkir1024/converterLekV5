@@ -108,7 +108,7 @@ class svgPath:
                     self.cornerBetweenToParallelLinesTwoSpline( line, lineN, pp0Max, pp1Max)
                 else:
                     self.cornerBetweenToParallelLinesOneSplne( line, lineN)
-        elif lineType == ParallStatus.vert:
+        elif lineType == ParallStatus.vert and isDownU == False:
             approx = cv2.approxPolyDP(contours, 0.001* peri, False)
             maxVal, pp0Max, pp1Max = geometryUtils.lenghtContoureLine(approx)
             if maxVal > 0:
