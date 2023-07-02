@@ -9,7 +9,7 @@ from shapely.geometry import Polygon
 from shapely.ops import split
 from shapely import geometry
 from geomUtils import *
-from commonData import LineStatus, ParallStatus, Corner,svgCountoure
+from commonData import LineStatus, ParallStatus, Corner, TypeСutout,svgCountoure
 from sequencer import sequencer
 
 
@@ -104,15 +104,18 @@ class svgPath:
             # approx = cv2.approxPolyDP(contours, 0.001* peri, False)
             approx = cv2.approxPolyDP(contours, 0.01 * peri, False)
             path = sequencer.checkPath(approx)
-            typeСutout = sequencer.classifyPath(path, approx)
-
-            maxVal, pp0Max, pp1Max = geometryUtils.lenghtContoureLine(approx)
-            if maxVal > 0:
-                coff = peri / maxVal
-                if coff < 5:
-                    self.cornerBetweenToParallelLinesTwoSpline( line, lineN, pp0Max, pp1Max)
-                else:
-                    self.cornerBetweenToParallelLinesOneSplne( line, lineN)
+            typeСutout, pp0, pp1, pp2 = sequencer.classifyPath(path, approx)
+            if typeСutout == TypeСutout.undifined:
+                maxVal, pp0Max, pp1Max = geometryUtils.lenghtContoureLine(approx)
+                if maxVal > 0:
+                    coff = peri / maxVal
+                    if coff < 5:
+                        self.cornerBetweenToParallelLinesTwoSpline( line, lineN, pp0Max, pp1Max)
+                    else:
+                        self.cornerBetweenToParallelLinesOneSplne( line, lineN)
+            else:
+                self.cutoutUType0(pp0, pp1, pp2)
+                pass
         elif lineType == ParallStatus.vert and isDownU == False:
             approx = cv2.approxPolyDP(contours, 0.001* peri, False)
             maxVal, pp0Max, pp1Max = geometryUtils.lenghtContoureLine(approx)
@@ -169,6 +172,7 @@ class svgPath:
 
         self.cornerBy2Point(pp1, pp2)
         return
+    # углы --------------------------------------------------------------
     # соединение пареллельных линий (есть линия внутри)
     def cornerBetweenToParallelLinesTwoSpline(self, line, lineN, pp0Max, pp1Max):
         pp0 = Point(line[0][0],line[0][1])
@@ -192,13 +196,12 @@ class svgPath:
         # self.addL(pp2)
         return
     # угол по 2 точкам (для параллельных прямых)
-    def cornerBy2Point(self, pp0, pp1):
-        coff1 = 0.7
+    def cornerBy2Point(self, pp0, pp1, coff1 = 0.7, coff2 = 0.7):
         pp01 = Point(pp1.x,pp0.y)
         pp10 = Point(pp0.x,pp1.y)
         
         bezP0 = bezier.interpolatePoint(pp01, pp0, coff1)
-        bezP1 = bezier.interpolatePoint(pp10, pp1, coff1)
+        bezP1 = bezier.interpolatePoint(pp10, pp1, coff2)
         self.addC(bezP0, bezP1, pp1)
         return
     # угол по 3 точкам
@@ -242,6 +245,11 @@ class svgPath:
         
         ppIntersected = geometryUtils.calkPointIntersection(pp0, pp1, pp2, pp3)
         self.cornerBy3Point(pp1, ppIntersected, pp2, coff1)
+        return
+    # вырезы --------------------------------------------------------------
+    def cutoutUType0(self, pp0,pp1, pp2):
+        self.cornerBy2Point(pp2, pp1, 0.3, 0.3)
+        self.cornerBy2Point(pp1, pp0, 0.3, 0.3)
         return
     
     def UneckSvg(self, ppStart, cornSize0, ppLeft, cornSize1, ppDown, cornSize2, ppRight, cornSize3, ppEnd):
