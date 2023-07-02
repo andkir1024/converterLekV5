@@ -37,6 +37,11 @@ class geometryUtils:
     def lenghtLine( pp0, pp1):
         lenLine = math.sqrt( ((pp0[0]-pp1[0])**2)+((pp0[1]-pp1[1])**2))
         return lenLine
+    def lenghtLineConture( line):
+        dxA = abs(line[0][0]-line[1][0])
+        dyA = abs(line[0][1]-line[1][1])
+        lenLine = math.sqrt( (dxA**2)+(dyA**2))
+        return lenLine
     def lenghtContoureLine( contour):
         maxVal =0
         pp0 = Point(0,0)
@@ -62,7 +67,25 @@ class geometryUtils:
             return None
         return result
 
-    def cornerBetweenToLines(pp0S, pp0E, pp1S, pp1E):
-        ppIntersected = geometryUtils.calkPointIntersection(pp0S, pp0E, pp1S, pp1E)
-        
-        return
+    # прверка является ли соединение линий углом
+    def checkCorner(lineA, lineB):
+        dxA = abs(lineA[0][0]-lineA[1][0])
+        dyA = abs(lineA[0][1]-lineA[1][1])
+        lenA = geometryUtils.lenghtLineConture(lineA)
+
+        dxB = abs(lineB[0][0]-lineB[1][0])
+        dyB = abs(lineB[0][1]-lineB[1][1])
+        lenB = geometryUtils.lenghtLineConture(lineB)
+        if lenA < 100 or lenB < 100:
+            return False
+
+        border = 10
+        if dyA < border and dxB < border:
+            return True
+        if dxA < border and dyB < border:
+            return True
+        if dyA < border and dxB < border:
+            return True
+        if dxA < border and dyB < border:
+            return True
+        return False

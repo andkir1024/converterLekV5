@@ -79,74 +79,85 @@ class svgPath:
         
         return
         
-    def createFlatCoutureV1(self, lines):
-        for index in range(len(lines)):
-            line = lines[index]
-            lineType = line[6].cross
-            # debug
-            # if index == 1:
-            if lineType == ParallStatus.hor:
-                lineP = lines[index-1]
-                lineN = lines[index+1]
-                
-                contours = line[6].pointsFig.copy()
-                peri = cv2.arcLength(contours,False)
-                approx = cv2.approxPolyDP(contours, 0.001* peri, False)
-                maxVal, pp0Max, pp1Max = geometryUtils.lenghtContoureLine(approx)
-                if maxVal > 0:
-                    coff = peri / maxVal
-                    self.cornerBetweenToLines( Point(lineP[0][0],lineP[0][1]), Point(lineP[1][0],lineP[1][1]), pp0Max, pp1Max)
-                
-                # def calkPointIntersection(lineP, lineB)
-                # pp0 = geometryUtils.calkPointIntersection(Point(lineP[0][0], lineP[0][1]), 
-                #                                           Point(lineP[1][0], lineP[1][1]),
-                #                                           Point(line[0][0], lineP[0][1]),
-                #                                           Point(line[0][0], line[0][1]))
-
-                pointS = Point(lineP[1][0], lineP[1][1])
-                ppStart = geometry.Point(pointS.x, pointS.y)
-
-                
-                ppLeft = geometryUtils.centerConnectionLines(lineP, line)
-                ppRight = geometryUtils.centerConnectionLines(line, lineN)
-
-                pointE = Point(lineN[0][0], lineN[0][1])
-                ppEnd = geometry.Point(pointE.x, pointE.y)
-                
-                ppDown = geometryUtils.centerLine(line)
-                
-                # self.UneckSvg(pp0, 40, ppLeft, 60, ppDown, 60, ppRight, 40, ppEnd)
-                # self.UneckSvg(ppStart, 40, ppLeft, 60, ppDown, 60, ppRight, 40, ppEnd)
-                # continue
-            pp0, pp1 = bezier.convertToPoint(line)
-            if index == 0:
-                self.addM(pp0)
-            else:
-                self.addL(pp0)
-            self.addL(pp1)
-        self.addZ()
-
     def createFlatCouture(self, lines):
-        for index in range(len(lines)):
+        pp0, pp1 = bezier.convertToPoint(lines[0])
+        self.addM(pp0)
+        for index in range(len(lines)-1):
             line = lines[index]
-            pp0, pp1 = bezier.convertToPoint(line)
-            self.addM(pp0)
-            self.addL(pp1)
-            lineType = line[6].cross
+            lineN = lines[index+1]
+            self.createStepCouture(line, lineN)
+            # pp0, pp1 = bezier.convertToPoint(line)
+            # self.addM(pp0)
+            # self.addL(pp1)
+            # lineType = line[6].cross
+
             
-            if lineType == ParallStatus.hor:
-                lineN = lines[index+1]
+            # isCorner = geometryUtils.checkCorner(line, lineN)
+
+            # # параллельные последовательные линии
+            # if lineType == ParallStatus.hor:
+            #     contours = line[6].pointsFig.copy()
+            #     peri = cv2.arcLength(contours,False)
+            #     approx = cv2.approxPolyDP(contours, 0.001* peri, False)
+            #     maxVal, pp0Max, pp1Max = geometryUtils.lenghtContoureLine(approx)
+            #     if maxVal > 0:
+            #         coff = peri / maxVal
+            #         if coff < 5:
+            #             self.cornerBetweenToParallelLinesTwoSpline( line, lineN, pp0Max, pp1Max)
+            #         else:
+            #             self.cornerBetweenToParallelLinesOneSplne( line, lineN)
+            # else:
+            #     if isCorner == True:
+            #         contours = line[6].pointsFig.copy()
+            #         peri = cv2.arcLength(contours,False)
+            #         approx = cv2.approxPolyDP(contours, 0.01* peri, False)
+            #         maxVal, pp0Max, pp1Max = geometryUtils.lenghtContoureLine(approx)
+            #         if maxVal > 0:
+            #             coff = peri / maxVal
+            #             if coff < 2:
+            #                 # угол с линией
+            #                 pass
+            #             else:
+            #                 # угол скругленный
+            #                 # self.cornerRightSmooth(line, lineN)
+            #                 pass
+        # self.createStepCouture(lines[0], lines[len(lines)-1])
+        self.createStepCouture(lines[len(lines)-1], lines[0])
+        # self.addZ()
+    def createStepCouture(self, line, lineN):
+        pp0, pp1 = bezier.convertToPoint(line)
+        # self.addM(pp0)
+        self.addL(pp1)
+        lineType = line[6].cross
+        isCorner = geometryUtils.checkCorner(line, lineN)
+
+        # параллельные последовательные линии
+        if lineType == ParallStatus.hor:
+            contours = line[6].pointsFig.copy()
+            peri = cv2.arcLength(contours,False)
+            approx = cv2.approxPolyDP(contours, 0.001* peri, False)
+            maxVal, pp0Max, pp1Max = geometryUtils.lenghtContoureLine(approx)
+            if maxVal > 0:
+                coff = peri / maxVal
+                if coff < 5:
+                    self.cornerBetweenToParallelLinesTwoSpline( line, lineN, pp0Max, pp1Max)
+                else:
+                    self.cornerBetweenToParallelLinesOneSplne( line, lineN)
+        else:
+            if isCorner == True:
                 contours = line[6].pointsFig.copy()
                 peri = cv2.arcLength(contours,False)
-                approx = cv2.approxPolyDP(contours, 0.001* peri, False)
+                approx = cv2.approxPolyDP(contours, 0.01* peri, False)
                 maxVal, pp0Max, pp1Max = geometryUtils.lenghtContoureLine(approx)
                 if maxVal > 0:
                     coff = peri / maxVal
-                    if coff < 5:
-                        self.cornerBetweenToParallelLinesTwoSpline( line, lineN, pp0Max, pp1Max)
+                    if coff < 2:
+                        # угол с линией
+                        pass
                     else:
-                        self.cornerBetweenToParallelLinesOneSplne( line, lineN)
-        self.addZ()
+                        # угол скругленный
+                        self.cornerRightSmooth(line, lineN)
+                        pass
     # соединение пареллельных линий (линии внутри нет)
     def cornerBetweenToParallelLinesOneSplne(self, line, lineN):
         pp0 = Point(line[0][0],line[0][1])
@@ -168,9 +179,10 @@ class svgPath:
         ppIntersected0 = geometryUtils.calkPointIntersection(pp0, pp1, pp0Max, pp1Max)
         ppIntersected1 = geometryUtils.calkPointIntersection(pp2, pp3, pp0Max, pp1Max)
 
-        self.cornerBy3Point(pp1, ppIntersected0, pp1Max)
+        coff1 = 0.6
+        self.cornerBy3Point(pp1, ppIntersected0, pp1Max,coff1)
         self.addL(pp0Max)
-        self.cornerBy3Point(pp0Max, ppIntersected1, pp2)
+        self.cornerBy3Point(pp0Max, ppIntersected1, pp2,coff1)
         
         # self.addL(ppIntersected0)
         # self.addL(pp1Max)
@@ -189,20 +201,24 @@ class svgPath:
         self.addC(bezP0, bezP1, pp1)
         return
     # угол по 3 точкам
-    def cornerBy3Point(self, pp0, pp1, pp2):
-        coff1 = 0.6
+    def cornerBy3Point(self, pp0, pp1, pp2, coff1):
         bezP0 = bezier.interpolatePoint(pp0, pp1, coff1)
         bezP1 = bezier.interpolatePoint(pp2, pp1, coff1)
         self.addC(bezP0, bezP1, pp2)
         return
-    
-    def cornerBetweenToLines(self, pp0S, pp0E, pp1S, pp1E):
-        ppIntersected = geometryUtils.calkPointIntersection(pp0S, pp0E, pp1S, pp1E)
-        if ppIntersected is not None:
-            self.addL(ppIntersected)
+    # прямой сглаженный угол
+    def cornerRightSmooth(self, lineA, lineB):
+        coff1 = 0.55
+        pp0 = Point(lineA[0][0],lineA[0][1])
+        pp1 = Point(lineA[1][0],lineA[1][1])
 
-        # geometryUtils.cornerBetweenToLines(pp0S, pp0E, pp1S, pp1E)
+        pp2 = Point(lineB[0][0],lineB[0][1])
+        pp3 = Point(lineB[1][0],lineB[1][1])
+        
+        ppIntersected = geometryUtils.calkPointIntersection(pp0, pp1, pp2, pp3)
+        self.cornerBy3Point(pp1, ppIntersected, pp2, coff1)
         return
+    
     def UneckSvg(self, ppStart, cornSize0, ppLeft, cornSize1, ppDown, cornSize2, ppRight, cornSize3, ppEnd):
         self.addL(ppStart)
         self.addL(ppLeft)
