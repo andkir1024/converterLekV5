@@ -8,6 +8,7 @@ class DirectionStatus(enum.Enum):
     dir90 = 1
     dir180 = 2
     dir270 = 3
+    dir360 = 8
 
     dir0_90 = 4
     dir90_180 = 5
