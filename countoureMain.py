@@ -138,6 +138,7 @@ class svgPath:
                     self.cornerBetweenToParallelLinesOneSplne( line, lineN)
             pass
         else:
+            isCorner = True
             if isCorner == True:
                 approx = cv2.approxPolyDP(contours, 0.01* peri, False)
                 maxVal, pp0Max, pp1Max = geometryUtils.lenghtContoureLine(approx)
@@ -149,7 +150,7 @@ class svgPath:
                         pass
                     else:
                         # угол скругленный
-                       self.cornerRightSmooth(line, lineN)
+                        self.cornerRightSmooth(line, lineN)
             if isDownU == True:
                 self.cornerUDown(line, lineN)
         return
@@ -220,7 +221,8 @@ class svgPath:
         
         ppIntersected0 = geometryUtils.calkPointIntersection(pp0, pp1, pp0Max, pp1Max)
         ppIntersected1 = geometryUtils.calkPointIntersection(pp2, pp3, pp0Max, pp1Max)
-        
+        ppIntersected0 = ppIntersected0.coords[0]
+        ppIntersected1 = ppIntersected1.coords[0]
         coff1 = 0.8
 
         # self.addL(pp0Max)
