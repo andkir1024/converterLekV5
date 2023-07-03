@@ -246,7 +246,8 @@ class svgPath:
         pp3 = Point(lineB[1][0],lineB[1][1])
         
         ppIntersected = geometryUtils.calkPointIntersection(pp0, pp1, pp2, pp3)
-        self.cornerBy3Point(pp1, ppIntersected, pp2, coff1)
+        if ppIntersected is not None:
+            self.cornerBy3Point(pp1, ppIntersected, pp2, coff1)
         return
     # вырезы --------------------------------------------------------------
     def cutoutUType0(self, ppAll):
