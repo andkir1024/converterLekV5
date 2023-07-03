@@ -70,6 +70,7 @@ class sequencer:
         start = False
         linesOut = []
         iS = -1
+        canAddHorizont = False
         for line in linesNew:
             dx = abs(line[1].x-line[2].x)
             dy = abs(line[1].y-line[2].y)
@@ -78,12 +79,14 @@ class sequencer:
                     start = True
                     iE = line[5]
                     linesOut.append((line, 0))
+                    canAddHorizont = False
                 else:
                     start = False
                     iS = line[5]
                     point = sequencer.findMaxY(approx, iS, iE)
                     linesOut.append((line, 1, point))
-            if dy < border:
+                    canAddHorizont = True
+            if dy < border and canAddHorizont:
                 linesOut.append((line, -1, None))
         return linesOut
     

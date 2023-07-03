@@ -335,7 +335,7 @@ class svgPath:
 
         return
 
-    def cutoutUType3(self, ppAll):
+    def cutoutUType3v1(self, ppAll):
         ppE = ppAll[1]
         ppS = ppAll[2]
         for index in range(len(ppAll[0])):
@@ -410,4 +410,60 @@ class svgPath:
                 return spline
         return None
 
-        
+    def cutoutUType3(self, ppAll):
+        ppE = ppAll[1]
+        ppS = ppAll[2]
+        all = len(ppAll[0])
+        for index in range(all - 1):
+            spline = ppAll[0][index]
+            line = spline[0]
+
+            splineN = ppAll[0][index+1]
+            lineN = splineN[0]
+
+            dir = spline[1]
+            dirN = splineN[1]
+            if dir == 0 and dirN == 1:
+                pp0 = ppS
+                pp1 = Point(0,0)
+                pp1 = splineN[2]
+                lineN = lineN
+
+                ppL0 = line[1]
+                ppL1 = line[2]
+
+                ppI0 = Point(ppL0.x, pp0.y)
+                ppI1 = Point(ppL1.x, pp1.y)
+
+                coff1 = 0.6
+                self.cornerBy3Point(ppS, ppI0, ppL1,coff1)
+                self.addL(ppL0)
+                self.cornerBy3Point(ppL0, ppI1, pp1,coff1)
+                if splineN != None:
+                    ppL0 = lineN[1]
+                    ppL1 = lineN[2]
+                    ppI0 = Point(ppL0.x, pp0.y)
+                    ppI1 = Point(ppL1.x, pp1.y)
+                    self.cornerBy3Point(pp1, ppI1, ppL1,coff1)
+                    self.addL(ppL0)
+                    # проверка есть ли далее горизонтальная линия или конец
+                    if index < all - 2:
+                        splineNN = ppAll[0][index+2]
+                        lineNN = splineNN[0]
+                        dirNN = splineNN[1]
+                        if dirNN == -1:
+                            pp2 = lineNN[2]
+                            self.cornerBy3Point(ppL0, ppI0, pp2,coff1)
+                            ppS = lineNN[1]    
+                            continue
+                    else:
+                        pp2 = ppE
+                        self.cornerBy3Point(ppL0, ppI0, pp2,coff1)
+                    
+                # ppS = ppL0
+            if dir == -1:
+                self.addL(line[2])
+                self.addL(line[1])
+                pass
+            pass
+        return
