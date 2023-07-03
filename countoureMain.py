@@ -102,7 +102,7 @@ class svgPath:
         # параллельные последовательные линии
         if lineType == ParallStatus.hor:
             # approx = cv2.approxPolyDP(contours, 0.001* peri, False)
-            approx = cv2.approxPolyDP(contours, 0.01 * peri, False)
+            approx = cv2.approxPolyDP(contours, 0.003 * peri, False)
             path = sequencer.checkPath(approx)
             typeСutout, ppAll = sequencer.classifyPath(path, approx, lineN)
             if typeСutout == TypeСutout.undifined:
@@ -117,6 +117,8 @@ class svgPath:
                 self.cutoutUType0(ppAll)
             elif typeСutout == TypeСutout.UType1:
                 self.cutoutUType1(ppAll)
+            elif typeСutout == TypeСutout.UType2:
+                self.cutoutUType2(ppAll)
                 pass
         elif lineType == ParallStatus.vert and isDownU == False:
             approx = cv2.approxPolyDP(contours, 0.001* peri, False)
@@ -260,13 +262,74 @@ class svgPath:
         pp0 = ppAll[0]
         pp1 = ppAll[1]
         pp2 = ppAll[2]
-        self.cornerBy2Point(pp2, pp1, 0.1, 0.1)
-        self.cornerBy2Point(pp1, pp0, 0.1, 0.1)
+        ppX0 = ppAll[3]
+        ppX1 = ppAll[4]
+        dx = (ppX1 - ppX0)/2
+        # leftt
+        ppL0 = Point(ppX0, pp2.y + dx/4)
+        ppL1 = Point(ppX0, pp1.y - dx)
+
+        ppI0 = Point(ppX0, pp2.y)
+        ppI1 = Point(ppX0, pp1.y)
+        
+        coff1 = 0.6
+        self.cornerBy3Point(pp2, ppI0, ppL0,coff1)
+        self.addL(ppL1)
+        self.cornerBy3Point(ppL1, ppI1, pp1,coff1)
+        # right
+        ppR0 = Point(ppX1, pp0.y + dx/4)
+        ppR1 = Point(ppX1, pp1.y - dx)
+
+        ppI0 = Point(ppX1, pp1.y)
+        ppI1 = Point(ppX1, pp0.y)
+
+        # self.addL(ppI0)
+        # self.addL(ppR1)
+        # self.addL(ppR0)
+        # self.addL(ppI1)
+        
+        self.cornerBy3Point(pp1, ppI0, ppR1, coff1)
+        self.addL(ppR0)
+        self.cornerBy3Point(ppR0, ppI1, pp0, coff1)
+
+        # self.cornerBy2Point(pp2, pp1, 0.1, 0.1)
+        # self.cornerBy2Point(pp1, pp0, 0.1, 0.1)
         return
     
-    def UneckSvg(self, ppStart, cornSize0, ppLeft, cornSize1, ppDown, cornSize2, ppRight, cornSize3, ppEnd):
-        self.addL(ppStart)
-        self.addL(ppLeft)
-        self.addL(ppDown)
-        self.addL(ppRight)
+    def cutoutUType2(self, ppAll):
+        pp0 = ppAll[0]
+        pp1 = ppAll[1]
+        pp2 = ppAll[2]
+        ppX0 = ppAll[3]
+        ppX1 = ppAll[4]
+        ppX2 = ppAll[5]
+        
+        pp1 = Point(ppX0 + (ppX1 - ppX0)/2, pp1.y)
+        pp2 = Point(ppX1, pp0.y)
+        
+        dx = (ppX1 - ppX0)/2
+        # leftt
+        ppL0 = Point(ppX0, pp2.y + dx/4)
+        ppL1 = Point(ppX0, pp1.y - dx)
+
+        ppI0 = Point(ppX0, pp2.y)
+        ppI1 = Point(ppX0, pp1.y)
+        
+        coff1 = 0.6
+        self.cornerBy3Point(pp2, ppI0, ppL0,coff1)
+        self.addL(ppL1)
+        self.cornerBy3Point(ppL1, ppI1, pp1,coff1)
+        # right
+        ppR0 = Point(ppX1, pp0.y + dx/4)
+        ppR1 = Point(ppX1, pp1.y - dx)
+
+        ppI0 = Point(ppX1, pp1.y)
+        ppI1 = Point(ppX1, pp0.y)
+        
+        self.cornerBy3Point(pp1, ppI0, ppR1, coff1)
+        self.addL(ppR0)
+        self.cornerBy3Point(ppR0, ppI1, pp0, coff1)
+
         return
+
+    

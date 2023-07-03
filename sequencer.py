@@ -31,33 +31,69 @@ class sequencer:
         if allSeq == 2:
             if seq[0][0]== DirectionStatus.dir90 and seq[1][0] == DirectionStatus.dir180:
                 pp0, pp1, pp2= sequencer.calk3PointRect(approx, lineN)
-                hasLines = sequencer.findParallelLines(approx)
+                hasLines, ppX0, ppX1, ppX2 = sequencer.findParallelLines(approx)
                 if hasLines == True:
-                    return TypeСutout.UType1, (pp0, pp1, pp2)
+                    return TypeСutout.UType1, (pp0, pp1, pp2, ppX0, ppX1,ppX2)
                 return TypeСutout.UType0, (pp0, pp1, pp2)
         if allSeq == 3:
             if seq[0][0]== DirectionStatus.dir180 and seq[1][0] == DirectionStatus.dir90 and seq[2][0] == DirectionStatus.dir180:
                 pp0, pp1, pp2= sequencer.calk3PointRect(approx, lineN)
-                return TypeСutout.UType1, (pp0, pp1, pp2)
+                hasLines, ppX0, ppX1,ppX2 = sequencer.findParallelLines(approx)
+                sequencer.findParam4Lines(approx)
+                return TypeСutout.UType2, (pp0, pp1, pp2, ppX0, ppX1, ppX2)
+        if allSeq == 4:
+            # hasLines, ppX0, ppX1,ppX2 = sequencer.findParallelLines(approx)
+            sequencer.findParam4Lines(approx)
+            pass
             
         return TypeСutout.undifined, None
 
+    def findParam3Lines(approx):
+        hasLines, ppX0, ppX1,ppX2 = sequencer.findParallelLines(approx)
+    def findParam4Lines(approx):
+        # peri = cv2.arcLength(approx,False)/25
+        peri = cv2.arcLength(approx,False)/len(approx)
+        lines = sequencer.lenghtContoureLine(approx, False)
+        # выделение нормальных линия
+        linesNew = []
+        for line in lines:
+            if line[0]> peri:
+                linesNew.append(line)
+        linesNew = list(reversed(linesNew))
+        # выделение вертикальных линия
+        border = 10
+        start = False
+        linesOut = []
+        for line in linesNew:
+            dx = abs(line[1].x-line[2].x)
+            dy = abs(line[1].y-line[2].y)
+            if dx < border:
+                if start == False:
+                    start = True
+                    linesOut.append((line, 0))
+                else:
+                    start = False
+                    linesOut.append((line, 1))
+            if dy < border:
+                linesOut.append((line, -1))
+        return
+    
     def lenghtLine( pp0, pp1):
         lenLine = math.sqrt( ((pp0[0]-pp1[0])**2)+((pp0[1]-pp1[1])**2))
         return lenLine
-    def lenghtContoureLine( contour):
+    def lenghtContoureLine( contour, sort = True):
         lines = []
-        maxVal =0
         for index in range(len(contour)-1):
             pointS = contour[index]
             pointE = contour[index+1]
             lenLine = sequencer.lenghtLine( pointS[0], pointE[0])
-            # if lenLine> maxVal:
-                # maxVal = lenLine
             pp0 = Point(pointS[0][0],pointS[0][1])
             pp1 = Point(pointE[0][0],pointE[0][1])
-            lines.append((lenLine, pp0, pp1))
-        lines = sorted(lines, key=lambda x: x[0], reverse=True)
+            dx = pp0.x-pp1.x
+            dy = pp0.y-pp1.y
+            lines.append((lenLine, pp0, pp1, dx, dy, index))
+        if sort:
+            lines = sorted(lines, key=lambda x: x[0], reverse=True)
         return lines
 
     def findParallelLines(approx):
@@ -66,20 +102,32 @@ class sequencer:
         if len(lines)>3:
             lineA = lines[0]
             lineB = lines[1]
+            lineC = lines[2]
             dxA = abs(lineA[1].x-lineA[2].x)
             dxB = abs(lineB[1].x-lineB[2].x)
-            boreder = 10
-            if dxA < boreder and dxB  < boreder and lineA[0]>peri and lineB[0]>peri:
-                return True
-        return False
+            dxC = abs(lineC[1].x-lineC[2].x)
+            x1 = sequencer.getMiddleX(lineA)
+            x2 = sequencer.getMiddleX(lineB)
+            x3 = sequencer.getMiddleX(lineC)
+            border = 10
+            if dxA < border and dxB < border  and dxC < border and lineA[0]>peri and lineB[0]>peri and lineC[0]>peri:
+                xAll = [x1,x2, x3]
+                xAll.sort()
+                return True, xAll[0], xAll[1],xAll[2]
+            if dxA < border and dxB  < border and lineA[0]>peri and lineB[0]>peri:
+                xAll = [x1,x2]
+                xAll.sort()
+                return True, xAll[0], xAll[1], None
+                # return True, lineA[1].x, lineB[1].x, None
+        return False, None, None, None
+    def getMiddleX(line):
+        minX = min(line[1].x, line[2].x)
+        x = minX + abs(line[1].x-line[2].x)/2
+        return x
+        # return line[1].x
 
     # крание и центральная нижняя точка
     def calk3PointRect(approx, lineN):
-        # pp0 = Point(approx[0][0][0],approx[0][0][1])
-        # pp2 = Point(lineN[0][0],lineN[0][1])
-        # # pp2 = Point(approx[-1][0][0],approx[-1][0][1])
-        # pp1 = approx[0]
-
         pp0 = Point(lineN[0][0],lineN[0][1])
         pp2 = Point(approx[-1][0][0],approx[-1][0][1])
         pp1 = approx[0]
@@ -113,36 +161,5 @@ class sequencer:
         if dx < 0 and dy >= 0:
             return DirectionStatus.dir360
 
-
-        # if dx == 0 and dy > 0:
-        #     return DirectionStatus.dir0
-        # if dx == 0 and dy < 0:
-        #     return DirectionStatus.dir180
-        # if dx > 0 and dy == 0:
-        #     return DirectionStatus.dir90
-        # if dx < 0 and dy == 0:
-        #     return DirectionStatus.dir270
-       
-        # if dx >= 0 and dy >= 0:
-        #     return DirectionStatus.dir0_90
-        # if dx >= 0 and dy < 0:
-        #     return DirectionStatus.dir90_180
-        # if dx < 0 and dy < 0:
-        #     return DirectionStatus.dir180_270
-        # if dx < 0 and dy >= 0:
-        #     return DirectionStatus.dir270_360
-        
-        # angle0 = geometryUtils.get_angle(0,0)
-        # angle1 = geometryUtils.get_angle(1,0)
-        # angle2 = geometryUtils.get_angle(1,-1)
-        # angle4 = geometryUtils.get_angle(0,-1)
-        # angle5 = geometryUtils.get_angle(-1,-1)
-        # angle6 = geometryUtils.get_angle(-1,0)
-        # angle7 = geometryUtils.get_angle(-1,1)
         return DirectionStatus.undifined
     
-    def get_angle(dx, dy):
-        if dy == 0:
-            return math.degrees(math.acos(0))
-        return math.degrees(-math.atan((dx) / (dy)))
-
