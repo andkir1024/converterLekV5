@@ -37,10 +37,13 @@ class sequencer:
                 return TypeСutout.UType0, (pp0, pp1, pp2)
         if allSeq == 3:
             if seq[0][0]== DirectionStatus.dir180 and seq[1][0] == DirectionStatus.dir90 and seq[2][0] == DirectionStatus.dir180:
-                pp0, pp1, pp2= sequencer.calk3PointRect(approx, lineN)
-                hasLines, ppX0, ppX1,ppX2 = sequencer.findParallelLines(approx)
-                sequencer.findParam4Lines(approx)
-                return TypeСutout.UType2, (pp0, pp1, pp2, ppX0, ppX1, ppX2)
+                # pp0, pp1, pp2= sequencer.calk3PointRect(approx, lineN)
+                # hasLines, ppX0, ppX1,ppX2 = sequencer.findParallelLines(approx)
+                # return TypeСutout.UType2, (pp0, pp1, pp2, ppX0, ppX1, ppX2)
+                param = sequencer.findParam4Lines(approx)
+                ppS = sequencer.convertCoutoreToPoint(approx[0])
+                ppE = sequencer.convertCoutoreToPoint(approx[-1])
+                return TypeСutout.UType3, (param, ppS, ppE)
         if allSeq == 4:
             # hasLines, ppX0, ppX1,ppX2 = sequencer.findParallelLines(approx)
             param = sequencer.findParam4Lines(approx)

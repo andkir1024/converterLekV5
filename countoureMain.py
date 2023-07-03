@@ -469,10 +469,24 @@ class svgPath:
                     pp2 = ppE
                     self.cornerBy3Point(ppNL0, ppNI0, pp2,coff1)
                     
-                # ppS = ppL0
+                continue
+            if dir == -1 and dirN == 0 and index < all - 1:
+                self.addL(line[1])
+                pp0 = line[2]
+                pp1 = ppE
+                ppL0 = lineN[1]
+                ppL1 = lineN[2]
+
+                ppI0 = Point(ppL0.x, pp0.y)
+                ppI1 = Point(ppL1.x, pp1.y)
+
+                coff1 = 0.6
+                self.cornerBy3Point(ppS, ppI0, ppL1,coff1)
+                self.addL(ppL0)
+                self.cornerBy3Point(ppL0, ppI1, pp1,coff1)
+                continue
             if dir == -1:
                 # self.addL(line[2])
                 self.addL(line[1])
-                pass
-            pass
+                continue
         return
