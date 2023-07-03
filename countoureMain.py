@@ -410,6 +410,10 @@ class svgPath:
                 return spline
         return None
 
+    def getCenterLines(self, lineA, lineB):
+        dx = abs(lineA[1].x-lineB[1].x)/2
+        x = min(lineA[1].x, lineB[1].x) + dx
+        return x
     def cutoutUType3(self, ppAll):
         ppE = ppAll[1]
         ppS = ppAll[2]
@@ -425,12 +429,16 @@ class svgPath:
             dirN = splineN[1]
             if dir == 0 and dirN == 1:
                 pp0 = ppS
-                pp1 = Point(0,0)
                 pp1 = splineN[2]
-                lineN = lineN
-
+                xx= self.getCenterLines(line, lineN)
+                pp1 = Point(xx, pp1.y)
                 ppL0 = line[1]
                 ppL1 = line[2]
+                ppNL0 = lineN[1]
+                ppNL1 = lineN[2]
+                ppL0, ppNL1 = bezier.aligmentHor(ppL0, ppNL1)
+                ppL1, ppNL0 = bezier.aligmentHor(ppL1, ppNL0)
+                # left
 
                 ppI0 = Point(ppL0.x, pp0.y)
                 ppI1 = Point(ppL1.x, pp1.y)
@@ -439,30 +447,31 @@ class svgPath:
                 self.cornerBy3Point(ppS, ppI0, ppL1,coff1)
                 self.addL(ppL0)
                 self.cornerBy3Point(ppL0, ppI1, pp1,coff1)
-                if splineN != None:
-                    ppL0 = lineN[1]
-                    ppL1 = lineN[2]
-                    ppI0 = Point(ppL0.x, pp0.y)
-                    ppI1 = Point(ppL1.x, pp1.y)
-                    self.cornerBy3Point(pp1, ppI1, ppL1,coff1)
-                    self.addL(ppL0)
-                    # проверка есть ли далее горизонтальная линия или конец
-                    if index < all - 2:
-                        splineNN = ppAll[0][index+2]
-                        lineNN = splineNN[0]
-                        dirNN = splineNN[1]
-                        if dirNN == -1:
-                            pp2 = lineNN[2]
-                            self.cornerBy3Point(ppL0, ppI0, pp2,coff1)
-                            ppS = lineNN[1]    
-                            continue
-                    else:
-                        pp2 = ppE
-                        self.cornerBy3Point(ppL0, ppI0, pp2,coff1)
+
+                # right
+                ppNL0 = lineN[1]
+                ppNL1 = lineN[2]
+                ppNI0 = Point(ppNL0.x, pp0.y)
+                ppNI1 = Point(ppNL1.x, pp1.y)
+                self.cornerBy3Point(pp1, ppNI1, ppNL1,coff1)
+                self.addL(ppNL0)
+                # проверка есть ли далее горизонтальная линия или конец
+                if index < all - 2:
+                    splineNN = ppAll[0][index+2]
+                    lineNN = splineNN[0]
+                    dirNN = splineNN[1]
+                    if dirNN == -1:
+                        pp2 = lineNN[2]
+                        self.cornerBy3Point(ppNL0, ppNI0, pp2,coff1)
+                        ppS = lineNN[1]    
+                        continue
+                else:
+                    pp2 = ppE
+                    self.cornerBy3Point(ppNL0, ppNI0, pp2,coff1)
                     
                 # ppS = ppL0
             if dir == -1:
-                self.addL(line[2])
+                # self.addL(line[2])
                 self.addL(line[1])
                 pass
             pass
