@@ -8,6 +8,7 @@ class TypeСutout(enum.Enum):
     UType0 = 1
     UType1 = 2
     UType2 = 3
+    UType3 = 4
 
 class DirectionStatus(enum.Enum):
     dir0 = 0

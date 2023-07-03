@@ -120,6 +120,9 @@ class svgPath:
             elif typeСutout == TypeСutout.UType2:
                 self.cutoutUType2(ppAll)
                 pass
+            elif typeСutout == TypeСutout.UType3:
+                self.cutoutUType3(ppAll)
+                pass
         elif lineType == ParallStatus.vert and isDownU == False:
             approx = cv2.approxPolyDP(contours, 0.001* peri, False)
             maxVal, pp0Max, pp1Max = geometryUtils.lenghtContoureLine(approx)
@@ -332,4 +335,79 @@ class svgPath:
 
         return
 
-    
+    def cutoutUType3(self, ppAll):
+        ppE = ppAll[1]
+        ppS = ppAll[2]
+        for index in range(len(ppAll[0])):
+            spline = ppAll[0][index]
+            line = spline[0]
+            dir = spline[1]
+            # downY = spline[2]
+            if dir == 0:
+                # pp0 = Point(ppS.x, ppS.y)
+                pp0 = ppS
+                pp1 = Point(0,0)
+                splineN = self.findNexSpline(ppAll, index)
+                if splineN == None:
+                    pass
+                else:
+                    pp1 = splineN[2]
+
+                ppL0 = line[1]
+                ppL1 = line[2]
+
+                ppI0 = Point(ppL0.x, pp0.y)
+                ppI1 = Point(ppL1.x, pp1.y)
+                
+                # coff1 = 0.6
+                # self.cornerBy3Point(pp0, ppI0, ppL0,coff1)
+                # self.addL(ppL1)
+                # self.cornerBy3Point(ppL1, ppI1, pp1,coff1)
+                # self.addL(pp0)
+
+                coff1 = 0.6
+                self.cornerBy3Point(ppS, ppI0, ppL1,coff1)
+                self.addL(ppL0)
+                self.cornerBy3Point(ppL0, ppI1, pp1,coff1)
+                if splineN != None:
+                    lineN = splineN[0]
+                    ppL0 = lineN[1]
+                    ppL1 = lineN[2]
+                    ppI0 = Point(ppL0.x, pp0.y)
+                    ppI1 = Point(ppL1.x, pp1.y)
+                    self.cornerBy3Point(pp1, ppI1, ppL1,coff1)
+                    self.addL(ppL0)
+                    # self.cornerBy3Point(ppL1, ppI0, pp1,coff1)
+                
+                # self.addL(ppS)
+                # self.addL(ppI0)
+                # self.addL(ppL1)
+                # self.addL(ppL0)
+                # self.addL(ppI1)
+                # self.addL(pp1)
+                
+                # if splineN != None:
+                #     lineN = splineN[0]
+                #     ppL0 = lineN[1]
+                #     ppL1 = lineN[2]
+                #     ppI0 = Point(ppL0.x, pp0.y)
+                #     ppI1 = Point(ppL1.x, pp1.y)
+                #     self.addL(ppI1)
+                #     self.addL(ppL0)
+                #     self.addL(ppL1)
+                #     self.addL(ppI0)
+                #     # self.addL(pp1)
+                break
+                pass
+            pass
+        return
+
+    def findNexSpline(self, ppAll, indexStart):
+        for index in range(indexStart, len(ppAll[0])):
+            spline = ppAll[0][index]
+            dir = spline[1]
+            if dir == 1:
+                return spline
+        return None
+
+        

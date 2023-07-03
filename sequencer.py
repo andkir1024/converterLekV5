@@ -43,10 +43,15 @@ class sequencer:
                 return TypeСutout.UType2, (pp0, pp1, pp2, ppX0, ppX1, ppX2)
         if allSeq == 4:
             # hasLines, ppX0, ppX1,ppX2 = sequencer.findParallelLines(approx)
-            sequencer.findParam4Lines(approx)
-            pass
+            param = sequencer.findParam4Lines(approx)
+            ppS = sequencer.convertCoutoreToPoint(approx[0])
+            ppE = sequencer.convertCoutoreToPoint(approx[-1])
+            return TypeСutout.UType3, (param, ppS, ppE)
             
         return TypeСutout.undifined, None
+    def convertCoutoreToPoint( countorePoint):
+        point = Point(countorePoint[0][0],countorePoint[0][1])
+        return point
 
     def findParam3Lines(approx):
         hasLines, ppX0, ppX1,ppX2 = sequencer.findParallelLines(approx)
@@ -64,19 +69,33 @@ class sequencer:
         border = 10
         start = False
         linesOut = []
+        iS = -1
         for line in linesNew:
             dx = abs(line[1].x-line[2].x)
             dy = abs(line[1].y-line[2].y)
             if dx < border:
                 if start == False:
                     start = True
+                    iE = line[5]
                     linesOut.append((line, 0))
                 else:
                     start = False
-                    linesOut.append((line, 1))
+                    iS = line[5]
+                    point = sequencer.findMaxY(approx, iS, iE)
+                    linesOut.append((line, 1, point))
             if dy < border:
-                linesOut.append((line, -1))
-        return
+                linesOut.append((line, -1, None))
+        return linesOut
+    
+    def findMaxY( approx, iS, iE):
+        y = 0
+        point = Point(0,0)
+        for index in range(iS, iE):
+            pointY = approx[index][0][1]
+            if pointY > y:
+                y = pointY
+                point = Point(approx[index][0][0],approx[index][0][1])
+        return point
     
     def lenghtLine( pp0, pp1):
         lenLine = math.sqrt( ((pp0[0]-pp1[0])**2)+((pp0[1]-pp1[1])**2))
