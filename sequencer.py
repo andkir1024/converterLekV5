@@ -27,6 +27,12 @@ class sequencer:
             pass
         allSeq = len(seq)
         if allSeq <= 1:
+            # if seq[0][0]== DirectionStatus.dir90 or seq[1][0] == DirectionStatus.dir180:
+            #     pp0, pp1, pp2= sequencer.calk3PointRect(approx, lineN)
+            #     hasLines, ppX0, ppX1, ppX2 = sequencer.findParallelLines(approx)
+            #     if hasLines == True:
+            #         return TypeСutout.UType1, (pp0, pp1, pp2, ppX0, ppX1,ppX2)
+            #     return TypeСutout.UType0, (pp0, pp1, pp2)
             return TypeСutout.undifined, None
         if allSeq == 2:
             if seq[0][0]== DirectionStatus.dir90 and seq[1][0] == DirectionStatus.dir180:
@@ -41,14 +47,26 @@ class sequencer:
                 # hasLines, ppX0, ppX1,ppX2 = sequencer.findParallelLines(approx)
                 # return TypeСutout.UType2, (pp0, pp1, pp2, ppX0, ppX1, ppX2)
                 param = sequencer.findParam4Lines(approx)
+                if param is None:
+                    return TypeСutout.undifined, None
                 ppS = sequencer.convertCoutoreToPoint(approx[0])
                 ppE = sequencer.convertCoutoreToPoint(approx[-1])
                 return TypeСutout.UType3, (param, ppS, ppE)
         if allSeq == 4:
-            # hasLines, ppX0, ppX1,ppX2 = sequencer.findParallelLines(approx)
             param = sequencer.findParam4Lines(approx)
+            if param is None:
+                return TypeСutout.undifined, None
             ppS = sequencer.convertCoutoreToPoint(approx[0])
             ppE = sequencer.convertCoutoreToPoint(approx[-1])
+            return TypeСutout.UType3, (param, ppS, ppE)
+        # test
+        if allSeq == 11:
+            param = sequencer.findParam4Lines(approx)
+            if param is None:
+                return TypeСutout.undifined, None
+            ppS = sequencer.convertCoutoreToPoint(approx[0])
+            ppE = sequencer.convertCoutoreToPoint(approx[-1])
+            lines = sequencer.lenghtContoureLine(approx, False)
             return TypeСutout.UType3, (param, ppS, ppE)
             
         return TypeСutout.undifined, None
@@ -91,6 +109,8 @@ class sequencer:
                     canAddHorizont = True
             if dy < border and canAddHorizont:
                 linesOut.append((line, -1, None))
+        if len(linesOut)==0:
+            return None
         return linesOut
     
     def findMaxY( approx, iS, iE):

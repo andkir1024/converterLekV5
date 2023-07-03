@@ -96,16 +96,20 @@ class svgPath:
         lineType = line[6].cross
         isCorner = geometryUtils.checkCorner(line, lineN)
         isDownU = geometryUtils.checkDownU(line, lineN)
+        isHorizontal = geometryUtils.checkHorizont(line, lineN)
+        isHorizontal = False
 
         contours = line[6].pointsFig.copy()
         peri = cv2.arcLength(contours,False)
         # параллельные последовательные линии
-        if lineType == ParallStatus.hor:
+        # lineType = None
+        if lineType == ParallStatus.hor or isHorizontal:
             # approx = cv2.approxPolyDP(contours, 0.001* peri, False)
             approx = cv2.approxPolyDP(contours, 0.003 * peri, False)
             path = sequencer.checkPath(approx)
             typeСutout, ppAll = sequencer.classifyPath(path, approx, lineN)
             if typeСutout == TypeСutout.undifined:
+                # pass                
                 maxVal, pp0Max, pp1Max = geometryUtils.lenghtContoureLine(approx)
                 if maxVal > 0:
                     coff = peri / maxVal
@@ -145,8 +149,7 @@ class svgPath:
                         pass
                     else:
                         # угол скругленный
-                        self.cornerRightSmooth(line, lineN)
-                        pass
+                       self.cornerRightSmooth(line, lineN)
             if isDownU == True:
                 self.cornerUDown(line, lineN)
         return
@@ -158,16 +161,6 @@ class svgPath:
         pp3 = Point(lineN[1][0],lineN[1][1])
         # pp1, pp2 = bezier.aligmentHor(pp1, pp2)
         self.addChalfCircle(pp0, pp1, pp2, pp3, True)
-        return
-    # соединение нижний вырез
-    def cornerBetweenToParallelLinesOneSplne(self, line, lineN):
-        pp0 = Point(line[0][0],line[0][1])
-        pp1 = Point(line[1][0],line[1][1])
-
-        pp2 = Point(lineN[0][0],lineN[0][1])
-        pp3 = Point(lineN[1][0],lineN[1][1])
-
-        self.cornerBy2Point(pp1, pp2)
         return
     # соединение пареллельных линий (линии внутри нет)
     def cornerBetweenToParallelLinesOneSplne(self, line, lineN):
@@ -470,7 +463,7 @@ class svgPath:
                     self.cornerBy3Point(ppNL0, ppNI0, pp2,coff1)
                     
                 continue
-            if dir == -1 and dirN == 0 and index < all - 1:
+            if dir == -1 and dirN == 0 and index >= all - 2:
                 self.addL(line[1])
                 pp0 = line[2]
                 pp1 = ppE

@@ -77,6 +77,23 @@ class geometryUtils:
             return None
         return result
 
+    # прверка является ли соединение последовательной гоизонтальной линией
+    def checkHorizont(lineA, lineB):
+        dxA = abs(lineA[0][0]-lineA[1][0])
+        dyA = abs(lineA[0][1]-lineA[1][1])
+        lenA = geometryUtils.lenghtLineConture(lineA)
+
+        dxB = abs(lineB[0][0]-lineB[1][0])
+        dyB = abs(lineB[0][1]-lineB[1][1])
+        lenB = geometryUtils.lenghtLineConture(lineB)
+        if lenA < 100 or lenB < 100:
+            return False
+
+        border = 15
+        if dyA < border and dyB < border:
+            if abs(lineB[0][0] - lineA[1][0]) > 0:
+                return True
+        return False
     # прверка является ли соединение линий углом
     def checkCorner(lineA, lineB):
         dxA = abs(lineA[0][0]-lineA[1][0])
@@ -89,7 +106,7 @@ class geometryUtils:
         if lenA < 100 or lenB < 100:
             return False
 
-        border = 10
+        border = 15
         if dyA < border and dxB < border:
             return True
         if dxA < border and dyB < border:

@@ -613,11 +613,6 @@ class bezier:
     def aligmentVert(pp0, pp1):
         x = pp0.x + ((pp1.x - pp0.x)/2)
         return Point(x, pp0.y), Point(x, pp1.y)
-    def is_parallel(line1, line2,minX,minY,maxX,maxY,linesFig ):
-        a_delta_x = abs(line1[1][0] - line1[0][0])
-        a_delta_y = abs(line1[1][1] - line1[0][1])
-        b_delta_x = abs(line2[1][0] - line2[0][0])
-        b_delta_y = abs(line2[1][1] - line2[0][1])
 class FigureStatus(enum.Enum):
     smoothCorner = 1
     angleCorner = 2
