@@ -12,6 +12,7 @@ from commonData import DirectionStatus, TypeСutout
 
 class sequencer:
     def classifyPath(direction, approx, lineN):
+        direction = sequencer.filterDirection(direction)
         seq = []
         # выделение последовательностей
         prev = direction[0]
@@ -208,3 +209,19 @@ class sequencer:
 
         return DirectionStatus.undifined
     
+    def filterDirection(direction):
+        directionNew = []
+        directionNew.append(direction[0])
+        directionNew.append(direction[1])
+        for index in range(2, len(direction)-2):
+            dir = direction[index]
+            if  direction[index-2] == direction[index-1] and direction[index+2] == direction[index+1] and direction[index-1] == direction[index+1]:
+                # if dir == direction[index+1]:
+                    # directionNew.append(dir)
+                # else:
+                directionNew.append(direction[index+1])
+            else:
+                directionNew.append(dir)
+        directionNew.append(direction[-1])
+                
+        return directionNew
