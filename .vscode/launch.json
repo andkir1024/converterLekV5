@@ -10,7 +10,7 @@
             "request": "launch",
             "program": "main.py",
             "console": "integratedTerminal",
-            "args": ["--wnd", "--dirSrc=../popular/","--svg=9.07"],
+            "args": ["--wnd", "--dirSrc=../popularBad/","--svg=9.07"],
             //"args": ["--wnd", "--dirSrc=../lekalo/srcDemo/","--svg=9.07"],
              //"args": ["--wnd", "--dirSrc=../popularBad/","--svg=8.163"],
             //  "args": ["--wnd", "--dirSrc=../popularBad2/","--svg=9.977"],
@@ -25,7 +25,7 @@
             //"args": ["--dirSrc=../lekalo/src/","--svg=9.07","--dirDst=../lekalo/outSvgFed/", "--pngDir=../lekalo/outSvgFed/"],
 
             //тестовый прогон на весь массив
-            //"args": ["--dirSrc=../lekalo/src/","--svg=9.07","--pngDir=../lekalo/outSvgFed1/"],
+            //"args": ["--dirSrc=../lekalo/src/","--svg=9.07","--dirDst=../lekalo/outSvgFed/","--pngDir=../lekalo/outSvgFed1/"],
             //отладка на популярном массиве
             //"args": ["--dirSrc=../popular/","--svg=9.07","--pngDir=../lekalo/popular2/"],
             "args": ["--dirSrc=../popular/","--svg=9.07","--dirDst=../lekalo/popular2/","--pngDir=../lekalo/popular2/"],

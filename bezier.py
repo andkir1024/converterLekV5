@@ -686,7 +686,7 @@ class contoureAnalizer:
             # contoureAnalizer.drawSingleCounture(img, contours,  0.1 * peri, w*2, (255,255,0),th)
             name = contoureAnalizer.curveDir + str(contoureAnalizer.counterCorner) + ".png"
             contoureAnalizer.counterCorner+=1
-            if bezier.DEBUG_MODE == True:
+            if bezier.DEBUG_MODE == True and img.shape[0] > 4:
                 cv2.imwrite(name, img) 
         return (typeFigure,lineA, lineB)
     def drawSingleCounture(img, contoursSrc, coff, xstart, color, th,w,h,lineA, lineB):
@@ -695,6 +695,8 @@ class contoureAnalizer:
             contour[0]=contour[0]+xstart
         approx = cv2.approxPolyDP(contours, coff, False)
         
+        if len(approx)<=2: 
+            return FigureStatus.undefined
         diffs = []
         for index in range(len(approx)-1):
             contour = approx[index]

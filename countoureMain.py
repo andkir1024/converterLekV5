@@ -63,6 +63,8 @@ class svgPath:
             point = Point(pp[1][0], pp[1][1])
             points.append(point)
             continue
+        if len(lines)<4:
+            return
         polygon = Polygon([i for i in points])
         
         if circles is not None:
@@ -99,9 +101,12 @@ class svgPath:
         isCorner = geometryUtils.checkCorner(line, lineN)
         isDownU = geometryUtils.checkDownU(line, lineN)
         isHorizontal = geometryUtils.checkHorizont(line, lineN)
-        isHorizontal = False
+        # isHorizontal = False
 
         contours = line[6].pointsFig.copy()
+        # andy
+        if len(contours) <=2:
+            return
         peri = cv2.arcLength(contours,False)
         # параллельные последовательные линии
         # lineType = None
@@ -135,7 +140,7 @@ class svgPath:
             if maxVal > 0:
                 coff = peri / maxVal
                 if coff < 5:
-                    self.cornerBetweenToParallelLinesTwoSpline( line, lineN, pp0Max, pp1Max)
+                    self.cornerBetweenToParallelLinesTwoSplineHor( line, lineN, pp0Max, pp1Max)
                 else:
                     self.cornerBetweenToParallelLinesOneSplne( line, lineN)
             pass
@@ -177,6 +182,29 @@ class svgPath:
         return
     # углы --------------------------------------------------------------
     # соединение пареллельных линий (есть линия внутри)
+    def cornerBetweenToParallelLinesTwoSplineHor(self, line, lineN, pp0Max, pp1Max):
+        pp0 = Point(line[0][0],line[0][1])
+        pp1 = Point(line[1][0],line[1][1])
+
+        pp2 = Point(lineN[0][0],lineN[0][1])
+        pp3 = Point(lineN[1][0],lineN[1][1])
+        
+        # pp1Max = Point(pp1Max.x- 20,pp1Max.y)
+        
+        ppIntersected0 = geometryUtils.calkPointIntersection(pp0, pp1, pp0Max, pp1Max)
+        ppIntersected1 = geometryUtils.calkPointIntersection(pp2, pp3, pp0Max, pp1Max)
+        coff1 = 0.6
+        self.cornerBy3Point(pp1, ppIntersected0, pp1Max,coff1)
+        self.addL(pp0Max)
+        self.cornerBy3Point(pp0Max, ppIntersected1, pp2,coff1)
+        
+        # self.addL(ppIntersected0)
+        # self.addL(pp1Max)
+        # self.addL(pp0Max)
+        # self.addL(ppIntersected1)
+        # self.addL(pp2)
+        return
+    # соединение пареллельных линий (есть линия внутри)
     def cornerBetweenToParallelLinesTwoSpline(self, line, lineN, pp0Max, pp1Max):
         pp0 = Point(line[0][0],line[0][1])
         pp1 = Point(line[1][0],line[1][1])
@@ -186,7 +214,6 @@ class svgPath:
         
         ppIntersected0 = geometryUtils.calkPointIntersection(pp0, pp1, pp0Max, pp1Max)
         ppIntersected1 = geometryUtils.calkPointIntersection(pp2, pp3, pp0Max, pp1Max)
-
         coff1 = 0.6
         self.cornerBy3Point(pp1, ppIntersected0, pp1Max,coff1)
         self.addL(pp0Max)
@@ -209,6 +236,8 @@ class svgPath:
         return
     # угол по 3 точкам
     def cornerBy3Point(self, pp0, pp1, pp2, coff1):
+        if pp0 is None or pp1 is None or pp2 is None:
+            return
         bezP0 = bezier.interpolatePoint(pp0, pp1, coff1)
         bezP1 = bezier.interpolatePoint(pp2, pp1, coff1)
         self.addC(bezP0, bezP1, pp2)
@@ -223,6 +252,10 @@ class svgPath:
         
         ppIntersected0 = geometryUtils.calkPointIntersection(pp0, pp1, pp0Max, pp1Max)
         ppIntersected1 = geometryUtils.calkPointIntersection(pp2, pp3, pp0Max, pp1Max)
+        if ppIntersected0 is None:
+            return
+        if ppIntersected1 is None:
+            return
         ppIntersected0 = ppIntersected0.coords[0]
         ppIntersected1 = ppIntersected1.coords[0]
         coff1 = 0.8

@@ -210,6 +210,8 @@ class sequencer:
         return DirectionStatus.undifined
     
     def filterDirection(direction):
+        if len(direction)<=4:
+            return direction
         directionNew = []
         directionNew.append(direction[0])
         directionNew.append(direction[1])
