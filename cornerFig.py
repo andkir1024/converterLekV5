@@ -15,7 +15,7 @@ from countoureMain import svgPath
 
 class CircuitSvg:
     
-    def createContureSvg(lines, draw, path, dpi, circles):
+    def createContureSvg(lines, draw, path, dpi, circles, number):
         indexMax = len(lines)-1
         svgMain = svgPath()
         # добавление горизонтального овала 
@@ -55,8 +55,8 @@ class CircuitSvg:
         svgMain.createFlatCouture(lines)
         svgMain.doPath(path, dpi)
         draw.append(path)
-
-        svgMain.testPointInCounture(lines, circles)
+        if number == 0:
+            svgMain.testPointInCounture(lines, circles)
 
         # добавление главного контура
         contoureAnalizer.start()

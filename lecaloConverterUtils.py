@@ -385,20 +385,22 @@ class cvUtils:
         d = drawSvg.Drawing(width, height, origin=(0, 0))
         # d.set_pixel_scale(2)  # Set number of pixels per geometry unit
         # d.set_render_size(400, 200)  # Alternative to set_pixel_scale
+        number = 0
         for countour in finalCountours:
             if countour[0] == 1:
                 # главный контур
                 p = drawSvg.Path(stroke="red", stroke_width=stroke_width, fill="none")
                 lines = countour[5]
                 if lines is not None:
-                    circles = CircuitSvg.createContureSvg(lines, d, p, dpi, circles)
+                    circles = CircuitSvg.createContureSvg(lines, d, p, dpi, circles,number)
+                number = number + 1
                 continue
             else:
                 # отверстия в лекале
                 p = drawSvg.Path(stroke="red", stroke_width=stroke_width, fill="none")
                 lines = countour[5]
                 if lines is not None:
-                    circles = CircuitSvg.createContureSvg(lines, d, p, dpi, circles)
+                    circles = CircuitSvg.createContureSvg(lines, d, p, dpi, circles, 0)
                 continue
 
         # добавление кругов
