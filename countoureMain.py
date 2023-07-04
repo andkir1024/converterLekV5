@@ -54,7 +54,7 @@ class svgPath:
             if item[0] == svgCountoure.svgC:
                 path.C(item[1].x / dpi, item[1].y / dpi, item[2].x / dpi, item[2].y / dpi, item[3].x / dpi, item[3].y / dpi)
         return
-    def testPointInCounture(self, lines, circles):
+    def testPointInCounture(self, lines, circles, mastInside= True):
         circlesNew = []
         points=[]
         for pp in lines:
@@ -73,6 +73,8 @@ class svgPath:
                 radius = i[2]
                 point = geometry.Point(center.x, center.y)
                 contains = polygon.contains(point)
+                if mastInside == False:
+                    contains = False if contains else True
                 if contains == False:
                     circle = circles[0][index]
                     circle[2]=0

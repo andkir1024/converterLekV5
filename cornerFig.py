@@ -49,6 +49,7 @@ class CircuitSvg:
             svgMain.doPath(path, dpi)
             draw.append(path)
 
+            svgMain.testPointInCounture(lines, circles, False)
             return circles
 
         svgMain.createFlatCouture(lines)
