@@ -15,7 +15,8 @@ from commonData import LineStatus, ParallStatus, Corner
 class cvUtils:
     # базовые константы для анализа
     # минимальная длина линии для выделения непрерывных линий
-    MIN_LEN_LINE = 100
+    # MIN_LEN_LINE = 100
+    MIN_LEN_LINE = 50
     # минимальная длина линии для работы в изогнутых фигурах
     MIN_LEN_CURVE_LINE = 10
 
@@ -160,12 +161,14 @@ class cvUtils:
         # -------------------------------------
         # фильтр изображения
         throu = 20
+        # throu = 70
         cThr = [throu, throu]
         imgBlur = cv2.GaussianBlur(imgGray, (5, 5), 1)
+        # imgBlur = cv2.GaussianBlur(imgGray, (1, 1), 1)
         imgCanny = cv2.Canny(imgBlur, cThr[0], cThr[1])
-        kernel = np.ones((5, 5))
-        imgDial = cv2.dilate(imgCanny, kernel, iterations=3)
-        imgThre = cv2.erode(imgDial, kernel, iterations=3)
+        # kernel = np.ones((5, 5))
+        # imgDial = cv2.dilate(imgCanny, kernel, iterations=3)
+        # imgThre = cv2.erode(imgDial, kernel, iterations=3)
         # imgCanny = imgGray
         imgTst = imgCanny
         # imgTst = imgGray

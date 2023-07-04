@@ -25,10 +25,10 @@
             //"args": ["--dirSrc=../lekalo/src/","--svg=9.07","--dirDst=../lekalo/outSvgFed/", "--pngDir=../lekalo/outSvgFed/"],
 
             //тестовый прогон на весь массив
-            //"args": ["--dirSrc=../lekalo/src/","--svg=9.07","--dirDst=../lekalo/outSvgFed/","--pngDir=../lekalo/outSvgFed1/"],
+            "args": ["--dirSrc=../lekalo/src/","--svg=9.07","--dirDst=../lekalo/outSvgFed1/","--pngDir=../lekalo/outSvgFed1/"],
             //отладка на популярном массиве
             //"args": ["--dirSrc=../popular/","--svg=9.07","--pngDir=../lekalo/popular2/"],
-            "args": ["--dirSrc=../popular/","--svg=9.07","--dirDst=../lekalo/popular2/","--pngDir=../lekalo/popular2/"],
+            //"args": ["--dirSrc=../popular/","--svg=9.07","--dirDst=../lekalo/popular2/","--pngDir=../lekalo/popular2/"],
 
             // "args": ["--dirSrc=../popular/","--svg=9.07","--dirDst=../lekalo/srcDemoResult/", "--pngDir=../lekalo/srcDemoResult/"],
 

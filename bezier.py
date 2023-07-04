@@ -637,7 +637,12 @@ class contoureAnalizer:
     def start():
         if bezier.DEBUG_MODE == True:
             contoureAnalizer.counterCorner=0
-            
+            if bezier.DEBUG_MODE == True:
+                contoureAnalizer.counterCorner=0
+                if contoureAnalizer.curveDir is not None:
+                    if not os.path.isdir(contoureAnalizer.curveDir):
+                        os.mkdir(contoureAnalizer.curveDir)
+                                
             for f in os.listdir(contoureAnalizer.curveDir):
                 os.remove(os.path.join(contoureAnalizer.curveDir, f))        
     def getParamVector(pointS, pointF):

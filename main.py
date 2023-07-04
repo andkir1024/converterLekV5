@@ -266,6 +266,7 @@ def show_frame():
             
             im_crop = imgDraw[viewY:viewY+heightZoom, viewX:right]
             # im_crop = imgTst[viewY:viewY+heightZoom, viewX:right]
+            cv2.imwrite("imgTst.png", imgTst)
 
             imgR = Image.fromarray(im_crop)
             imgtkZoom = ImageTk.PhotoImage(image=imgR)
