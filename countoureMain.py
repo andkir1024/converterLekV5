@@ -63,7 +63,7 @@ class svgPath:
             point = Point(pp[1][0], pp[1][1])
             points.append(point)
             continue
-        if len(lines)<4:
+        if len(lines)<4 and mastInside == True:
             return
         polygon = Polygon([i for i in points])
         
@@ -105,35 +105,51 @@ class svgPath:
 
         contours = line[6].pointsFig.copy()
         # andy
-        if len(contours) <=2:
-            return
+        # if len(contours) <=2:
+            # return
         peri = cv2.arcLength(contours,False)
+        figSize = sequencer.getSizeFig(line, 50)
+        # if figSize[2]:
+            # self.cornerRightSmooth(line, lineN)
+
+            # self.cornerBetweenToParallelLinesOneSplne( line, lineN)
+            # return
         # параллельные последовательные линии
         # lineType = None
         if lineType == ParallStatus.hor or isHorizontal:
+            if figSize[2]:
+                self.cornerBetweenToParallelLinesOneSplne( line, lineN)
+                return
+
             # approx = cv2.approxPolyDP(contours, 0.001* peri, False)
             approx = cv2.approxPolyDP(contours, 0.003 * peri, False)
             path = sequencer.checkPath(approx)
             typeСutout, ppAll = sequencer.classifyPath(path, approx, lineN)
             if typeСutout == TypeСutout.undifined:
                 # pass                
+                # self.cornerBetweenToParallelLinesOneSplne( line, lineN)
                 maxVal, pp0Max, pp1Max = geometryUtils.lenghtContoureLine(approx)
+                # self.cornerBetweenToParallelLinesTwoSpline( line, lineN, pp0Max, pp1Max)
+                # self.cornerBetweenToParallelLinesTwoSpline( line, lineN, pp0Max, pp1Max)
                 if maxVal > 0:
                     coff = peri / maxVal
                     if coff < 5:
                         self.cornerBetweenToParallelLinesTwoSpline( line, lineN, pp0Max, pp1Max)
                     else:
                         self.cornerBetweenToParallelLinesOneSplne( line, lineN)
+                return
             elif typeСutout == TypeСutout.UType0:
                 self.cutoutUType0(ppAll)
+                return
             elif typeСutout == TypeСutout.UType1:
                 self.cutoutUType1(ppAll)
+                return
             elif typeСutout == TypeСutout.UType2:
                 self.cutoutUType2(ppAll)
-                pass
+                return
             elif typeСutout == TypeСutout.UType3:
                 self.cutoutUType3(ppAll)
-                pass
+                return
         elif lineType == ParallStatus.vert and isDownU == False:
             approx = cv2.approxPolyDP(contours, 0.001* peri, False)
             maxVal, pp0Max, pp1Max = geometryUtils.lenghtContoureLine(approx)
@@ -145,7 +161,7 @@ class svgPath:
                     self.cornerBetweenToParallelLinesOneSplne( line, lineN)
             pass
         else:
-            isCorner = True
+            # isCorner = True
             if isCorner == True:
                 approx = cv2.approxPolyDP(contours, 0.01* peri, False)
                 maxVal, pp0Max, pp1Max = geometryUtils.lenghtContoureLine(approx)
@@ -158,8 +174,13 @@ class svgPath:
                     else:
                         # угол скругленный
                         self.cornerRightSmooth(line, lineN)
+                    return
+                # else:
+                    # self.cornerBetweenToParallelLinesOneSplne( line, lineN)
+                return
             if isDownU == True:
                 self.cornerUDown(line, lineN)
+                return
         return
     def cornerUDown(self, line, lineN):
         pp0 = Point(line[0][0],line[0][1])

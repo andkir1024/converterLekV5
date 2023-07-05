@@ -19,12 +19,15 @@ class CircuitSvg:
         indexMax = len(lines)-1
         svgMain = svgPath()
         # добавление горизонтального овала 
-        if indexMax == 1:
+        if indexMax == 1 or indexMax == 2:
             lineA = lines[0]
             lineB = lines[1]
 
             pp0, pp1 = bezier.convertToPoint(lineA)
             pp2, pp3 = bezier.convertToPoint(lineB)
+            
+            if pp0.x == pp1.x:
+                return circles 
             
             pp0, pp1 = bezier.aligmentHor(pp0, pp1)
             pp2, pp3 = bezier.aligmentHor(pp2, pp3)

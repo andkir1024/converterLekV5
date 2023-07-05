@@ -13,6 +13,10 @@ from commonData import DirectionStatus, TypeСutout
 class sequencer:
     def classifyPath(direction, approx, lineN):
         direction = sequencer.filterDirection(direction)
+        noise = sequencer.filterDirectionNoise(direction)
+        # if noise == True:
+        #     return TypeСutout.undifined, None
+
         seq = []
         # выделение последовательностей
         prev = direction[0]
@@ -62,6 +66,7 @@ class sequencer:
             return TypeСutout.UType3, (param, ppS, ppE)
         # test
         if allSeq == 11:
+            # return TypeСutout.undifined, None
             param = sequencer.findParam4Lines(approx)
             if param is None:
                 return TypeСutout.undifined, None
@@ -227,3 +232,34 @@ class sequencer:
         directionNew.append(direction[-1])
                 
         return directionNew
+    def getSizeFig(line, minSize):
+        fig = line[6]
+        xSize = fig.maxX - fig.minX
+        ySize = fig.maxY - fig.minY
+        if xSize< minSize and ySize < minSize:
+            return xSize, ySize, True
+        return xSize, ySize, False
+        
+    def filterDirectionNoise(direction):
+        all = len(direction)
+        # return True
+        counterA = 0
+        counterB = 0
+        counterC = 0
+        counterD = 0
+        for index in range(all):
+            dir = direction[index]
+            if dir == DirectionStatus.dir90:
+                counterA = counterA +1
+            elif dir == DirectionStatus.dir180:
+                counterB = counterB +1
+            elif dir == DirectionStatus.dir270:
+                counterC = counterC +1
+            elif dir == DirectionStatus.dir360:
+                counterD = counterD +1
+        if all >= 6:
+            all = all / 4
+            if counterA > all and counterB > all:
+                return True
+                
+        return False

@@ -16,7 +16,8 @@ class cvUtils:
     # базовые константы для анализа
     # минимальная длина линии для выделения непрерывных линий
     # MIN_LEN_LINE = 100
-    MIN_LEN_LINE = 50
+    MIN_LEN_LINE = 100
+    MIN_LEN_LINE_SHORT = 50
     # минимальная длина линии для работы в изогнутых фигурах
     MIN_LEN_CURVE_LINE = 10
 
@@ -58,20 +59,39 @@ class cvUtils:
 
     def findCircles(img_grey, img_Draw, draw_conrure):
         rows = img_grey.shape[0]
+        # circles = cv2.HoughCircles(img_grey,cv2.HOUGH_GRADIENT,1,20, param1=50,param2=30,minRadius=0,maxRadius=100)
+        # circles = cv2.HoughCircles(img_grey,cv2.HOUGH_GRADIENT,1, 20, param1=160,param2=40,minRadius=0,maxRadius=1000)
+        # radius = 200
+        # len = 3.14 * radius
+        # circles = cv2.HoughCircles(img_grey,cv2.HOUGH_GRADIENT,1, len, param1=160,param2=40,minRadius=10,maxRadius=radius)
+        # circles = cv2.HoughCircles(img_grey,cv2.HOUGH_GRADIENT,1, 200, param1=20,param2=40,minRadius=0,maxRadius=1000)
+        # circles = cv2.HoughCircles(img_grey,cv2.HOUGH_GRADIENT,1, 200, param1=1000,param2=40,minRadius=0,maxRadius=1000)
+        # circles = cv2.HoughCircles(image=img_grey, method=cv2.HOUGH_GRADIENT, dp=0.09, minDist=180, param1=110, param2=39, maxRadius=700)        
         circles = cv2.HoughCircles(
             img_grey,
             cv2.HOUGH_GRADIENT,
             1,
             rows / (64),
-            param1=160,
-            param2=80,
-            # param1=160, param2=110,
-            # param1=40, param2=40,
-            # param1=200, param2=10,
-            # param1=100, param2=30,
-            minRadius=3,
-            maxRadius=1000,
-        )
+            # rows / (64),
+            param1=160,  param2=80,
+        )        
+        #     # param1=160, param2=110,
+        #     # param1=40, param2=40,
+        #     # param1=200, param2=10,
+        #     # param1=100, param2=30,
+        #     minRadius=0,
+        #     maxRadius=1000,
+        # )
+        # circles.append(circlesSmall)
+        # if circles is not None:
+        #     circles = np.append(circles[0],[10,10,10])
+        #     pass
+            # np.append(circles, circlesSmall)
+            # circles = np.append(circles, circlesSmall)
+            # circles[0] =np.append(circles[0], circlesSmall[0])
+            # np.concatenate((circles, circlesSmall))
+            # circles.append(circlesSmall)
+        
         if draw_conrure == True:
             if circles is not None:
                 circlesDraw = np.uint16(np.around(circles))
@@ -200,9 +220,10 @@ class cvUtils:
 
         # генерация параметров контуров
         for countour in finalCountours:
-            lines = classifier.classifieCounter(
-                countour[4], cvUtils.MIN_LEN_LINE, 0, -1
-            )
+            if countour[0] == 1:
+                lines = classifier.classifieCounter( countour[4], cvUtils.MIN_LEN_LINE, 0, -1 )
+            else:
+                lines = classifier.classifieCounter( countour[4], cvUtils.MIN_LEN_LINE_SHORT, 0, -1 )
             if lines is None:
                 continue
             countour[5] = lines
@@ -215,17 +236,15 @@ class cvUtils:
                 if lines is not None:
                     classifier.drawFigRect(img, countour, lines)
 
-        cvUtils.createMainContoursSvg(
-            finalCountours, circles, imgGray, filesSrc, svgDir, dpiSvg,pngDir
-        )
+        cvUtils.createMainContoursSvg( finalCountours, circles, imgGray, filesSrc, svgDir, dpiSvg,pngDir )
         return imgTst
 
     # border граница длин линий
-    def drawContureLines(img, sel_countour, color, thickness, border):
-        lines = classifier.classifieCounter(sel_countour, cvUtils.MIN_LEN_LINE, 0, -1)
-        if img is not None:
-            classifier.drawFigRect(img, sel_countour, lines)
-        return lines
+    # def drawContureLines(img, sel_countour, color, thickness, border):
+    #     lines = classifier.classifieCounter(sel_countour, cvUtils.MIN_LEN_LINE, 0, -1)
+    #     if img is not None:
+    #         classifier.drawFigRect(img, sel_countour, lines)
+    #     return lines
 
     def MarkedAndAligmentLinesInConture(lines):
         if lines is None:
