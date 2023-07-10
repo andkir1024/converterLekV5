@@ -4,13 +4,48 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
+        
         {
-            "name": "Python: Current File",
+            "name": "Python: main.py",
             "type": "python",
             "request": "launch",
             "program": "main.py",
             "console": "integratedTerminal",
-            "justMyCode": true
-        }
+            "args": ["--wnd", "--dirSrc=../popularBad/","--svg=9.07"],
+            //"args": ["--wnd", "--dirSrc=../lekalo/srcDemo/","--svg=9.07"],
+             //"args": ["--wnd", "--dirSrc=../popularBad/","--svg=8.163"],
+            //  "args": ["--wnd", "--dirSrc=../popularBad2/","--svg=9.977"],
+        },
+        {
+            "name": "Python: Console",
+            "type": "python",
+            "request": "launch",
+            "program": "main.py",
+            "console": "externalTerminal",
+            //"args": ["--dirSrc=../lekalo/srcDemo/","--svg=9.07","--dirDst=../lekalo/outSvgDemo/", "--pngDir=../lekalo/outSvgDemo/"],
+            //"args": ["--dirSrc=../lekalo/src/","--svg=9.07","--dirDst=../lekalo/outSvgFed/", "--pngDir=../lekalo/outSvgFed/"],
+
+            //тестовый прогон на весь массив
+            //"args": ["--dirSrc=../lekalo/src/","--svg=9.07","--dirDst=../lekalo/outSvgFed1/","--pngDir=../lekalo/outSvgFed1/"],
+            //отладка на популярном массиве
+            "args": ["--dirSrc=../popularBad/","--svg=9.07","--dirDst=../lekalo/popularBad/","--pngDir=../lekalo/popularBad/"],
+            //"args": ["--dirSrc=../popular/","--svg=9.07","--dirDst=../lekalo/popular2/","--pngDir=../lekalo/popular2/"],
+            //"args": ["--dirSrc=../popular/","--svg=9.07","--dirDst=../lekalo/popular2/","--pngDir=../lekalo/popular2/"],
+
+            // "args": ["--dirSrc=../popular/","--svg=9.07","--dirDst=../lekalo/srcDemoResult/", "--pngDir=../lekalo/srcDemoResult/"],
+
+            // "args": ["--dirSrc=../lekalo/popular/","--svg=9.07","--dirDst=../lekalo/srcDemoResult/", "--pngDir=../lekalo/srcDemoResult/"],
+            // "args": ["--dirSrc=../lekalo/src/","--svg=9.07","--dirDst=../lekalo/srcDemoResult/"],
+            //"args": ["--dirSrc=../lekalo/srcDemo/","--svg=9.07","--dirDst=../lekalo/srcDemoResult/"],
+            // "args": ["--dirSrc=../popularBad/","--svg=9.07","--dirDst=./out"],
+            // "args": ["--dirSrc=../popularOut/src/","--svg=9.07","--dirDst=./out"],
+        },
+        {
+            "name": "Python: Test Console",
+            "type": "python",
+            "request": "launch",
+            "program": "sortResuly.py",
+            "console": "externalTerminal",
+        }        
     ]
 }
