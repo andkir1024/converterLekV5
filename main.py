@@ -204,7 +204,7 @@ def convertScreenToImageCoord(rmainImage, imgOk, xZoom, yZoom):
     # viewX = 440
     # viewY = 934
     return viewX, viewY
-def do_frame(imgOk, filesSrc, svgDir, param0,pngDir):
+def do_frame(imgOk, filesSrc, svgDir, param0,pngDir, errorThreshold):
     # imgDraw = imgOk.copy()
     # # param0 = frame2control.param0.get()  
     # imgGrey =cvDraw.createGray(imgOk, param0)
@@ -216,15 +216,15 @@ def do_frame(imgOk, filesSrc, svgDir, param0,pngDir):
             imgDraw = imgOk.copy()
             # param0 = frame2control.param0.get()
             imgGrey =cvDraw.createGray(imgOk, param0)
-            imgTst = cvUtils.doContours(imgGrey, imgDraw, filesSrc, svgDir, dpiSvg,pngDir)
+            imgTst, result = cvUtils.doContours(imgGrey, imgDraw, filesSrc, svgDir, dpiSvg,pngDir, errorThreshold)
         except Exception as e:
-            return imgDraw, imgDraw, e
-        return imgDraw, imgTst, None
+            return imgDraw, imgDraw, e, None
+        return imgDraw, imgTst, None, result
     else:
         imgDraw = imgOk.copy()
         imgGrey =cvDraw.createGray(imgOk, param0)
-        imgTst = cvUtils.doContours(imgGrey, imgDraw, filesSrc, svgDir, dpiSvg,pngDir)
-        return imgDraw, imgTst, None
+        imgTst, result = cvUtils.doContours(imgGrey, imgDraw, filesSrc, svgDir, dpiSvg,pngDir, errorThreshold)
+        return imgDraw, imgTst, None, result
 def show_frame():
     global imgOk
     global updateImage
@@ -236,7 +236,8 @@ def show_frame():
     if updateImage == True or updateImageZoom == True:
         updateImage = False
         if imgOk is not None:
-            imgDraw,imgTst, resImag = do_frame(imgOk, filesSrc, svgDir, slider1.get(),pngDir)
+            imgDraw,imgTst, resImag, result = do_frame(imgOk, filesSrc, svgDir, slider1.get(),pngDir, -1)
+            root.title("Лекала тестер " + str(result))
 
             scale, dispX, dispY = calkViewParam(rmainImage, imgDraw)
             img = cv2.resize(imgDraw, (0, 0), interpolation=cv2.INTER_AREA, fx=scale, fy=scale)
@@ -266,7 +267,7 @@ def show_frame():
             
             im_crop = imgDraw[viewY:viewY+heightZoom, viewX:right]
             # im_crop = imgTst[viewY:viewY+heightZoom, viewX:right]
-            cv2.imwrite("imgTst.png", imgTst)
+            # cv2.imwrite("imgTst.png", imgTst)
 
             imgR = Image.fromarray(im_crop)
             imgtkZoom = ImageTk.PhotoImage(image=imgR)
@@ -289,11 +290,21 @@ else:
         nowStart = datetime.datetime.now()
         index = 0
         listErr = []
+        listLog = []
+        errorThreshold = 1000
+        allOk = 0
+        if svgDir is not None:
+            if not os.path.isdir(svgDir):
+                os.mkdir(svgDir)
         for f in listFiles:
             imgOk = cv2.imdecode(np.fromfile(f, dtype=np.uint8), cv2.IMREAD_COLOR)
-            imd0, img1, ok = do_frame(imgOk, f, svgDir, 0, pngDir)
+            imd0, img1, ok, result = do_frame(imgOk, f, svgDir, 0, pngDir, errorThreshold)
             if ok is None:
+                if result < errorThreshold:
+                    allOk = allOk+ 1
                 msg = f"{index} "
+                msgLog = F"{result}  " +f + "\n"
+                listLog.append((result,f))
                 print(msg + f)
             else:
                 print(ok)
@@ -309,3 +320,17 @@ else:
             print(f"Произошли ошибки:")
         for err in listErr:
             print(err)
+
+        if svgDir is not None:
+            log_file = open(svgDir + "log.txt", "w+")
+            listLog = sorted(listLog, key=lambda x: x[0], reverse=False)
+            log_file.write("ошибки:" + "\n")
+            for err in listErr:
+                if isinstance(err, str):
+                    log_file.write(err)
+            coff = 100*allOk/len(listLog)
+            log_file.write(f"результат: {int(coff)}%" + "\n")
+            for log in listLog:
+                msgLog = F"{log[0]}  " + log[1] + "\n"
+                log_file.write(msgLog)
+            log_file.close()

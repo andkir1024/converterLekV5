@@ -45,7 +45,7 @@ class classifier:
         
         indexPrev=-1
         # border =10
-        startP = None
+        startPindex = None
         for index in range(startPoint+1, finPoint):
             curr_point=sel_countour[index][0]
             last_point = sel_countour[index-1][0]
@@ -54,24 +54,48 @@ class classifier:
             if line is not None:
                 lines.append(line)
                 indexPrev = index
-                if startP is  None:
-                    startP = startPoint
+                if startPindex is  None:
+                    startPindex = index
         if closed == True:
-            # line =classifier.packLine(last_point,sel_countour[startP][0], border, (indexPrev,finPoint))
+            # for index in range(startPoint+1, finPoint):
+            #     curr_point=sel_countour[index][0]
+            #     last_point = sel_countour[index-1][0]
+
+            #     line =classifier.packLine(last_point,curr_point, border, (indexPrev,index))
+            #     if line is not None:
+            #         lines.append(line)
+            #         indexPrev = index
+            #         if startPindex is  None:
+            #             startPindex = index
+
             line =classifier.packLine(last_point,sel_countour[startPoint][0], border, (indexPrev,finPoint))
-            # line =classifier.packLine(last_point,sel_countour[startPoint][0], 10, (indexPrev,finPoint))
+            
             if line is not None:
                 lines.append(line)
         lines = lines[::-1]
         return lines
     # 1 начало работы класификатора
     def classifieCounter(sel_countour, border, startPoint, finPoint):
+        # dx = int(abs(corner.maxX - corner.minX))
+        # dy = int(abs(corner.maxY - corner.minY))
+        
         lines =classifier.extractLinesFromCircuit(sel_countour, border, startPoint, finPoint, True)
         if len(lines) == 0:
             return None
         lines =classifier.AligmentLinesInConture(lines)
         classifier.doPropertyesFig(sel_countour, lines)
+        # lines = classifier.deleteLinesNearest(lines)
         return lines
+    def deleteLinesNearest(lines):
+        linesNew = []
+        for line in lines:
+            corner = line[6]
+            dx = int(abs(corner.maxX - corner.minX))
+            dy = int(abs(corner.maxY - corner.minY))
+            if dx >5 and dy> 5:
+                linesNew.append(line)
+            
+        return linesNew
     # выравнивание линий по начало конец
     def AligmentLinesInConture(lines):
         linesDst = []
@@ -115,14 +139,18 @@ class classifier:
     # определение того как соеденить сегменты
     def testSegment(countour, prevLine, nextLine, cente ):
         return
-    def drawFigRect(img, sel_countour, lines):
+    def drawFigRect(img, lines):
         thickness = 10
         allLines = len(lines)
         for index in range(0, allLines):
             line = lines[index]
             corner = line[6]
             img = cv2.rectangle(img, (corner.minX,corner.minY), (corner.maxX, corner.maxY), (0, 255, 0), thickness)
-            msg = f"{line[4][0]},{line[4][1]},{index}"
+            dx = int(abs(corner.maxX - corner.minX))
+            dy = int(abs(corner.maxY - corner.minY))
+            msg = f"{index}"
+            # msg = f"({dx},{dy}),{index}"
+            # msg = f"{line[4][0]},{line[4][1]},{index}"
             cv2.putText(img, msg, (corner.minX, corner.minY), cv2.FONT_HERSHEY_SIMPLEX, 3, (255,0,0),4)
             cv2.line(img, line[0], line[1], color=(0,0,255), thickness=thickness)
             if ParallStatus.isCoord(corner.cross) == True:

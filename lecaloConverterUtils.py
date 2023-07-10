@@ -10,7 +10,7 @@ from shapely import Point
 import pathlib
 import os
 from commonData import LineStatus, ParallStatus, Corner
-
+from processorCountore import *
 
 class cvUtils:
     # базовые константы для анализа
@@ -174,7 +174,7 @@ class cvUtils:
     def custom_key(extCtr):
         return extCtr[1]
 
-    def doContours(imgGray, img, filesSrc, svgDir, dpiSvg,pngDir):
+    def doContours(imgGray, img, filesSrc, svgDir, dpiSvg,pngDir, errorThreshold):
         # -------------------------------------
         # нахождение круговых вырезов
         circles = cvUtils.findCircles(imgGray, img, True)
@@ -213,10 +213,7 @@ class cvUtils:
                 bbox = cv2.boundingRect(approx)
                 finalCountours.append([0, area, approx, bbox, iCon, None])
         finalCountours = sorted(finalCountours, key=lambda x: x[1], reverse=True)
-        # finalCountoursA = []
-        # finalCountoursA.append(finalCountours[1])
-        # finalCountours = finalCountoursA
-        finalCountours = cvUtils.extractContours(finalCountours, circles)
+        finalCountours = processorCountoure.extractContours(finalCountours, circles)
 
         # генерация параметров контуров
         for countour in finalCountours:
@@ -234,10 +231,10 @@ class cvUtils:
             if img is not None:
                 lines = countour[5]
                 if lines is not None:
-                    classifier.drawFigRect(img, countour, lines)
+                    classifier.drawFigRect(img, lines)
 
-        cvUtils.createMainContoursSvg( finalCountours, circles, imgGray, filesSrc, svgDir, dpiSvg,pngDir )
-        return imgTst
+        result = cvUtils.createMainContoursSvg( finalCountours, circles, imgGray, filesSrc, svgDir, dpiSvg, pngDir, errorThreshold )
+        return imgTst, result
 
     # border граница длин линий
     # def drawContureLines(img, sel_countour, color, thickness, border):
@@ -315,69 +312,69 @@ class cvUtils:
         pointDst[0], pointDst[1] = pointDst[1], pointDst[0]
         return pointDst
 
-    def extractContours(finalCountours, circles):
-        result = []
-        for index in range(len(finalCountours) - 1):
-            counter = finalCountours[index]
-            if index == 0:
-                counter[0] = 1
-                result.append(counter)
-                continue
-            ok = False
-            for counterForTest in result:
-                if cvUtils.compareContours(counter, counterForTest, circles) == True:
-                    ok = True
-            if ok == False:
-                if counter[1] > 1000000:
-                    counter[0] = 1
-                result.append(counter)
-        return result
+    # def extractContours(finalCountours, circles):
+    #     result = []
+    #     for index in range(len(finalCountours) - 1):
+    #         counter = finalCountours[index]
+    #         if index == 0:
+    #             counter[0] = 1
+    #             result.append(counter)
+    #             continue
+    #         ok = False
+    #         for counterForTest in result:
+    #             if cvUtils.compareContours(counter, counterForTest, circles) == True:
+    #                 ok = True
+    #         if ok == False:
+    #             if counter[1] > 1000000:
+    #                 counter[0] = 1
+    #             result.append(counter)
+    #     return result
 
-    # True добавлять не надо
-    def compareContours(countourA, countourB, circles):
-        areaA = countourA[1]
-        areaB = countourB[1]
-        delta = abs(areaA - areaB)
-        coff = delta / areaA
+    # # True добавлять не надо
+    # def compareContours(countourA, countourB, circles):
+    #     areaA = countourA[1]
+    #     areaB = countourB[1]
+    #     delta = abs(areaA - areaB)
+    #     coff = delta / areaA
 
-        M = cv2.moments(countourA[4])
-        cAX = int(M["m10"] / M["m00"])
-        cAY = int(M["m01"] / M["m00"])
-        M = cv2.moments(countourB[4])
-        cBX = int(M["m10"] / M["m00"])
-        cBY = int(M["m01"] / M["m00"])
-        border = 10
-        len = math.sqrt(((cAX - cBX) ** 2) + (cAY - cBY) ** 2)
+    #     M = cv2.moments(countourA[4])
+    #     cAX = int(M["m10"] / M["m00"])
+    #     cAY = int(M["m01"] / M["m00"])
+    #     M = cv2.moments(countourB[4])
+    #     cBX = int(M["m10"] / M["m00"])
+    #     cBY = int(M["m01"] / M["m00"])
+    #     border = 10
+    #     len = math.sqrt(((cAX - cBX) ** 2) + (cAY - cBY) ** 2)
 
-        isCircle = cvUtils.isContourCircle(cAX, cAY, circles)
-        if isCircle == True:
-            return True
-        if coff > 1:
-            return False
-        if len > border:
-            return False
+    #     isCircle = cvUtils.isContourCircle(cAX, cAY, circles)
+    #     if isCircle == True:
+    #         return True
+    #     if coff > 1:
+    #         return False
+    #     if len > border:
+    #         return False
 
-        return True
+    #     return True
 
-    def calkCenter(countour):
-        M = cv2.moments(countour[4])
-        cX = int(M["m10"] / M["m00"])
-        cY = int(M["m01"] / M["m00"])
-        return cX, cY
+    # def calkCenter(countour):
+    #     M = cv2.moments(countour[4])
+    #     cX = int(M["m10"] / M["m00"])
+    #     cY = int(M["m01"] / M["m00"])
+    #     return cX, cY
 
-    def isContourCircle(x, y, circles):
-        if circles is None:
-            return False
-        circlesDraw = np.uint16(np.around(circles))
-        for i in circlesDraw[0, :]:
-            center = (i[0], i[1])
-            radius = i[2]
-            len = math.sqrt(((x - center[0]) ** 2) + ((y - center[1]) ** 2))
-            if len < 10:
-                return True
-        return False
+    # def isContourCircle(x, y, circles):
+    #     if circles is None:
+    #         return False
+    #     circlesDraw = np.uint16(np.around(circles))
+    #     for i in circlesDraw[0, :]:
+    #         center = (i[0], i[1])
+    #         radius = i[2]
+    #         len = math.sqrt(((x - center[0]) ** 2) + ((y - center[1]) ** 2))
+    #         if len < 10:
+    #             return True
+    #     return False
 
-    def createMainContoursSvg(finalCountours, circles, img, filesSrc, svgDir, dpiSvg,pngDir):
+    def createMainContoursSvg(finalCountours, circles, img, filesSrc, svgDir, dpiSvg,pngDir, errorThreshold):
         # return
         width = 4000
         height = 8000
@@ -385,17 +382,18 @@ class cvUtils:
             width = img.shape[1]
             height = img.shape[0]
         # создам svg для
-        dPrn = cvUtils.createSvg(finalCountours, circles, width, height, True, dpiSvg,pngDir)
+        dPrn = cvUtils.createSvg(finalCountours, circles, width, height, True, dpiSvg,pngDir, errorThreshold)
         svgTestName = "example.svg"
         dPrn.save_svg(svgTestName)
         pngTestName = "example.png"
-        d = cvUtils.createSvg(finalCountours, circles, width, height, False, dpiSvg,pngDir)
+        d = cvUtils.createSvg(finalCountours, circles, width, height, False, dpiSvg,pngDir, errorThreshold)
         d.save_png(pngTestName)
-        cvUtils.saveResult(img, filesSrc, svgDir, svgTestName, pngTestName,pngDir)
-        return
+        result = cvUtils.saveResult(img, filesSrc, svgDir, svgTestName, pngTestName,pngDir, errorThreshold)
+        return result
 
-    def createSvg(finalCountours, circles, width, height, printSvg, dpiSvg,pngDir):
-        dpi = 1
+    def createSvg(finalCountours, circles, width, height, printSvg, dpiSvg,pngDir, errorThreshold):
+        # dpi = 1
+        dpi = 1.0005
         stroke_width = 10
         colorCircle = "blue"
         if printSvg == True:
@@ -444,7 +442,7 @@ class cvUtils:
         return d
 
     # сохранение результатов
-    def saveResult(img, filesSrc, svgDir, svgTestName, pngTestName,pngDir):
+    def saveResult(img, filesSrc, svgDir, svgTestName, pngTestName,pngDir, errorThreshold):
         if svgDir is not None:
             if not os.path.isdir(svgDir):
                 os.mkdir(svgDir)
@@ -453,35 +451,55 @@ class cvUtils:
                 os.mkdir(pngDir)
         name = pathlib.Path(filesSrc).stem
         name =name.removesuffix('.prn')
-        if svgDir is not None:
-            nameSvg = svgDir + "/" + name + ".svg"
-            # nameSvg = "result.svg"
-            with open(svgTestName, "r") as f1, open(nameSvg, "w") as f2:
-                lines = f1.readlines()
-
-                for line in lines:
-                    line = line.strip() + "\n"
-                    key = line.find("viewBox")
-                    if key >= 0:
-                        f2.write(
-                            'width="8.2677in" height="11.6929in" viewBox="0 0 595.2756 841.8898">\n'
-                        )
-                    else:
-                        f2.write(line)
-
+        # сохранение img
         imgSvg = cv2.imread(pngTestName)
         imgSrc = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
+
+        imgSvg[np.all(imgSvg == (0, 0, 255), axis=-1)] = (255,255,255)
+        imgSvg[np.all(imgSvg == (255, 0, 0), axis=-1)] = (255,255,255)
+        
+        imgTmp = cv2.bitwise_or(imgSvg,imgSrc)
+        
+        cv2.imwrite("svgDiff.png", (255-imgTmp))
+        # cv2.imwrite("svg.png", imgSvg) 
+        # cv2.imwrite("src.png", imgSrc) 
 
         alpha = 0.5
         out_img = np.zeros(imgSvg.shape, dtype=imgSvg.dtype)
         out_img[:, :, :] = (alpha * imgSvg[:, :, :]) + ((1 - alpha) * imgSrc[:, :, :])
         cv2.imwrite("out.png", out_img)
         sought = [0, 0, 0]
-        result = np.count_nonzero(np.all(out_img == sought, axis=2))
+        # result = np.count_nonzero(np.all(out_img == sought, axis=2))
+        result = np.count_nonzero(np.all(imgTmp == sought, axis=2))
 
         if pngDir is not None:
             nameDiff = pngDir + "/" + name + "." + str(result) + ".png"
+            # nameDiff = pngDir + "/" + name + ".png"
             is_success, im_buf_arr = cv2.imencode(".png", out_img)
             im_buf_arr.tofile(nameDiff)
+            nameDiff2 = pngDir + "/" + str(result) + "." + name + ".png"
+            im_buf_arr.tofile(nameDiff2)
 
-        return
+            # nameDiff = pngDir + "/diff_" + name + "." + str(result) + ".png"
+            # is_success, im_buf_arr = cv2.imencode(".png", (255-imgTmp))
+            # im_buf_arr.tofile(nameDiff)
+        # сохранение svg
+        if errorThreshold <0 or result < abs(errorThreshold):
+            if svgDir is not None:
+                nameSvg = svgDir + "/" + name + ".svg"
+                # nameSvg = "result.svg"
+                with open(svgTestName, "r") as f1, open(nameSvg, "w") as f2:
+                    lines = f1.readlines()
+
+                    for line in lines:
+                        line = line.strip() + "\n"
+                        key = line.find("viewBox")
+                        if key >= 0:
+                            f2.write(
+                                'width="8.2677in" height="11.6929in" viewBox="0 0 595.2756 841.8898">\n'
+                            )
+                        else:
+                            f2.write(line)
+
+        return result
+        

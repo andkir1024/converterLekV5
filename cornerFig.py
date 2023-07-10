@@ -34,6 +34,7 @@ class CircuitSvg:
             
             pp1, pp2 = bezier.aligmentVert(pp1, pp2)
             pp0, pp3 = bezier.aligmentVert(pp0, pp3)
+            pp0, pp1, pp2, pp3 = bezier.aligmentShify(pp0, pp1,pp2, pp3, 3)
 
 
             # svgMain.addM(pp0)
@@ -52,14 +53,17 @@ class CircuitSvg:
             svgMain.doPath(path, dpi)
             draw.append(path)
 
-            svgMain.testPointInCounture(lines, circles, False)
+            svgMain.testPointInCounture(lines, circles, False, True)
             return circles
 
+        # lines.insert(0, lines[5])
+        # lines.pop(0)
+        # lines.pop(-1)
         svgMain.createFlatCouture(lines)
         svgMain.doPath(path, dpi)
         draw.append(path)
         if number == 0:
-            svgMain.testPointInCounture(lines, circles)
+            svgMain.testPointInCounture(lines, circles, True, False)
 
         # добавление главного контура
         contoureAnalizer.start()

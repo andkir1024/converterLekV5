@@ -13,9 +13,6 @@ from commonData import DirectionStatus, TypeСutout
 class sequencer:
     def classifyPath(direction, approx, lineN):
         direction = sequencer.filterDirection(direction)
-        noise = sequencer.filterDirectionNoise(direction)
-        # if noise == True:
-        #     return TypeСutout.undifined, None
 
         seq = []
         # выделение последовательностей
@@ -30,6 +27,9 @@ class sequencer:
                 param = (prev, index)
                 seq.append(param)
             pass
+        noise = sequencer.filterSeqNoise(seq)
+        if noise == True:
+            return TypeСutout.undifined, None
         allSeq = len(seq)
         if allSeq <= 1:
             # if seq[0][0]== DirectionStatus.dir90 or seq[1][0] == DirectionStatus.dir180:
@@ -99,6 +99,8 @@ class sequencer:
         iS = -1
         canAddHorizont = False
         for line in linesNew:
+            if line[0]< 30:
+                continue
             dx = abs(line[1].x-line[2].x)
             dy = abs(line[1].y-line[2].y)
             if dx < border:
@@ -117,6 +119,12 @@ class sequencer:
                 linesOut.append((line, -1, None))
         if len(linesOut)==0:
             return None
+        # if len(linesOut)>=6:
+        #     linesOutShorted = []
+        #     for line in linesOut:
+        #         if line[0][0]> 30:
+        #             linesOutShorted.append(line)
+        #     return linesOutShorted
         return linesOut
     
     def findMaxY( approx, iS, iE):
@@ -222,14 +230,19 @@ class sequencer:
         directionNew.append(direction[1])
         for index in range(2, len(direction)-2):
             dir = direction[index]
+            # если совпадают 2 предидущих и 2 последующих то центр устанавливается ка у них
             if  direction[index-2] == direction[index-1] and direction[index+2] == direction[index+1] and direction[index-1] == direction[index+1]:
-                # if dir == direction[index+1]:
-                    # directionNew.append(dir)
-                # else:
                 directionNew.append(direction[index+1])
+            # если совпадают 2 предидущих и 2 последующих то центр устанавливается ка у них
+            elif  direction[index+2] == direction[index+1] and direction[index-1] == direction[index+1]:
+                directionNew.append(direction[index+1])
+            # если совпадают 2 предидущих и 2 последующих то центр устанавливается ка у них 1-2i-1-2
+            elif  direction[index-1] != direction[index] and direction[index] != direction[index+1] and direction[index] == direction[index+2]:
+                pass
             else:
                 directionNew.append(dir)
         directionNew.append(direction[-1])
+        directionNew.append(direction[-2])
                 
         return directionNew
     def getSizeFig(line, minSize):
@@ -240,26 +253,40 @@ class sequencer:
             return xSize, ySize, True
         return xSize, ySize, False
         
-    def filterDirectionNoise(direction):
-        all = len(direction)
-        # return True
-        counterA = 0
-        counterB = 0
-        counterC = 0
-        counterD = 0
-        for index in range(all):
-            dir = direction[index]
-            if dir == DirectionStatus.dir90:
-                counterA = counterA +1
-            elif dir == DirectionStatus.dir180:
-                counterB = counterB +1
-            elif dir == DirectionStatus.dir270:
-                counterC = counterC +1
-            elif dir == DirectionStatus.dir360:
-                counterD = counterD +1
-        if all >= 6:
-            all = all / 4
-            if counterA > all and counterB > all:
+    def testSegment(segA, segB, segC):
+        if segA[0]==segC[0] and segA[0] != segB[0]:
+            if segA[1]<=2 and segB[1] <=2 and segC[1] <=2:
+                return False
+        return True
+    def filterSeqNoise(seqments):
+        all = len(seqments)
+        # if all<=3:
+            # return True
+        counter =0
+        for index in range(all-2):
+            ok = sequencer.testSegment(seqments[index], seqments[index+1], seqments[index+2])
+            if ok == False:
                 return True
+            continue
+        # all = len(direction)
+        # # return True
+        # counterA = 0
+        # counterB = 0
+        # counterC = 0
+        # counterD = 0
+        # for index in range(all):
+        #     dir = direction[index]
+        #     if dir == DirectionStatus.dir90:
+        #         counterA = counterA +1
+        #     elif dir == DirectionStatus.dir180:
+        #         counterB = counterB +1
+        #     elif dir == DirectionStatus.dir270:
+        #         counterC = counterC +1
+        #     elif dir == DirectionStatus.dir360:
+        #         counterD = counterD +1
+        # if all >= 6:
+        #     all = all / 4
+        #     if counterA > all and counterB > all:
+        #         return True
                 
         return False

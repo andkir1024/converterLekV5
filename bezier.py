@@ -599,6 +599,13 @@ class bezier:
         length = line.length
         ip = line.interpolate(length * coff)
         return ip
+    def interpolatePointByPixel(pointA, pointB, disp):
+        line = LineString([pointA, pointB])
+        length = line.length
+        # ip = line.interpolate(length - 100)
+        # ip = line.interpolate(length - 20)
+        ip = line.interpolate(length - disp)
+        return ip
     def divideLine(line, place):
         splitter = MultiPoint([line.interpolate((place), normalized=True) for i in range(1, 2)])
         split(line, splitter).wkt
@@ -613,6 +620,8 @@ class bezier:
     def aligmentVert(pp0, pp1):
         x = pp0.x + ((pp1.x - pp0.x)/2)
         return Point(x, pp0.y), Point(x, pp1.y)
+    def aligmentShify(pp0, pp1,pp2, pp3, shift):
+        return Point(pp0.x+shift, pp0.y+shift), Point(pp1.x-shift, pp1.y+shift), Point(pp2.x-shift, pp2.y-shift), Point(pp3.x+shift, pp3.y-shift)
 class FigureStatus(enum.Enum):
     smoothCorner = 1
     angleCorner = 2
@@ -637,11 +646,9 @@ class contoureAnalizer:
     def start():
         if bezier.DEBUG_MODE == True:
             contoureAnalizer.counterCorner=0
-            if bezier.DEBUG_MODE == True:
-                contoureAnalizer.counterCorner=0
-                if contoureAnalizer.curveDir is not None:
-                    if not os.path.isdir(contoureAnalizer.curveDir):
-                        os.mkdir(contoureAnalizer.curveDir)
+            if contoureAnalizer.curveDir is not None:
+                if not os.path.isdir(contoureAnalizer.curveDir):
+                    os.mkdir(contoureAnalizer.curveDir)
                                 
             for f in os.listdir(contoureAnalizer.curveDir):
                 os.remove(os.path.join(contoureAnalizer.curveDir, f))        
