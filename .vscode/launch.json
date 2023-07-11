@@ -11,7 +11,7 @@
             "request": "launch",
             "program": "main.py",
             "console": "integratedTerminal",
-            "args": ["--wnd", "--dirSrc=../popularBad/","--svg=9.07"],
+            "args": ["--wnd", "--dirSrc=../popular/","--svg=9.07"],
             //"args": ["--wnd", "--dirSrc=../lekalo/srcDemo/","--svg=9.07"],
              //"args": ["--wnd", "--dirSrc=../popularBad/","--svg=8.163"],
             //  "args": ["--wnd", "--dirSrc=../popularBad2/","--svg=9.977"],
@@ -21,8 +21,8 @@
             "type": "python",
             "request": "launch",
             "program": "main.py",
-            "console": "externalTerminal",
-            //"args": ["--dirSrc=../lekalo/srcDemo/","--svg=9.07","--dirDst=../lekalo/outSvgDemo/", "--pngDir=../lekalo/outSvgDemo/"],
+            // "console": "externalTerminal",
+            //"args": ["--dirSrc=../lekalo/srgit cDemo/","--svg=9.07","--dirDst=../lekalo/outSvgDemo/", "--pngDir=../lekalo/outSvgDemo/"],
             //"args": ["--dirSrc=../lekalo/src/","--svg=9.07","--dirDst=../lekalo/outSvgFed/", "--pngDir=../lekalo/outSvgFed/"],
 
             //тестовый прогон на весь массив
