@@ -17,15 +17,15 @@ testName = None
 filesDir = '../popular1/'
 filesSrc = None
 svgDir = None
-# '../outSvg/'
-cmpDir = '../outSvg/'
 pngDir = None
 doConsole = True
 dpiSvg = 9.977
+thre = 100
+badDir = None
 
 argumentList = sys.argv[1:]
 options = "hmo:"
-long_options = ["Help", "wnd", "dirSrc=","pngDir=","dirDst=", "svg=", "cmp="]
+long_options = ["wnd","dirSrc=","pngDir=","dirDst=", "svg=", "thre=","badDir="]
 arguments, values = getopt.getopt(argumentList, options, long_options)
 for currentArgument, currentValue in arguments:
         if currentArgument in ("-o", "--dirDst"):
@@ -38,8 +38,10 @@ for currentArgument, currentValue in arguments:
             doConsole = False
         if currentArgument in ("-s", "--svg"):
             dpiSvg = float(currentValue)
-        if currentArgument in ("-c", "--cmp"):
-            dpiSvg = float(currentValue)
+        if currentArgument in ("--thre"):
+            thre = int(currentValue)
+        if currentArgument in ("--badDir"):
+            badDir = currentValue
     
 updateImage = False
 updateImageZoom = False
@@ -204,7 +206,7 @@ def convertScreenToImageCoord(rmainImage, imgOk, xZoom, yZoom):
     # viewX = 440
     # viewY = 934
     return viewX, viewY
-def do_frame(imgOk, filesSrc, svgDir, param0,pngDir, errorThreshold):
+def do_frame(imgOk, filesSrc, svgDir, param0,pngDir, errorThreshold,badDir):
     # imgDraw = imgOk.copy()
     # # param0 = frame2control.param0.get()  
     # imgGrey =cvDraw.createGray(imgOk, param0)
@@ -216,14 +218,14 @@ def do_frame(imgOk, filesSrc, svgDir, param0,pngDir, errorThreshold):
             imgDraw = imgOk.copy()
             # param0 = frame2control.param0.get()
             imgGrey =cvDraw.createGray(imgOk, param0)
-            imgTst, result = cvUtils.doContours(imgGrey, imgDraw, filesSrc, svgDir, dpiSvg,pngDir, errorThreshold)
+            imgTst, result = cvUtils.doContours(imgGrey, imgDraw, filesSrc, svgDir, dpiSvg,pngDir, errorThreshold,badDir)
         except Exception as e:
             return imgDraw, imgDraw, e, None
         return imgDraw, imgTst, None, result
     else:
         imgDraw = imgOk.copy()
         imgGrey =cvDraw.createGray(imgOk, param0)
-        imgTst, result = cvUtils.doContours(imgGrey, imgDraw, filesSrc, svgDir, dpiSvg,pngDir, errorThreshold)
+        imgTst, result = cvUtils.doContours(imgGrey, imgDraw, filesSrc, svgDir, dpiSvg,pngDir, errorThreshold,badDir)
         return imgDraw, imgTst, None, result
 def show_frame():
     global imgOk
@@ -231,12 +233,12 @@ def show_frame():
     global testName
     global updateImageZoom
     global xZoom,yZoom
-    global filesSrc, svgDir, pngDir
+    global filesSrc, svgDir, pngDir,badDir
 
     if updateImage == True or updateImageZoom == True:
         updateImage = False
         if imgOk is not None:
-            imgDraw,imgTst, resImag, result = do_frame(imgOk, filesSrc, svgDir, slider1.get(),pngDir, -1)
+            imgDraw,imgTst, resImag, result = do_frame(imgOk, filesSrc, svgDir, slider1.get(),pngDir, -1,badDir)
             root.title("Лекала тестер " + str(result))
 
             scale, dispX, dispY = calkViewParam(rmainImage, imgDraw)
@@ -291,14 +293,14 @@ else:
         index = 0
         listErr = []
         listLog = []
-        errorThreshold = 1000
+        errorThreshold = thre
         allOk = 0
         if svgDir is not None:
             if not os.path.isdir(svgDir):
                 os.mkdir(svgDir)
         for f in listFiles:
             imgOk = cv2.imdecode(np.fromfile(f, dtype=np.uint8), cv2.IMREAD_COLOR)
-            imd0, img1, ok, result = do_frame(imgOk, f, svgDir, 0, pngDir, errorThreshold)
+            imd0, img1, ok, result = do_frame(imgOk, f, svgDir, 0, pngDir, errorThreshold,badDir)
             if ok is None:
                 if result < errorThreshold:
                     allOk = allOk+ 1

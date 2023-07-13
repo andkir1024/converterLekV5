@@ -26,9 +26,10 @@
             //"args": ["--dirSrc=../lekalo/src/","--svg=9.07","--dirDst=../lekalo/outSvgFed/", "--pngDir=../lekalo/outSvgFed/"],
 
             //тестовый прогон на весь массив
+            "args": ["--dirSrc=../lekalo/src/","--svg=9.07","--dirDst=../lekalo/outSvgFed1/","--pngDir=../lekalo/outSvgFed1/","--thre=500","--badDir=../lekalo/badRound/"],
             //"args": ["--dirSrc=../lekalo/src/","--svg=9.07","--dirDst=../lekalo/outSvgFed1/","--pngDir=../lekalo/outSvgFed1/"],
             //отладка на популярном массиве
-            "args": ["--dirSrc=../popularBad/","--svg=9.07","--dirDst=../lekalo/popularBad/","--pngDir=../lekalo/popularBad/"],
+            // "args": ["--dirSrc=../popularBad/","--svg=9.07","--dirDst=../lekalo/popularBad/","--pngDir=../lekalo/popularBad/"],
             //"args": ["--dirSrc=../popular/","--svg=9.07","--dirDst=../lekalo/popular2/","--pngDir=../lekalo/popular2/"],
             //"args": ["--dirSrc=../popular/","--svg=9.07","--dirDst=../lekalo/popular2/","--pngDir=../lekalo/popular2/"],
 

@@ -11,6 +11,7 @@ import pathlib
 import os
 from commonData import LineStatus, ParallStatus, Corner
 from processorCountore import *
+import shutil
 
 class cvUtils:
     # базовые константы для анализа
@@ -174,7 +175,7 @@ class cvUtils:
     def custom_key(extCtr):
         return extCtr[1]
 
-    def doContours(imgGray, img, filesSrc, svgDir, dpiSvg,pngDir, errorThreshold):
+    def doContours(imgGray, img, filesSrc, svgDir, dpiSvg,pngDir, errorThreshold,badDir):
         # -------------------------------------
         # нахождение круговых вырезов
         circles = cvUtils.findCircles(imgGray, img, True)
@@ -233,7 +234,7 @@ class cvUtils:
                 if lines is not None:
                     classifier.drawFigRect(img, lines)
 
-        result = cvUtils.createMainContoursSvg( finalCountours, circles, imgGray, filesSrc, svgDir, dpiSvg, pngDir, errorThreshold )
+        result = cvUtils.createMainContoursSvg( finalCountours, circles, imgGray, filesSrc, svgDir, dpiSvg, pngDir, errorThreshold,badDir )
         return imgTst, result
 
     # border граница длин линий
@@ -374,7 +375,7 @@ class cvUtils:
     #             return True
     #     return False
 
-    def createMainContoursSvg(finalCountours, circles, img, filesSrc, svgDir, dpiSvg,pngDir, errorThreshold):
+    def createMainContoursSvg(finalCountours, circles, img, filesSrc, svgDir, dpiSvg,pngDir, errorThreshold,badDir):
         # return
         width = 4000
         height = 8000
@@ -388,7 +389,7 @@ class cvUtils:
         pngTestName = "example.png"
         d = cvUtils.createSvg(finalCountours, circles, width, height, False, dpiSvg,pngDir, errorThreshold)
         d.save_png(pngTestName)
-        result = cvUtils.saveResult(img, filesSrc, svgDir, svgTestName, pngTestName,pngDir, errorThreshold)
+        result = cvUtils.saveResult(img, filesSrc, svgDir, svgTestName, pngTestName,pngDir, errorThreshold,badDir)
         return result
 
     def createSvg(finalCountours, circles, width, height, printSvg, dpiSvg,pngDir, errorThreshold):
@@ -442,13 +443,16 @@ class cvUtils:
         return d
 
     # сохранение результатов
-    def saveResult(img, filesSrc, svgDir, svgTestName, pngTestName,pngDir, errorThreshold):
+    def saveResult(img, filesSrc, svgDir, svgTestName, pngTestName,pngDir, errorThreshold,badDir):
         if svgDir is not None:
             if not os.path.isdir(svgDir):
                 os.mkdir(svgDir)
         if pngDir is not None:
             if not os.path.isdir(pngDir):
                 os.mkdir(pngDir)
+        if badDir is not None:
+            if not os.path.isdir(badDir):
+                os.mkdir(badDir)
         name = pathlib.Path(filesSrc).stem
         name =name.removesuffix('.prn')
         # сохранение img
@@ -472,13 +476,13 @@ class cvUtils:
         # result = np.count_nonzero(np.all(out_img == sought, axis=2))
         result = np.count_nonzero(np.all(imgTmp == sought, axis=2))
 
+        namePng = None
         if pngDir is not None:
-            nameDiff = pngDir + "/" + name + "." + str(result) + ".png"
-            # nameDiff = pngDir + "/" + name + ".png"
+            namePng = pngDir + "/" + name + "." + str(result) + ".png"
             is_success, im_buf_arr = cv2.imencode(".png", out_img)
-            im_buf_arr.tofile(nameDiff)
-            nameDiff2 = pngDir + "/" + str(result) + "." + name + ".png"
-            im_buf_arr.tofile(nameDiff2)
+            im_buf_arr.tofile(namePng)
+            # nameDiff2 = pngDir + "/" + str(result) + "." + name + ".png"
+            # im_buf_arr.tofile(nameDiff2)
 
             # nameDiff = pngDir + "/diff_" + name + "." + str(result) + ".png"
             # is_success, im_buf_arr = cv2.imencode(".png", (255-imgTmp))
@@ -500,6 +504,18 @@ class cvUtils:
                             )
                         else:
                             f2.write(line)
+        # сохранение плохих данных
+        if errorThreshold > 0 and result > abs(errorThreshold):
+            if svgDir is not None and badDir is not None :
+                namePngDst = badDir + "/" + name + "." + str(result) + ".png"
+                shutil.copyfile(namePng, namePngDst)
+                
+                p = pathlib.Path(filesSrc)
+                filesDsr = badDir + p.name
+                shutil.copyfile(filesSrc, filesDsr)
+                
+                pass
+
 
         return result
         

@@ -45,6 +45,7 @@ class svgPath:
         self.svg.append(param)
         return        
     def doPath(self, path, dpi):
+        # dpi = 1
         for item in self.svg:
             if item[0] == svgCountoure.svgM:
                 path.M(item[1].x / dpi, item[1].y / dpi)
